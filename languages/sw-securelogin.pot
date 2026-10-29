@@ -1,0 +1,168 @@
+# Copyright (C) 2026 
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: SW Securelogin 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/sw-securelogin\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-10-29T22:33:45+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: sw-securelogin\n"
+
+#. Plugin Name of the plugin
+#: sw-securelogin.php
+#: src/Admin/SettingsPage.php:19
+#: src/Admin/SettingsPage.php:20
+#: src/Admin/SettingsPage.php:33
+msgid "SW Securelogin"
+msgstr ""
+
+#. Description of the plugin
+#: sw-securelogin.php
+msgid "Modular authentication platform. Foundation preview; authentication modules are not yet available."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:34
+msgid "Passkey registration can be enabled below. Password login remains available; passkey login is not available yet."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:35
+msgid "Modules"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:36
+msgid "Passkeys — registration preview"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:37
+msgid "External OpenID Connect login — planned for version 1.1+"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:38
+msgid "Authorization Server — requires a separate security review"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:39
+msgid "Security status"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:41
+msgid "HTTPS is active for this request."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:42
+msgid "HTTPS is required before authentication modules can be used."
+msgstr ""
+
+#: src/Core/MigrationRunner.php:55
+msgid "SW Securelogin database upgrade is unavailable. Please retry."
+msgstr ""
+
+#: src/Core/MigrationRunner.php:63
+msgid "SW Securelogin database upgrade failed. Authentication modules remain disabled."
+msgstr ""
+
+#: src/Core/Plugin.php:64
+msgid "SW Securelogin is currently available for single-site installations only."
+msgstr ""
+
+#: src/Modules/Passkeys/PasskeysModule.php:115
+msgid "Passkey registration"
+msgstr ""
+
+#: src/Modules/Passkeys/PasskeysModule.php:116
+msgid "Requires HTTPS. Enabling pins the configured site origin; domain changes require a separate migration."
+msgstr ""
+
+#: src/Modules/Passkeys/PasskeysModule.php:119
+msgid "Enable passkey registration"
+msgstr ""
+
+#: src/Modules/Passkeys/PasskeysModule.php:120
+msgid "Save"
+msgstr ""
+
+#: src/Modules/Passkeys/PasskeysModule.php:127
+msgid "Access denied."
+msgstr ""
+
+#: src/Modules/Passkeys/PasskeysModule.php:135
+msgid "Passkey configuration could not be saved. Check HTTPS and the pinned site origin."
+msgstr ""
+
+#: src/Modules/Passkeys/PrivacyController.php:58
+#: src/Modules/Passkeys/PrivacyController.php:71
+#: src/Modules/Passkeys/PrivacyController.php:97
+msgid "Passkeys"
+msgstr ""
+
+#: src/Modules/Passkeys/PrivacyController.php:124
+msgid "Passkey data could not be erased. Please retry."
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:40
+msgid "Registered (UTC)"
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:41
+msgid "Last used (UTC)"
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:42
+msgid "Never"
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:43
+#: src/Modules/Passkeys/RegistrationController.php:236
+msgid "The passkey operation could not be completed. Please confirm your password again and retry."
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:44
+msgid "Passkeys require a supported browser and a secure connection."
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:45
+msgid "No passkeys registered."
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:46
+msgid "Rename"
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:47
+msgid "Revoke"
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:48
+#: src/Modules/Passkeys/ProfileController.php:64
+msgid "Passkey name"
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:49
+msgid "Passkey operation completed."
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:62
+msgid "My passkeys"
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:63
+msgid "Passkey registration is available. Passkey login will follow in a later milestone. Password login remains available."
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:65
+msgid "Confirm your current password for each change"
+msgstr ""
+
+#: src/Modules/Passkeys/ProfileController.php:66
+msgid "Add passkey"
+msgstr ""
+
+#: sw-securelogin.php:34
+msgid "SW Securelogin requires its Composer dependencies. Run composer install in the plugin directory."
+msgstr ""

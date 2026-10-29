@@ -1,0 +1,6 @@
+/vendor/
+/.phpunit.cache/
+/.phpstan-cache/
+/vendor-prefixed/
+/build/
+/node_modules/

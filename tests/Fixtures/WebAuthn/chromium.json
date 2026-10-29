@@ -1,0 +1,14 @@
+{
+  "origin": "https://example.test",
+  "rpId": "example.test",
+  "challenge": "JTsFTtKUMxNSdTsuzHEl0_I-dHg2OS-0FSiA7rOVVBI",
+  "handle": "ht8uPRE0sAzFUgsswlCATYTclHZ2YuNo1OPIxku5iL8",
+  "rawId": "HLVo652akXIKsD3ZWLkkotaCstM1d_icTQVuSZyr56Q",
+  "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiSlRzRlR0S1VNeE5TZFRzdXpIRWwwX0ktZEhnMk9TLTBGU2lBN3JPVlZCSSIsIm9yaWdpbiI6Imh0dHBzOi8vZXhhbXBsZS50ZXN0IiwiY3Jvc3NPcmlnaW4iOmZhbHNlfQ",
+  "attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVikmyY_vLWJhTE3sz3cr6W8xUA0ZOrU2nZtD4GTSL-NRyxFAAAAAQECAwQFBgcIAQIDBAUGBwgAIBy1aOudmpFyCrA92Vi5JKLWgrLTNXf4nE0Fbkmcq-ekpQECAyYgASFYIPO8e1xgA2O-mWsW09wV-Y9txQdJwaX3kwQ_U8Yn93jDIlggly-Kj8TQTFFIiD-CyQHt7fHf_c1FX29Xej-_UYt5upw",
+  "assertion": {
+    "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiSlRzRlR0S1VNeE5TZFRzdXpIRWwwX0ktZEhnMk9TLTBGU2lBN3JPVlZCSSIsIm9yaWdpbiI6Imh0dHBzOi8vZXhhbXBsZS50ZXN0IiwiY3Jvc3NPcmlnaW4iOmZhbHNlfQ",
+    "authenticatorData": "myY_vLWJhTE3sz3cr6W8xUA0ZOrU2nZtD4GTSL-NRywFAAAAAg",
+    "signature": "MEUCIQDDAQSLD9BFaNnyauU9JGaPWe4BVB_xWu5zQSiHuNVioAIgG0RsXyndIQoELbD-CXWXq-u2A04q4yxAS38NDGRs66k"
+  }
+}

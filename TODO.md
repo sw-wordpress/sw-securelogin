@@ -1,0 +1,139 @@
+# SW Securelogin — Aufgaben und Meilensteine
+
+Stand: 29.10.2026. Architektur und Abnahmekriterien stehen in [PLAN.md](PLAN.md),
+verbindliche Implementierungsregeln in [CODE-STYLE.md](CODE-STYLE.md).
+Diese Datei dokumentiert den Arbeitsstand und die nächsten konkreten Aufgaben.
+Bei Änderungen an Meilensteinen beide Dateien konsistent halten.
+
+## Aktueller Stand
+
+M0 ist implementiert und lokal geprüft. Als Nächstes folgt M1.
+Passkeys und OIDC sind noch nicht implementiert; der Passwortlogin bleibt erhalten.
+Aktuell vorgesehen: PHP ab 8.2, WordPress ab 6.7, Einzelinstallationen,
+GPL-2.0-or-later. Vor Veröffentlichung die unterstützte Versionsmatrix erneut prüfen.
+
+## M0 — Grundlagen und Architektur
+
+- [x] Plugin-Einstiegspunkt, Composer-Autoloading und versionierte Abhängigkeiten anlegen.
+- [x] Modulvertrag und Registry mit deaktivierten Standardwerten und Abhängigkeitsprüfung implementieren.
+- [x] Geschützte Adminübersicht und Hinweis für nicht unterstütztes Multisite anlegen.
+- [x] Versionierte Migrationen mit Datenbanksperre, Wiederaufnahme und verifizierten Versionsschritten implementieren.
+- [x] Einstellungen mit leerer Modulliste initialisieren; Daten bei Deaktivierung und Deinstallation erhalten.
+- [x] Bedrohungsmodell und Architekturentscheidungen dokumentieren.
+- [x] Deutsche und englische Übersetzungen samt Übersetzungsvorlage anlegen.
+- [x] PHPUnit, WPCS, PHPStan, Lint und CI konfigurieren.
+- [x] Mozart-Konfiguration aus sw-backupit übernehmen: lokaler Namespace, isolierter Produktionsbuild und Kollisions-/Autoload-Smoke-Tests.
+- [x] Sieben Unit-Tests und elf Integrationstests gegen echtes WordPress erfolgreich ausführen.
+- [x] Composer-Validierung, PHP-Lint, WPCS, PHPStan und Abhängigkeitsaudit erfolgreich ausführen.
+
+Lokal geprüft mit WordPress 6.7, PHP 8.3 und MariaDB. Tests umfassen unter anderem
+Migrationsfehler, Wiederaufnahme, Sperrkonkurrenz, ungültige Versionen, Berechtigungen
+sowie Passwortauthentifizierung und Sitzungserhalt bei Deaktivierung.
+
+Noch ausstehende Verifikation der eingerichteten CI:
+
+- [ ] GitHub-Actions-Läufe ausführen und Ergebnisse prüfen.
+- [ ] Matrix WordPress 6.7 / PHP 8.2 / MySQL 8.0 bestätigen.
+- [ ] Matrix aktuelle WordPress-Version / PHP 8.3 / MariaDB 11.4 bestätigen.
+
+## M1 — Passkey-Registrierung
+
+Nächste Umsetzungsschritte in Arbeitsreihenfolge:
+
+- [ ] Gepflegte WebAuthn-Bibliotheken hinsichtlich PHP-Kompatibilität, Lizenz, Pflege und Validierungsumfang evaluieren; Auswahl als ADR dokumentieren.
+- [ ] Bibliothek integrieren und Abhängigkeiten sperren; Mozart-Build anhand realer WebAuthn-Positiv-/Negativfälle prüfen, insbesondere Serialisierung, dynamische Klassen und Ressourcen.
+- [ ] Neue Autoload-Formen wie files/classmap vor Freigabe für den Mozart-Build explizit prüfen; der aktuelle Build unterstützt PSR-4/PSR-0.
+- [ ] HTTPS-, Origin- und RP-ID-Konzept einschließlich abweichender Site-/Home-URLs und Reverse Proxies spezifizieren.
+- [ ] Modulstart an erfolgreiche Migrationen und erfüllte Anforderungen binden; Einstellungen über einen validierenden Repository-Zugriff lesen.
+- [ ] Produktionsschema und Migrationen für Credentials und kurzlebige Transaktionen definieren.
+- [ ] Credential-Repository mit eindeutiger Credential-ID und serverseitiger Benutzerzuordnung implementieren.
+- [ ] Challenges mit Ablauf, Benutzer-/Sitzungsbindung und atomarem Einmalverbrauch implementieren.
+- [ ] Frische Reauthentication per Passwort oder vorhandenem Passkey konzipieren und implementieren; eine vorhandene Sitzung allein genügt nicht.
+- [ ] Registrierungsrouten mit Session, Capability, REST-Nonce und frischer Reauthentication absichern.
+- [ ] Attestation und Credential-Daten vollständig durch die Bibliothek prüfen, einschließlich Challenge, Origin, RP-ID und UP/UV.
+- [ ] Profiloberfläche für Hinzufügen, Auflisten, Benennen und einzelnen Widerruf implementieren.
+- [ ] Credential-Limit und mehrere Passkeys pro Benutzer unterstützen.
+- [ ] Benutzerlöschung, Datenschutzexport/-löschung und Aufbewahrungsregeln integrieren.
+- [ ] Positive und negative Unit-, Integrations- und Browsertests ergänzen, insbesondere Replay, parallelen Verbrauch, CSRF und fremde Benutzerzuordnung.
+
+Abnahme: Zwei unabhängige Passkeys für dasselbe Konto registrieren und einzeln
+widerrufen können; Replay und CSRF werden abgewiesen.
+
+## M2 — Passkey-Login
+
+- [ ] Benutzernamenbasierte Passkey-Anmeldung auf der WordPress-Loginseite ergänzen.
+- [ ] Transaktionsgebundene Assertion-Optionen und vollständige Bibliotheksvalidierung implementieren.
+- [ ] Neutrale Antworten und Schutz vor Benutzernamen-Erkennung implementieren.
+- [ ] Gemeinsame Dienste für Authentifizierungspolicies und WordPress-Sitzungsausstellung implementieren.
+- [ ] Login-Hooks, bestehende Sicherheits-/MFA-Policies und sichere interne Adminweiterleitung integrieren.
+- [ ] Rate Limits, Replay-Schutz, datensparsames Audit und Aufbewahrungsregeln ergänzen.
+- [ ] Signaturzähler und Backup-/Sync-Eigenschaften ohne pauschale Klonsperre behandeln.
+- [ ] Passwortfallback erhalten; Recovery dokumentieren.
+- [ ] Geräte-/Browsertests und Negativtests für Challenge, Ablauf, Origin, RP-ID, Signatur, Credential-ID, Benutzerbindung und UP/UV ausführen.
+- [ ] Nachweisen, dass fehlgeschlagene Authentifizierung keine Sitzung erzeugt.
+
+Abnahme: Anmeldung mit mehreren Credentials funktioniert; manipulierte, abgelaufene
+oder wiederverwendete Assertions werden ohne Sitzungsausstellung abgewiesen.
+
+## M3 — Stabilisierung und Release 1.0
+
+- [ ] Security Review, Plugin Check und vollständige Qualitätsprüfungen durchführen.
+- [ ] Unterstützte WordPress-/PHP-/Datenbankmatrix und Browser-E2E prüfen.
+- [ ] Sicherheitsplugins, geänderte Login-URLs und MFA-Integration testen.
+- [ ] Multisite-Einschränkungen, Reverse Proxies und Domain-/RP-ID-Migration dokumentieren und testen.
+- [ ] Übersetzungen aller neuen Oberflächen sowie Accessibility vervollständigen.
+- [ ] Readme, Datenschutzhinweise, Upgrade-/Backupverfahren und Admin-Recovery vervollständigen.
+- [ ] Bewusste Datenlöschoption und Uninstall-Policy festlegen.
+- [ ] Reproduzierbares Release-ZIP mit Produktionsabhängigkeiten ohne Dev-Abhängigkeiten bauen.
+- [ ] Finales ZIP in frischer WordPress-Instanz einschließlich Registrierung und Login prüfen.
+- [ ] Release erst ohne offene Critical-/High-Findings veröffentlichen.
+
+## M4 — Externer OIDC-Login, Version 1.1+
+
+- [ ] Providerverwaltung, geschützte Konfiguration und validierte Discovery-/JWKS-Abfragen implementieren.
+- [ ] SSRF-Schutz einschließlich DNS, IP-Bereichen, Redirects und Antwortlimits umsetzen.
+- [ ] Authorization Code Flow mit PKCE S256 sowie einmaligem State und Nonce implementieren.
+- [ ] ID-Token-Signatur und alle erforderlichen Claims strikt prüfen.
+- [ ] Identitäten ausschließlich über Issuer und Subject verknüpfen; Verknüpfung mit frischer Reauthentication absichern.
+- [ ] Mehrere Provider, geschützte Adminoberfläche und sichere Trennung/Wiederherstellung integrieren.
+- [ ] Mindestens zwei standardkonforme Provider und die im PLAN genannten Angriffe testen.
+
+## M5 — Authorization-Server-Design
+
+- [ ] Separate Protokollspezifikation und Bedrohungsmodell erstellen und freigeben.
+- [ ] Ressourcen, Scopes und Capability-Zuordnung festlegen.
+- [ ] Gepflegte Serverbibliothek auswählen.
+- [ ] Clientverwaltung, Consent, Tokenformat und Tokenlebenszyklen spezifizieren.
+- [ ] Schlüsselquelle, Speicherung, Rotation, Backup und Verantwortlichkeiten festlegen.
+- [ ] Interoperabilitätstests und unabhängige Sicherheitsprüfung planen.
+
+Vor freigegebenem Design keinen produktiven Authorization Server implementieren.
+
+## M6 — OAuth-Authorization-Server, Version 2.0
+
+- [ ] Clientverwaltung, exakte Redirect-URI-Prüfung und Clientauthentifizierung implementieren.
+- [ ] Authorization Code mit PKCE, Tokenendpunkt, Consent und Revocation implementieren.
+- [ ] Atomaren Codeverbrauch sowie Scope-/Audience-/Ressourcenbindung sicherstellen.
+- [ ] Auditing, Angriffs-, Interoperabilitäts- und Lasttests durchführen.
+- [ ] Unabhängige Sicherheitsprüfung vor produktiver Aktivierung bestehen.
+
+## M7 — OIDC-Provider, Version 2.x
+
+- [ ] Signierte ID-Tokens, JWKS, Discovery und UserInfo implementieren.
+- [ ] Stabile Subjects, sparsame Claims und Consent-/Datenschutzregeln umsetzen.
+- [ ] Schlüsselrotation einschließlich Überlappungszeitraum und Widerruf testen.
+- [ ] OIDC-Conformance-Tests und unabhängiges Audit bestehen.
+
+## Laufende Arbeitsregeln
+
+- Nur den jeweils bearbeiteten Meilenstein umsetzen; optionale Module bis zur vollständigen Sicherheitsprüfung deaktiviert halten.
+- Sicherheitsentscheidungen als ADR dokumentieren; Abnahmekriterien und Negativtests vor der Implementierung festlegen.
+- Passende Checks nach jeder Implementierungsänderung ausführen und verbleibende Prüflücken ausdrücklich festhalten.
+- Keine privaten Schlüssel, Tokens, Assertions oder Challenges protokollieren.
+- Status in dieser Datei nach abgeschlossenen Arbeitspaketen aktualisieren.
+
+Testbefehle und die isolierte WordPress-Testumgebung stehen in
+[docs/TESTING.md](docs/TESTING.md). Bisherige Sicherheitsentscheidungen:
+[ADR 001](docs/ADR-001-foundation.md), [ADR 002](docs/ADR-002-migrations.md),
+[ADR 003](docs/ADR-003-mozart.md) und
+[Bedrohungsmodell](docs/THREAT-MODEL.md).

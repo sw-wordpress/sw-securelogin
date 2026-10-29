@@ -1,0 +1,11 @@
+{
+  "name": "sw-securelogin-dev",
+  "private": true,
+  "scripts": {
+    "lint": "node --check assets/js/passkeys.js && node --check tests/E2E/passkeys.mjs && node --check tests/E2E/run.mjs",
+    "test:e2e": "node tests/E2E/run.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "1.55.1"
+  }
+}

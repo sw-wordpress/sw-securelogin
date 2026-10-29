@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="tests/Integration/bootstrap.php" colors="true" failOnWarning="true" failOnRisky="true" cacheDirectory=".phpunit.cache/integration">
+  <testsuites><testsuite name="WordPress integration"><directory>tests/Integration</directory><exclude>tests/Integration/bootstrap.php</exclude></testsuite></testsuites>
+</phpunit>

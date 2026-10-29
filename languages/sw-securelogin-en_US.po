@@ -1,0 +1,157 @@
+msgid ""
+msgstr "Project-Id-Version: SW Securelogin 0.1.0\nLanguage: en_US\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\nPO-Revision-Date: 2026-10-29 00:00+0000\nLast-Translator: SW Securelogin\nLanguage-Team: SW Securelogin\n"
+
+#. Plugin Name of the plugin
+#: sw-securelogin.php
+#: src/Admin/SettingsPage.php:19
+#: src/Admin/SettingsPage.php:20
+#: src/Admin/SettingsPage.php:33
+msgid "SW Securelogin"
+msgstr "SW Securelogin"
+
+#. Description of the plugin
+#: sw-securelogin.php
+msgid "Modular authentication platform. Foundation preview; authentication modules are not yet available."
+msgstr "Modular authentication platform. Foundation preview; authentication modules are not yet available."
+
+#: src/Admin/SettingsPage.php:34
+msgid "Passkey registration can be enabled below. Password login remains available; passkey login is not available yet."
+msgstr "Passkey registration can be enabled below. Password login remains available; passkey login is not available yet."
+
+#: src/Admin/SettingsPage.php:35
+msgid "Modules"
+msgstr "Modules"
+
+#: src/Admin/SettingsPage.php:36
+msgid "Passkeys — registration preview"
+msgstr "Passkeys — registration preview"
+
+#: src/Admin/SettingsPage.php:37
+msgid "External OpenID Connect login — planned for version 1.1+"
+msgstr "External OpenID Connect login — planned for version 1.1+"
+
+#: src/Admin/SettingsPage.php:38
+msgid "Authorization Server — requires a separate security review"
+msgstr "Authorization Server — requires a separate security review"
+
+#: src/Admin/SettingsPage.php:39
+msgid "Security status"
+msgstr "Security status"
+
+#: src/Admin/SettingsPage.php:41
+msgid "HTTPS is active for this request."
+msgstr "HTTPS is active for this request."
+
+#: src/Admin/SettingsPage.php:42
+msgid "HTTPS is required before authentication modules can be used."
+msgstr "HTTPS is required before authentication modules can be used."
+
+#: src/Core/MigrationRunner.php:55
+msgid "SW Securelogin database upgrade is unavailable. Please retry."
+msgstr "SW Securelogin database upgrade is unavailable. Please retry."
+
+#: src/Core/MigrationRunner.php:63
+msgid "SW Securelogin database upgrade failed. Authentication modules remain disabled."
+msgstr "SW Securelogin database upgrade failed. Authentication modules remain disabled."
+
+#: src/Core/Plugin.php:64
+msgid "SW Securelogin is currently available for single-site installations only."
+msgstr "SW Securelogin is currently available for single-site installations only."
+
+#: src/Modules/Passkeys/PasskeysModule.php:115
+msgid "Passkey registration"
+msgstr "Passkey registration"
+
+#: src/Modules/Passkeys/PasskeysModule.php:116
+msgid "Requires HTTPS. Enabling pins the configured site origin; domain changes require a separate migration."
+msgstr "Requires HTTPS. Enabling pins the configured site origin; domain changes require a separate migration."
+
+#: src/Modules/Passkeys/PasskeysModule.php:119
+msgid "Enable passkey registration"
+msgstr "Enable passkey registration"
+
+#: src/Modules/Passkeys/PasskeysModule.php:120
+msgid "Save"
+msgstr "Save"
+
+#: src/Modules/Passkeys/PasskeysModule.php:127
+msgid "Access denied."
+msgstr "Access denied."
+
+#: src/Modules/Passkeys/PasskeysModule.php:135
+msgid "Passkey configuration could not be saved. Check HTTPS and the pinned site origin."
+msgstr "Passkey configuration could not be saved. Check HTTPS and the pinned site origin."
+
+#: src/Modules/Passkeys/PrivacyController.php:58
+#: src/Modules/Passkeys/PrivacyController.php:71
+#: src/Modules/Passkeys/PrivacyController.php:97
+msgid "Passkeys"
+msgstr "Passkeys"
+
+#: src/Modules/Passkeys/PrivacyController.php:124
+msgid "Passkey data could not be erased. Please retry."
+msgstr "Passkey data could not be erased. Please retry."
+
+#: src/Modules/Passkeys/ProfileController.php:40
+msgid "Registered (UTC)"
+msgstr "Registered (UTC)"
+
+#: src/Modules/Passkeys/ProfileController.php:41
+msgid "Last used (UTC)"
+msgstr "Last used (UTC)"
+
+#: src/Modules/Passkeys/ProfileController.php:42
+msgid "Never"
+msgstr "Never"
+
+#: src/Modules/Passkeys/ProfileController.php:43
+#: src/Modules/Passkeys/RegistrationController.php:236
+msgid "The passkey operation could not be completed. Please confirm your password again and retry."
+msgstr "The passkey operation could not be completed. Please confirm your password again and retry."
+
+#: src/Modules/Passkeys/ProfileController.php:44
+msgid "Passkeys require a supported browser and a secure connection."
+msgstr "Passkeys require a supported browser and a secure connection."
+
+#: src/Modules/Passkeys/ProfileController.php:45
+msgid "No passkeys registered."
+msgstr "No passkeys registered."
+
+#: src/Modules/Passkeys/ProfileController.php:46
+msgid "Rename"
+msgstr "Rename"
+
+#: src/Modules/Passkeys/ProfileController.php:47
+msgid "Revoke"
+msgstr "Revoke"
+
+#: src/Modules/Passkeys/ProfileController.php:48
+#: src/Modules/Passkeys/ProfileController.php:64
+msgid "Passkey name"
+msgstr "Passkey name"
+
+#: src/Modules/Passkeys/ProfileController.php:49
+msgid "Passkey operation completed."
+msgstr "Passkey operation completed."
+
+#: src/Modules/Passkeys/ProfileController.php:62
+msgid "My passkeys"
+msgstr "My passkeys"
+
+#: src/Modules/Passkeys/ProfileController.php:63
+msgid "Passkey registration is available. Passkey login will follow in a later milestone. Password login remains available."
+msgstr "Passkey registration is available. Passkey login will follow in a later milestone. Password login remains available."
+
+#: src/Modules/Passkeys/ProfileController.php:65
+msgid "Confirm your current password for each change"
+msgstr "Confirm your current password for each change"
+
+#: src/Modules/Passkeys/ProfileController.php:66
+msgid "Add passkey"
+msgstr "Add passkey"
+
+#: sw-securelogin.php:34
+msgid "SW Securelogin requires its Composer dependencies. Run composer install in the plugin directory."
+msgstr "SW Securelogin requires its Composer dependencies. Run composer install in the plugin directory."
+
+

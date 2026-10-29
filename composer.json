@@ -1,0 +1,50 @@
+{
+  "name": "sw/securelogin",
+  "description": "Modular authentication for WordPress.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.2",
+    "ext-openssl": "*",
+    "lbuchs/webauthn": "^2.2"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.5",
+    "phpstan/phpstan": "^2.1",
+    "szepeviktor/phpstan-wordpress": "^2.0",
+    "wp-coding-standards/wpcs": "^3.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "SW\\Securelogin\\": "src/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    },
+    "sort-packages": true
+  },
+  "scripts": {
+    "test": "@php vendor/bin/phpunit",
+    "analyse": "@php vendor/bin/phpstan analyse --memory-limit=512M",
+    "cs": "@php vendor/bin/phpcs",
+    "lint": "find src tests bin sw-securelogin.php uninstall.php -name '*.php' -print0 | xargs -0 -n1 php -l",
+    "test:integration": "@php vendor/bin/phpunit -c phpunit.integration.xml.dist",
+    "build:prefixed": "bash bin/build-prefixed.sh",
+    "test:mozart": "bash tests/Build/mozart-smoke.sh"
+  },
+  "extra": {
+    "mozart": {
+      "dep_namespace": "SW\\Securelogin\\Dependencies\\",
+      "dep_directory": "/vendor-prefixed/",
+      "classmap_directory": "/vendor-prefixed/",
+      "classmap_prefix": "SWSL_",
+      "constant_prefix": "SWSL_",
+      "functions_prefix": "swsl_",
+      "generate_autoloader": true,
+      "delete_vendor_directories": true
+    }
+  }
+}

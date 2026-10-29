@@ -1,0 +1,80 @@
+name: Quality
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.2', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer:v2
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist
+      - run: composer validate --strict
+      - run: find . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
+      - run: composer cs
+      - run: composer analyse
+      - run: composer test
+      - run: composer audit
+
+  wordpress:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - php: '8.2'
+            wordpress: '6.7'
+            database: 'mysql:8.0'
+          - php: '8.3'
+            wordpress: 'latest'
+            database: 'mariadb:11.4'
+    services:
+      database:
+        image: ${{ matrix.database }}
+        env:
+          MYSQL_ROOT_HOST: "%"
+          MYSQL_ROOT_PASSWORD: swsl-test-root
+          MYSQL_DATABASE: swsl_m0_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -pswsl-test-root || mariadb-admin ping -h localhost -pswsl-test-root"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      SWSL_TEST_WORDPRESS: /tmp/swsl-ci-wordpress
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli
+          tools: composer:v2, wp-cli
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist
+      - run: composer test:mozart
+      - run: composer build:prefixed
+      - name: Install disposable WordPress
+        run: |
+          wp core download --path="$SWSL_TEST_WORDPRESS" --version="${{ matrix.wordpress }}"
+          wp config create --path="$SWSL_TEST_WORDPRESS" --dbname=swsl_m0_test --dbuser=root --dbpass=swsl-test-root --dbhost=127.0.0.1:3306 --dbprefix=swsltest_
+          wp core install --path="$SWSL_TEST_WORDPRESS" --url=http://swsl.test --title='Securelogin integration' --admin_user=swsl-test-admin --admin_password=swsl-disposable-test-password --admin_email=test@example.org --skip-email
+          ln -s "$GITHUB_WORKSPACE/build/sw-securelogin" "$SWSL_TEST_WORDPRESS/wp-content/plugins/sw-securelogin"
+          wp plugin activate sw-securelogin --path="$SWSL_TEST_WORDPRESS"
+      - run: composer test:integration
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run lint
+      - run: npm audit --audit-level=high
+      - run: npx playwright-core install --with-deps chromium
+      - run: npm run test:e2e
