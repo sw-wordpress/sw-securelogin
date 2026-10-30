@@ -33,9 +33,10 @@ The prefix configuration is prepared for other symbol forms, but those build pat
 are not yet approved or tested. Source entry points must not directly import runtime
 libraries; keep those references inside src so the staging pass can process them.
 
-No production WebAuthn/OIDC/cryptography library is installed in M0. The synthetic
+M0 originally had no production protocol library. M1 now integrates lbuchs/webauthn;
+see ADR 004 for its tested ES256/none-attestation scope. The synthetic
 collision test proves basic dependency loading and rewritten root imports, not
-protocol compatibility. Before adding a real library, test the built artifact's
+protocol compatibility. For every additional library, test the built artifact's
 serialization, dynamic class references, internal resources, valid signatures and
 all negative protocol cases. Do not silently fall back to unprefixed libraries when
 a scoped dependency fails.

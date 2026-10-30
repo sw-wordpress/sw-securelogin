@@ -57,9 +57,12 @@ final class PluginTest extends TestCase {
 		wp_set_current_user( $user->ID );
 		( new Plugin() )->upgrade();
 		$settings = get_option( 'swsl_settings' );
+		wp_schedule_event( time() + 300, 'hourly', 'swsl_cleanup' );
+		$this->assertNotFalse( wp_next_scheduled( 'swsl_cleanup' ) );
 		try {
 			deactivate_plugins( $plugin );
 			$this->assertFalse( is_plugin_active( $plugin ) );
+			$this->assertFalse( wp_next_scheduled( 'swsl_cleanup' ) );
 			$this->assertSame( $settings, get_option( 'swsl_settings' ) );
 			$this->assertSame( $user->ID, wp_validate_auth_cookie( $cookie, 'auth' ) );
 			$this->assertTrue( $sessions->verify( $token ) );

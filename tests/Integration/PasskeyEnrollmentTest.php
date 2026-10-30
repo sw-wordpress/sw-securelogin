@@ -196,8 +196,10 @@ final class PasskeyEnrollmentTest extends TestCase {
 		$this->assertTrue( $privacy->erase( $user->user_email )['items_removed'] );
 		$this->assertCount( 0, $this->credentials->listForUser( $this->userId ) );
 		$this->assertSame( '0', $wpdb->get_var( 'SELECT COUNT(*) FROM swsltest_swsl_transactions' ) );
+		$wpdb->insert( $wpdb->prefix . 'swsl_user_handles', array( 'user_id' => 99999999, 'handle' => random_bytes( 32 ) ) );
 		$this->transactions->issue( $this->userId, 'expired', 'test', array(), time() - 1 );
 		$privacy->cleanup();
+		$this->assertNull( $wpdb->get_var( 'SELECT handle FROM swsltest_swsl_user_handles WHERE user_id = 99999999' ) );
 		$this->assertSame( '0', $wpdb->get_var( 'SELECT COUNT(*) FROM swsltest_swsl_transactions' ) );
 	}
 	public function testParallelWorkersHaveExactlyOneWinner(): void {

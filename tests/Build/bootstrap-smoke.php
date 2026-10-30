@@ -14,6 +14,7 @@ function add_action( string $hook, callable $callback ): void {
 function is_multisite(): bool {
 	return false;
 }
+function register_deactivation_hook( string $file, callable $callback ): void {}
 class wpdb {}
 $GLOBALS['wpdb'] = new wpdb();
 function get_option( string $name, mixed $default = false ): mixed {

@@ -12,6 +12,8 @@ mkdir -p "$SWSL_PLUGIN"
 # Explicit allowlist keeps development tools, tests, credentials and local notes out.
 cp "$SWSL_ROOT/composer.json" "$SWSL_ROOT/composer.lock" "$SWSL_ROOT/sw-securelogin.php" \
   "$SWSL_ROOT/uninstall.php" "$SWSL_ROOT/readme.txt" "$SWSL_ROOT/LICENSE" "$SWSL_PLUGIN/"
+mkdir -p "$SWSL_PLUGIN/docs"
+cp "$SWSL_ROOT/docs/PRIVACY.md" "$SWSL_PLUGIN/docs/"
 cp -R "$SWSL_ROOT/src" "$SWSL_ROOT/languages" "$SWSL_PLUGIN/"
 for SWSL_DIRECTORY in assets templates; do
   if [ -d "$SWSL_ROOT/$SWSL_DIRECTORY" ]; then

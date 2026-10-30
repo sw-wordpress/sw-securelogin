@@ -11,7 +11,8 @@ Only token hashes are stored. Session binding is a salted fingerprint, not a raw
 cookie. Proof lasts up to five minutes and enrollment up to two minutes, capped by proof
 expiry. Rate-limit buckets contain hashed purpose/user/window identifiers. Their retention
 ends on hourly WP-Cron cleanup once expired. If cron is delayed, records remain stored
-longer but are unusable for authentication after expiry. Inactive plugins cannot run cleanup.
+longer but are unusable for authentication after expiry. Inactive plugins cannot run cleanup. Deactivation and uninstall remove the scheduled
+maintenance job; activation restores it when the versioned schema is ready.
 
 WordPress's verified personal-data export includes credential management metadata, without
 keys, raw session tokens or pending proof data. Its eraser removes credentials, handles

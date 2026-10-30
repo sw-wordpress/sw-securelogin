@@ -21,6 +21,14 @@ if ( version_compare( PHP_VERSION, '8.2', '<' ) ) {
 	return;
 }
 
+// Deactivation removes only this plugin's maintenance job, never credential data.
+register_deactivation_hook(
+	__FILE__,
+	static function (): void {
+		wp_clear_scheduled_hook( 'swsl_cleanup' );
+	}
+);
+
 // Built distributions use isolated dependencies; source checkouts use Composer.
 $swsl_autoload = __DIR__ . '/vendor-prefixed/autoload.php';
 if ( ! is_readable( $swsl_autoload ) ) {

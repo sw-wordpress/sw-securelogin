@@ -46,6 +46,10 @@ final class PrivacyController {
 		foreach ( array( 'swsl_transactions', 'swsl_limits' ) as $suffix ) {
 			$this->database->query( $this->database->prepare( 'DELETE FROM %i WHERE expires_at <= %d', $this->database->prefix . $suffix, time() ) );
 		}
+		// Retry account-deletion cleanup after an earlier interrupted request.
+		foreach ( array( 'swsl_passkeys', 'swsl_user_handles', 'swsl_transactions' ) as $suffix ) {
+			$this->database->query( $this->database->prepare( 'DELETE owned FROM %i AS owned LEFT JOIN %i AS users ON users.ID = owned.user_id WHERE users.ID IS NULL', $this->database->prefix . $suffix, $this->database->users ) );
+		}
 	}
 
 	/** Add the WordPress exporter.

@@ -33,6 +33,6 @@ final class SettingsRepository {
 
 	/** Whether enrollment tables have been migrated by this plugin version. */
 	public function schemaReady(): bool {
-		return '2' === (string) get_option( 'swsl_schema_version', '0' );
+		return in_array( get_option( 'swsl_schema_version', '0' ), array( 2, '2' ), true );
 	}
 }

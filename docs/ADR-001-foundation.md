@@ -3,7 +3,7 @@
 Status: accepted for development; release requirements must be revalidated.
 
 Start with M0. Use GPL-2.0-or-later, PHP 8.2+, WordPress 6.7+, Composer PSR-4,
-and single-site activation. No production runtime library is needed yet. Evaluate
+and single-site activation. No production runtime library was needed for M0; M1 adds the WebAuthn adapter (ADR 004). Evaluate
 WebAuthn libraries and compatibility before M1; do not scope cryptographic dependencies blindly.
 Mozart build infrastructure is now configured; see ADR 003 for its tested scope.
 No OAuth server, role policy, secret storage, or multisite implementation is included.

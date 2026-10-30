@@ -89,7 +89,15 @@ final class PasskeysModule implements ModuleInterface {
 		add_action( 'admin_post_swsl_passkeys_settings', array( $this, 'saveSettings' ) );
 		add_filter( 'rest_post_dispatch', array( $this, 'noStore' ), 10, 3 );
 		if ( $this->settings->schemaReady() ) {
+			add_action( 'init', array( $this, 'scheduleCleanup' ) );
 			( new PrivacyController( $this->database, new CredentialRepository( $this->database ) ) )->register();
+		}
+	}
+
+	/** Restore the maintenance job after reactivation, even with enrollment disabled. */
+	public function scheduleCleanup(): void {
+		if ( ! wp_next_scheduled( 'swsl_cleanup' ) ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'hourly', 'swsl_cleanup' );
 		}
 	}
 
@@ -126,9 +134,17 @@ final class PasskeysModule implements ModuleInterface {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Access denied.', 'sw-securelogin' ), '', array( 'response' => 403 ) );
 		}
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Exact HTTP-method allowlist; transforming it could accept malformed values.
+		if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+			wp_die( esc_html__( 'Access denied.', 'sw-securelogin' ), '', array( 'response' => 405 ) );
+		}
 		check_admin_referer( 'swsl_passkeys_settings' );
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Reject every value outside the literal checkbox allowlist.
+		if ( isset( $_POST['enabled'] ) && '1' !== $_POST['enabled'] ) {
+			wp_die( esc_html__( 'Access denied.', 'sw-securelogin' ), '', array( 'response' => 400 ) );
+		}
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Exact literal allowlist comparison; no free-form input is stored.
-		$enabled = isset( $_POST['enabled'] ) && '1' === $_POST['enabled'];
+		$enabled = isset( $_POST['enabled'] );
 		try {
 			$this->configure( $enabled );
 		} catch ( Throwable $exception ) {
@@ -165,8 +181,6 @@ final class PasskeysModule implements ModuleInterface {
 		if ( get_option( 'swsl_settings' ) !== $settings ) {
 			throw new RuntimeException( 'Module settings were not persisted.' );
 		}
-		if ( ! wp_next_scheduled( 'swsl_cleanup' ) ) {
-			wp_schedule_event( time() + HOUR_IN_SECONDS, 'hourly', 'swsl_cleanup' );
-		}
+		$this->scheduleCleanup();
 	}
 }

@@ -1,6 +1,6 @@
 # SW Securelogin — PLAN.md
 
-> Status: Architektur- und Implementierungsplan · Stand: 29.10.2026  
+> Status: Architektur- und Implementierungsplan · Stand: 30.10.2026  
 > Produkt: SW Securelogin · Plugin-Slug: `sw-securelogin` · Textdomain: `sw-securelogin`  
 > Projektziel: Modulare Authentifizierungsplattform für WordPress mit Passkeys, externem OpenID-Connect-Login und später einem eigenen OAuth-2.0-/OpenID-Connect-Provider.
 
@@ -253,10 +253,10 @@ Global: Modulauswahl, Sicherheitsstatus (HTTPS, PHP-Erweiterungen, korrektes Ori
 
 ### M1 — Passkey-Registrierung
 
-- [ ] Bibliothek evaluieren/integrieren, korrektes Origin/RP-ID-Konzept.
-- [ ] DB-Schema, Credential-Repository, atomare Challenges.
-- [ ] Profilansicht, Registrierung, Benennung, Widerruf und Reauth.
-- [ ] Mehrere Passkeys pro Nutzer, User-Löschung und Datenschutz.
+- [x] Bibliothek evaluieren/integrieren, korrektes Origin/RP-ID-Konzept.
+- [x] DB-Schema, Credential-Repository, atomare Challenges.
+- [x] Profilansicht, Registrierung, Benennung, Widerruf und Reauth.
+- [x] Mehrere Passkeys pro Nutzer, User-Löschung und Datenschutz.
 
 **Abnahme:** Zwei unabhängige Passkeys für denselben Account registrierbar, getrennt widerrufbar, Replay/CSRF verweigert.
 

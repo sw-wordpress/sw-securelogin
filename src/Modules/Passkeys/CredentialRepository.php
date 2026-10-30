@@ -163,6 +163,7 @@ final class CredentialRepository {
 	 * @return string MySQL lock name.
 	 */
 	private function userLockName( int $user_id ): string {
-		return 'swsl_user_' . hash( 'sha224', (string) $this->database->get_var( 'SELECT DATABASE()' ) . ':' . $this->database->prefix . ':' . $user_id );
+		// Keep the complete name below MySQL's 64-character limit.
+		return 'swsl_u_' . hash( 'sha224', (string) $this->database->get_var( 'SELECT DATABASE()' ) . ':' . $this->database->prefix . ':' . $user_id );
 	}
 }

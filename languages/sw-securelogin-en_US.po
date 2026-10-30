@@ -1,5 +1,5 @@
 msgid ""
-msgstr "Project-Id-Version: SW Securelogin 0.1.0\nLanguage: en_US\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\nPO-Revision-Date: 2026-10-29 00:00+0000\nLast-Translator: SW Securelogin\nLanguage-Team: SW Securelogin\n"
+msgstr "Project-Id-Version: SW Securelogin 0.2.0\nLanguage: en_US\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\nPO-Revision-Date: 2026-10-30 00:00+0000\nLast-Translator: SW Securelogin\nLanguage-Team: SW Securelogin\n"
 
 #. Plugin Name of the plugin
 #: sw-securelogin.php
@@ -11,8 +11,8 @@ msgstr "SW Securelogin"
 
 #. Description of the plugin
 #: sw-securelogin.php
-msgid "Modular authentication platform. Foundation preview; authentication modules are not yet available."
-msgstr "Modular authentication platform. Foundation preview; authentication modules are not yet available."
+msgid "Modular authentication platform. Passkey registration preview; password login remains available."
+msgstr "Modular authentication platform. Passkey registration preview; password login remains available."
 
 #: src/Admin/SettingsPage.php:34
 msgid "Passkey registration can be enabled below. Password login remains available; passkey login is not available yet."
@@ -105,7 +105,7 @@ msgid "Never"
 msgstr "Never"
 
 #: src/Modules/Passkeys/ProfileController.php:43
-#: src/Modules/Passkeys/RegistrationController.php:236
+#: src/Modules/Passkeys/RegistrationController.php:239
 msgid "The passkey operation could not be completed. Please confirm your password again and retry."
 msgstr "The passkey operation could not be completed. Please confirm your password again and retry."
 
