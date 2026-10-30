@@ -38,6 +38,14 @@ try {
   assert.equal(await page.locator('#swsl-passkey-status').textContent(),'Passkey operation completed.');
  }
  assert.equal(await page.locator('#swsl-passkey-list input').count(),2);
+ assert.equal(await page.locator('#swsl-passkey-count').textContent(),'2');
+ for (const width of [1440, 390]) {
+  await page.setViewportSize({width,height:1000});
+  const fits = await page.locator('#swsl-passkeys').evaluate(element=>element.scrollWidth <= element.clientWidth + 1);
+  assert.equal(fits,true,`Passkey panel overflows at ${width}px`);
+  if (process.env.SWSL_SCREENSHOTS) await page.locator('#swsl-passkeys').screenshot({path:`${process.env.SWSL_SCREENSHOTS}/swsl-profile-${width}.png`});
+ }
+ await page.setViewportSize({width:1440,height:1000});
  await page.locator('#swsl-passkey-list input').first().fill('Renamed laptop');
  await page.locator('#swsl-passkey-password').fill('swsl-disposable-test-password');
  await page.locator('#swsl-passkey-list li').first().getByRole('button',{name:'Rename',exact:true}).click();

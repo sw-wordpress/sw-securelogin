@@ -107,3 +107,20 @@ Local M1 verification: 25 unit tests and 25 integration tests passed on both PHP
 and PHP 8.3 with WordPress 6.7 / MariaDB 11.1.3. Chromium E2E and Mozart protocol smoke
 tests also pass. GitHub CI, MySQL, latest WordPress, real devices and other browsers
 remain separately unverified; no production-conformance claim is made.
+
+
+# Manual profile UI checks after restyling
+
+Open Users > Profile and hard-refresh the page. Confirm the password area, registration
+card and credential list are separated clearly. Check an empty list and multiple keys;
+register, rename and revoke one credential with a fresh password each time. A rejected
+password should produce a visible error and focus the password field. Repeat at a narrow
+viewport and with keyboard navigation. The E2E suite covers the existing management
+workflow plus panel overflow and credential counts at desktop/mobile widths.
+
+
+# Automatic SonarQube analysis
+
+See [SONARQUBE.md](SONARQUBE.md) for GitHub secrets/variables, source coverage collection,
+Clover merging and checks of the CI/quality-gate status. Coverage must be collected on
+original PHP files; compiled Mozart builds are tested separately.

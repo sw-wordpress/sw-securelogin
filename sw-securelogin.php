@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SW Securelogin
  * Description: Modular authentication platform. Passkey registration preview; password login remains available.
- * Version: 0.2.0
+ * Version: 0.2.1
  * Requires at least: 6.7
  * Requires PHP: 8.2
  * License: GPL-2.0-or-later

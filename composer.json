@@ -33,7 +33,10 @@
     "lint": "find src tests bin sw-securelogin.php uninstall.php -name '*.php' -print0 | xargs -0 -n1 php -l",
     "test:integration": "@php vendor/bin/phpunit -c phpunit.integration.xml.dist",
     "build:prefixed": "bash bin/build-prefixed.sh",
-    "test:mozart": "bash tests/Build/mozart-smoke.sh"
+    "test:mozart": "bash tests/Build/mozart-smoke.sh",
+    "test:coverage": "@php vendor/bin/phpunit --coverage-clover coverage/unit.xml --fail-on-warning",
+    "test:integration:coverage": "@php vendor/bin/phpunit -c phpunit.integration.xml.dist --coverage-clover coverage/wordpress.xml --fail-on-warning",
+    "coverage:merge": "@php tests/coverage/merge.php coverage/clover.xml coverage/unit.xml coverage/wordpress.xml"
   },
   "extra": {
     "mozart": {

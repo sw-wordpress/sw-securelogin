@@ -7,7 +7,7 @@ Bei Änderungen an Meilensteinen beide Dateien konsistent halten.
 
 ## Aktueller Stand
 
-M0 und M1 sind implementiert und lokal geprüft (Entwicklungsvorschau 0.2.0).
+M0 und M1 sind implementiert und lokal geprüft (Entwicklungsvorschau 0.2.1).
 Passkeys lassen sich im eigenen Profil registrieren, benennen und widerrufen.
 Die Passkey-Anmeldung folgt in M2; OIDC ist noch nicht implementiert. Der Passwortlogin bleibt erhalten.
 Das Modul ist standardmäßig deaktiviert und wird auf der Adminübersicht ausdrücklich aktiviert.
@@ -65,6 +65,23 @@ WordPress 6.7 / MariaDB 11.1.3. Chromium-E2E mit zwei virtuellen Authenticatoren
 Umbenennung und einzelnem Widerruf; Mozart-Build mit echten Signatur-/Serialisierungstests.
 Release-Prüfungen für reale Geräte, weitere Browser, MySQL und aktuelle WordPress-Versionen
 bleiben offen. Details und Grenzen stehen in [ADR 004](docs/ADR-004-passkey-enrollment.md).
+
+## Profiloberfläche — Überarbeitung
+
+- [x] Registrierung, Passwortbestätigung und bestehende Passkeys visuell gliedern.
+- [x] Profil-CSS kapseln, mobile Darstellung und Statusmeldungen verbessern.
+- [x] Benutzer-Testübersicht nach Implementierungen als Projektregel in AGENTS.md festhalten.
+- [x] Darstellung und Aktionen im Browser bei 1440 px und 390 px bestätigen; Screenshots visuell geprüft.
+
+## SonarQube und automatische Tests
+
+- [x] SonarQube-Cloud-Konfiguration aus sw-backupit auf dieses Repository übertragen.
+- [x] Unit-/WordPress-Coverage für Originalquellen konfigurieren; Mozart-Artefakt separat testen.
+- [x] Clover-Berichte mit Pfadprüfung und nachvollziehbarer Zusammenführung bereitstellen; lokal mit Xdebug verifiziert (28 Unit-/25 Integrationstests).
+- [x] Workflow für Push, PR und manuellen Start mit Artefakten und Quality-Gate-Prüfung erweitern; YAML und Ausdrücke mit actionlint geprüft.
+- [x] Mozart-Standardaufruf mit dem eigenen Adapter vergleichen; notwendige Root-Import-Verarbeitung durch Kollisions-Test bestätigen (ADR 003).
+- [ ] SONAR_TOKEN und SONAR_ORGANIZATION im GitHub-Repository bzw. der Organisation prüfen/freigeben.
+- [ ] SonarQube-Cloud-Projekt auf CI-basierte Analyse einstellen und ersten Remote-Lauf prüfen.
 
 ## M2 — Passkey-Login
 

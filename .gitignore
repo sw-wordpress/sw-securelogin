@@ -4,3 +4,5 @@
 /vendor-prefixed/
 /build/
 /node_modules/
+/coverage/
+/.scannerwork/

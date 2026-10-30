@@ -53,3 +53,22 @@ remain in M3. WordPress CI is configured to test the staged build; remote CI run
 still need verification.
 
 Upstream reference: https://github.com/coenjacobs/mozart/blob/1.2.3/README.md
+
+
+## Vergleich mit den übrigen sw-Plugins (30.10.2026)
+
+Die Prüfung der lokalen Projekte zeigt unterschiedliche Buildwege. sw-mailgate,
+sw-newspaper2 und sw-forms rufen /mozart/bin/mozart compose direkt auf.
+sw-cloudcalendar führt zusätzlich bin/prefix-sources.php für eigene Imports aus;
+sw-backupit verwendet bin/mozart-compose.php für einen Abhängigkeitszyklus.
+Unsere PHP-Datei ist ein Build-Adapter für Root-Imports und Lizenzhinweise, kein
+Ersatz für den Mozart-Autoloader. Sie wird nicht im Plugin-Artefakt ausgeliefert.
+
+Ein isolierter Vergleich mit dem unveränderten Container coenjacobs/mozart:1.2.3
+bestätigte: Die Abhängigkeit wird präfixiert, der Import des Root-Consumers bleibt
+unverändert. Der vorhandene Kollisions-Smoke-Test bricht dann mit
+"Parent dependency references were not rewritten" ab. Die Standardkonfiguration
+allein ersetzt diesen Schritt in der derzeit geprüften Version daher nicht.
+Andere Plugins wurden nur gelesen und nicht verändert. Sobald Mozart Root-Imports
+selbst verarbeitet, kann der Adapter nach bestandenem Kollisions- und WebAuthn-Test
+entfernt werden. Keine globalen Klassen-Aliase als Ersatz für die Isolation einführen.

@@ -14,3 +14,13 @@ if ( 'swsl_m0_test' !== DB_NAME || 'swsltest_' !== $GLOBALS['wpdb']->prefix ) {
 require dirname( __DIR__, 2 ) . '/vendor/autoload.php';
 require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+// Coverage must use the original source; compiled builds are tested separately.
+$swsl_expected_plugin = getenv( 'SWSL_EXPECT_PLUGIN_ROOT' );
+if ( false !== $swsl_expected_plugin && '' !== $swsl_expected_plugin ) {
+	$swsl_expected_file = realpath( $swsl_expected_plugin . '/src/Core/Plugin.php' );
+	$swsl_loaded_file = ( new ReflectionClass( SW\Securelogin\Core\Plugin::class ) )->getFileName();
+	if ( false === $swsl_expected_file || realpath( $swsl_loaded_file ) !== $swsl_expected_file ) {
+		throw new RuntimeException( 'WordPress loaded a different plugin tree than expected.' );
+	}
+}

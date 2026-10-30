@@ -1,5 +1,8 @@
-name: Quality
-on: [push, pull_request]
+name: Tests and SonarQube
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -14,13 +17,26 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           tools: composer:v2
-          coverage: none
+          coverage: ${{ matrix.php == '8.2' && 'xdebug' || 'none' }}
       - run: composer install --no-interaction --prefer-dist
       - run: composer validate --strict
       - run: find . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
       - run: composer cs
       - run: composer analyse
       - run: composer test
+        if: matrix.php != '8.2'
+      - name: Unit coverage against source
+        if: matrix.php == '8.2'
+        env:
+          XDEBUG_MODE: coverage
+        run: composer test:coverage
+      - uses: actions/upload-artifact@v4
+        if: matrix.php == '8.2'
+        with:
+          name: php-unit-coverage
+          path: coverage/unit.xml
+          if-no-files-found: error
+          retention-days: 14
       - run: composer audit
 
   wordpress:
@@ -57,7 +73,7 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: mysqli
           tools: composer:v2, wp-cli
-          coverage: none
+          coverage: ${{ matrix.php == '8.2' && 'xdebug' || 'none' }}
       - run: composer install --no-interaction --prefer-dist
       - run: composer test:mozart
       - run: composer build:prefixed
@@ -66,9 +82,28 @@ jobs:
           wp core download --path="$SWSL_TEST_WORDPRESS" --version="${{ matrix.wordpress }}"
           wp config create --path="$SWSL_TEST_WORDPRESS" --dbname=swsl_m0_test --dbuser=root --dbpass=swsl-test-root --dbhost=127.0.0.1:3306 --dbprefix=swsltest_
           wp core install --path="$SWSL_TEST_WORDPRESS" --url=http://swsl.test --title='Securelogin integration' --admin_user=swsl-test-admin --admin_password=swsl-disposable-test-password --admin_email=test@example.org --skip-email
-          ln -s "$GITHUB_WORKSPACE/build/sw-securelogin" "$SWSL_TEST_WORDPRESS/wp-content/plugins/sw-securelogin"
+          ln -s "$GITHUB_WORKSPACE" "$SWSL_TEST_WORDPRESS/wp-content/plugins/sw-securelogin"
           wp plugin activate sw-securelogin --path="$SWSL_TEST_WORDPRESS"
-      - run: composer test:integration
+      - name: WordPress coverage against original source
+        if: matrix.php == '8.2'
+        env:
+          XDEBUG_MODE: coverage
+          SWSL_EXPECT_PLUGIN_ROOT: ${{ github.workspace }}
+        run: composer test:integration:coverage
+      - uses: actions/upload-artifact@v4
+        if: matrix.php == '8.2'
+        with:
+          name: php-wordpress-coverage
+          path: coverage/wordpress.xml
+          if-no-files-found: error
+          retention-days: 14
+      - name: Switch disposable site to the isolated build
+        run: ln -sfn "$GITHUB_WORKSPACE/build/sw-securelogin" "$SWSL_TEST_WORDPRESS/wp-content/plugins/sw-securelogin"
+      - name: Test isolated WordPress build
+        env:
+          XDEBUG_MODE: 'off'
+          SWSL_EXPECT_PLUGIN_ROOT: ${{ github.workspace }}/build/sw-securelogin
+        run: composer test:integration
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -78,3 +113,61 @@ jobs:
       - run: npm audit --audit-level=high
       - run: npx playwright-core install --with-deps chromium
       - run: npm run test:e2e
+
+  sonarqube:
+    name: SonarQube Cloud
+    needs: [php, wordpress]
+    if: >-
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository) ||
+      ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+       github.ref_name == github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: dom
+          coverage: none
+      - uses: actions/download-artifact@v4
+        with:
+          name: php-unit-coverage
+          path: coverage
+      - uses: actions/download-artifact@v4
+        with:
+          name: php-wordpress-coverage
+          path: coverage
+      - name: Merge and normalize original-source coverage
+        run: php tests/coverage/merge.php coverage/clover.xml coverage/unit.xml coverage/wordpress.xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: php-coverage
+          path: coverage/clover.xml
+          if-no-files-found: error
+          retention-days: 14
+      - name: Check SonarQube configuration
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
+        run: |
+          if [ -z "$SONAR_TOKEN" ]; then
+            echo '::error::Set the SONAR_TOKEN repository secret for SonarQube Cloud.'
+            exit 1
+          fi
+          if [ -z "$SONAR_ORGANIZATION" ]; then
+            echo '::error::Set the SONAR_ORGANIZATION repository variable.'
+            exit 1
+          fi
+          test -s coverage/clover.xml
+      - name: Analyze code, import coverage and check quality gate
+        uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9
+        with:
+          args: >-
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.timeout=300
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

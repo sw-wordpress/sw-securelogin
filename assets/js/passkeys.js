@@ -39,12 +39,15 @@
 		panel.setAttribute('aria-busy', 'true');
 		panel.querySelectorAll('button').forEach((button) => { button.disabled = true; });
 		status.textContent = '';
+		status.dataset.state = 'busy';
 		try {
 			await action();
 			await refresh();
 			status.textContent = swslPasskeys.done;
+			status.dataset.state = 'success';
 		} catch {
 			status.textContent = swslPasskeys.error;
+			status.dataset.state = 'error';
 			password.focus();
 		} finally {
 			busy = false;
@@ -55,28 +58,41 @@
 	async function refresh() {
 		const result = await request();
 		list.replaceChildren();
+		document.getElementById('swsl-passkey-count').textContent = String(result.credentials.length);
 		if (!result.credentials.length) {
 			const empty = document.createElement('li');
-			empty.textContent = swslPasskeys.empty;
+			empty.className = 'swsl-passkeys-empty';
+			const icon = document.createElement('span');
+			icon.className = 'dashicons dashicons-lock'; icon.setAttribute('aria-hidden', 'true');
+			const message = document.createElement('p'); message.textContent = swslPasskeys.empty;
+			empty.append(icon, message);
 			list.append(empty);
 		}
 		for (const credential of result.credentials) {
 			const item = document.createElement('li');
+			item.className = 'swsl-passkeys-item';
+			const details = document.createElement('div'); details.className = 'swsl-passkeys-details';
 			const name = document.createElement('input');
 			name.type = 'text'; name.value = credential.name; name.maxLength = 80;
 			name.setAttribute('aria-label', `${swslPasskeys.name}: ${credential.name}`);
-			const dates = document.createElement('span');
-			dates.textContent = ` ${swslPasskeys.created}: ${credential.created_at}; ${swslPasskeys.lastUsed}: ${credential.last_used_at || swslPasskeys.never} `;
-			item.append(name, dates);
+			const dates = document.createElement('dl'); dates.className = 'swsl-passkeys-dates';
+			for (const [label, value] of [[swslPasskeys.created, credential.created_at], [swslPasskeys.lastUsed, credential.last_used_at || swslPasskeys.never]]) {
+				const term = document.createElement('dt'); term.textContent = label;
+				const description = document.createElement('dd'); description.textContent = value;
+				dates.append(term, description);
+			}
+			details.append(name, dates);
+			const actions = document.createElement('div'); actions.className = 'swsl-passkeys-actions';
+			item.append(details, actions);
 			for (const operation of ['rename', 'revoke']) {
 				const button = document.createElement('button');
-				button.type = 'button'; button.className = 'button'; button.textContent = swslPasskeys[operation];
+				button.type = 'button'; button.className = operation === 'revoke' ? 'button swsl-passkey-revoke' : 'button'; button.textContent = swslPasskeys[operation];
 				button.addEventListener('click', () => run(async () => {
 					const grant = await proof();
 					const body = operation === 'rename' ? { grant, name: name.value } : { grant };
 					await request(`/${credential.id}`, operation === 'rename' ? 'PATCH' : 'DELETE', body);
 				}));
-				item.append(button);
+				actions.append(button);
 			}
 			list.append(item);
 		}
@@ -105,5 +121,8 @@
 			transports: credential.response.getTransports ? credential.response.getTransports() : [],
 		});
 	}));
-	refresh().catch(() => { status.textContent = swslPasskeys.error; });
+	refresh().catch(() => {
+		status.textContent = swslPasskeys.error;
+		status.dataset.state = 'error';
+	});
 })();
