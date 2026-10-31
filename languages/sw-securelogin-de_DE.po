@@ -1,5 +1,7 @@
+# Copyright (C) 2026
+# This file is distributed under the GPL-2.0-or-later.
 msgid ""
-msgstr "Project-Id-Version: SW Securelogin 0.2.1\nLanguage: de_DE\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\nPO-Revision-Date: 2026-10-30 00:00+0000\nLast-Translator: SW Securelogin\nLanguage-Team: SW Securelogin\n"
+msgstr "Project-Id-Version: SW Securelogin 0.3.0\nLanguage: de_DE\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=(n != 1);\nPO-Revision-Date: 2026-10-31 00:00+0000\nLast-Translator: SW Securelogin\nLanguage-Team: SW Securelogin\n"
 
 #. Plugin Name of the plugin
 #: sw-securelogin.php
@@ -11,20 +13,20 @@ msgstr "SW Securelogin"
 
 #. Description of the plugin
 #: sw-securelogin.php
-msgid "Modular authentication platform. Passkey registration preview; password login remains available."
-msgstr "Modulare Authentifizierungsplattform. Vorschau der Passkey-Registrierung; die Passwortanmeldung bleibt verfügbar."
+msgid "Modular authentication platform. Passkey registration and login preview; password login remains available."
+msgstr "Modulare Authentifizierungsplattform. Vorschau der Passkey-Registrierung und -Anmeldung; die Passwortanmeldung bleibt verfügbar."
 
 #: src/Admin/SettingsPage.php:34
-msgid "Passkey registration can be enabled below. Password login remains available; passkey login is not available yet."
-msgstr "Die Passkey-Registrierung kann unten aktiviert werden. Die Passwortanmeldung bleibt verfügbar; die Passkey-Anmeldung ist noch nicht verfügbar."
+msgid "Passkey registration and login can be enabled below. Password login remains available."
+msgstr "Passkey-Registrierung und -Anmeldung können unten aktiviert werden. Die Passwortanmeldung bleibt verfügbar."
 
 #: src/Admin/SettingsPage.php:35
 msgid "Modules"
 msgstr "Module"
 
 #: src/Admin/SettingsPage.php:36
-msgid "Passkeys — registration preview"
-msgstr "Passkeys — Vorschau der Registrierung"
+msgid "Passkeys — registration and login"
+msgstr "Passkeys — Registrierung und Anmeldung"
 
 #: src/Admin/SettingsPage.php:37
 msgid "External OpenID Connect login — planned for version 1.1+"
@@ -58,122 +60,159 @@ msgstr "Die Datenbankaktualisierung von SW Securelogin ist fehlgeschlagen. Authe
 msgid "SW Securelogin is currently available for single-site installations only."
 msgstr "SW Securelogin ist derzeit nur für Einzelinstallationen verfügbar."
 
-#: src/Modules/Passkeys/PasskeysModule.php:123
-msgid "Passkey registration"
-msgstr "Passkey-Registrierung"
+#: src/Modules/Passkeys/LoginController.php:278
+#: src/Modules/Passkeys/LoginPage.php:33
+msgid "Passkey authentication could not be completed. Retry or sign in with your password."
+msgstr "Die Passkey-Bestätigung konnte nicht abgeschlossen werden. Versuche es erneut oder melde dich mit deinem Passwort an."
 
-#: src/Modules/Passkeys/PasskeysModule.php:124
-msgid "Requires HTTPS. Enabling pins the configured site origin; domain changes require a separate migration."
-msgstr "Erfordert HTTPS. Bei der Aktivierung wird die konfigurierte Website-Origin festgelegt; Domainänderungen erfordern eine separate Migration."
+#: src/Modules/Passkeys/LoginPage.php:34
+msgid "Enter your username or email address to sign in with a passkey."
+msgstr "Gib deinen Benutzernamen oder deine E-Mail-Adresse ein, um dich mit einem Passkey anzumelden."
 
-#: src/Modules/Passkeys/PasskeysModule.php:127
-msgid "Enable passkey registration"
-msgstr "Passkey-Registrierung aktivieren"
+#: src/Modules/Passkeys/LoginPage.php:35
+#: src/Modules/Passkeys/ProfileController.php:46
+msgid "Passkeys require a supported browser and a secure connection."
+msgstr "Passkeys erfordern einen unterstützten Browser und eine sichere Verbindung."
 
-#: src/Modules/Passkeys/PasskeysModule.php:128
-msgid "Save"
-msgstr "Speichern"
+#: src/Modules/Passkeys/LoginPage.php:42
+msgid "Sign in with a passkey"
+msgstr "Mit Passkey anmelden"
 
-#: src/Modules/Passkeys/PasskeysModule.php:135
-#: src/Modules/Passkeys/PasskeysModule.php:139
-#: src/Modules/Passkeys/PasskeysModule.php:144
-msgid "Access denied."
-msgstr "Zugriff verweigert."
+#: src/Modules/Passkeys/LoginPage.php:43
+msgid "Enter your username or email address above, then use a passkey."
+msgstr "Gib oben deinen Benutzernamen oder deine E-Mail-Adresse ein und verwende dann einen Passkey."
 
-#: src/Modules/Passkeys/PasskeysModule.php:151
-msgid "Passkey configuration could not be saved. Check HTTPS and the pinned site origin."
-msgstr "Die Passkey-Konfiguration konnte nicht gespeichert werden. Prüfen Sie HTTPS und die festgelegte Website-Origin."
+#: src/Modules/Passkeys/LoginPage.php:46
+msgid "Log in with password"
+msgstr "Mit Passwort anmelden"
 
+#: src/Modules/Passkeys/PasskeysModule.php:131
 #: src/Modules/Passkeys/PrivacyController.php:62
 #: src/Modules/Passkeys/PrivacyController.php:75
 #: src/Modules/Passkeys/PrivacyController.php:101
 msgid "Passkeys"
 msgstr "Passkeys"
 
+#: src/Modules/Passkeys/PasskeysModule.php:135
+msgid "Additional authentication extensions require a reviewed passkey adapter. Password login remains available."
+msgstr "Zusätzliche Authentifizierungserweiterungen benötigen einen geprüften Passkey-Adapter. Die Passwortanmeldung bleibt verfügbar."
+
+#: src/Modules/Passkeys/PasskeysModule.php:137
+msgid "Requires HTTPS. Enabling pins the configured site origin; domain changes require a separate migration."
+msgstr "Erfordert HTTPS. Bei der Aktivierung wird die konfigurierte Website-Origin festgelegt; Domainänderungen erfordern eine separate Migration."
+
+#: src/Modules/Passkeys/PasskeysModule.php:140
+msgid "Enable passkey registration and login"
+msgstr "Passkey-Registrierung und -Anmeldung aktivieren"
+
+#: src/Modules/Passkeys/PasskeysModule.php:141
+msgid "Save"
+msgstr "Speichern"
+
+#: src/Modules/Passkeys/PasskeysModule.php:148
+#: src/Modules/Passkeys/PasskeysModule.php:152
+#: src/Modules/Passkeys/PasskeysModule.php:157
+msgid "Access denied."
+msgstr "Zugriff verweigert."
+
+#: src/Modules/Passkeys/PasskeysModule.php:164
+msgid "Passkey configuration could not be saved. Check HTTPS and the pinned site origin."
+msgstr "Die Passkey-Konfiguration konnte nicht gespeichert werden. Prüfen Sie HTTPS und die festgelegte Website-Origin."
+
 #: src/Modules/Passkeys/PrivacyController.php:128
 msgid "Passkey data could not be erased. Please retry."
 msgstr "Passkey-Daten konnten nicht gelöscht werden. Bitte erneut versuchen."
 
-#: src/Modules/Passkeys/ProfileController.php:41
+#: src/Modules/Passkeys/ProfileController.php:42
 msgid "Registered (UTC)"
 msgstr "Registriert (UTC)"
 
-#: src/Modules/Passkeys/ProfileController.php:42
+#: src/Modules/Passkeys/ProfileController.php:43
 msgid "Last used (UTC)"
 msgstr "Zuletzt verwendet (UTC)"
 
-#: src/Modules/Passkeys/ProfileController.php:43
+#: src/Modules/Passkeys/ProfileController.php:44
 msgid "Never"
 msgstr "Noch nie"
 
-#: src/Modules/Passkeys/ProfileController.php:44
-#: src/Modules/Passkeys/RegistrationController.php:239
-msgid "The passkey operation could not be completed. Please confirm your password again and retry."
-msgstr "Der Passkey-Vorgang konnte nicht abgeschlossen werden. Bitte bestätigen Sie Ihr Passwort erneut und versuchen Sie es noch einmal."
-
 #: src/Modules/Passkeys/ProfileController.php:45
-msgid "Passkeys require a supported browser and a secure connection."
-msgstr "Passkeys erfordern einen unterstützten Browser und eine sichere Verbindung."
+#: src/Modules/Passkeys/RegistrationController.php:239
+msgid "The passkey operation could not be completed. Confirm again with your password or a passkey and retry."
+msgstr "Der Passkey-Vorgang konnte nicht abgeschlossen werden. Bestätige erneut mit deinem Passwort oder einem Passkey und versuche es noch einmal."
 
-#: src/Modules/Passkeys/ProfileController.php:46
+#: src/Modules/Passkeys/ProfileController.php:47
 msgid "No passkeys registered."
 msgstr "Keine Passkeys registriert."
 
-#: src/Modules/Passkeys/ProfileController.php:47
+#: src/Modules/Passkeys/ProfileController.php:48
 msgid "Rename"
 msgstr "Umbenennen"
 
-#: src/Modules/Passkeys/ProfileController.php:48
+#: src/Modules/Passkeys/ProfileController.php:49
 msgid "Revoke"
 msgstr "Widerrufen"
 
-#: src/Modules/Passkeys/ProfileController.php:49
-#: src/Modules/Passkeys/ProfileController.php:73
+#: src/Modules/Passkeys/ProfileController.php:50
+#: src/Modules/Passkeys/ProfileController.php:75
 msgid "Passkey name"
 msgstr "Passkey-Name"
 
-#: src/Modules/Passkeys/ProfileController.php:50
+#: src/Modules/Passkeys/ProfileController.php:51
 msgid "Passkey operation completed."
 msgstr "Passkey-Vorgang abgeschlossen."
 
-#: src/Modules/Passkeys/ProfileController.php:64
+#: src/Modules/Passkeys/ProfileController.php:65
 msgid "My passkeys"
 msgstr "Meine Passkeys"
 
-#: src/Modules/Passkeys/ProfileController.php:65
+#: src/Modules/Passkeys/ProfileController.php:66
 msgid "Manage the passkeys linked to your account."
 msgstr "Verwalte die mit deinem Konto verknüpften Passkeys."
 
-#: src/Modules/Passkeys/ProfileController.php:66
-msgid "Passkey registration is available. Passkey login will follow in a later milestone. Password login remains available."
-msgstr "Die Passkey-Registrierung ist verfügbar. Die Passkey-Anmeldung folgt in einem späteren Meilenstein. Die Passwortanmeldung bleibt verfügbar."
-
 #: src/Modules/Passkeys/ProfileController.php:67
-msgid "Confirm your current password for each change"
-msgstr "Aktuelles Passwort für jede Änderung bestätigen"
+msgid "Use your passkeys to sign in. Password login remains available."
+msgstr "Melde dich mit deinen Passkeys an. Die Passwortanmeldung bleibt verfügbar."
 
 #: src/Modules/Passkeys/ProfileController.php:68
-msgid "Enter your password before adding, renaming or revoking a passkey. The field is cleared after each confirmation."
-msgstr "Gib dein Passwort ein, bevor du einen Passkey hinzufügst, umbenennst oder widerrufst. Das Feld wird nach jeder Bestätigung geleert."
+msgid "Confirm each change"
+msgstr "Jede Änderung bestätigen"
+
+#: src/Modules/Passkeys/ProfileController.php:69
+msgid "Confirm with your password or an existing passkey before each change. The password field is cleared after confirmation."
+msgstr "Bestätige jede Änderung mit deinem Passwort oder einem vorhandenen Passkey. Das Passwortfeld wird nach der Bestätigung geleert."
+
+#: src/Modules/Passkeys/ProfileController.php:70
+msgid "Confirm with"
+msgstr "Bestätigen mit"
+
+#: src/Modules/Passkeys/ProfileController.php:70
+msgid "Password"
+msgstr "Passwort"
+
+#: src/Modules/Passkeys/ProfileController.php:70
+msgid "Existing passkey"
+msgstr "Vorhandener Passkey"
 
 #: src/Modules/Passkeys/ProfileController.php:71
+msgid "Current password"
+msgstr "Aktuelles Passwort"
+
+#: src/Modules/Passkeys/ProfileController.php:73
 msgid "Add a new passkey"
 msgstr "Neuen Passkey hinzufügen"
 
-#: src/Modules/Passkeys/ProfileController.php:72
+#: src/Modules/Passkeys/ProfileController.php:74
 msgid "Choose a name that helps you recognize this passkey later."
 msgstr "Wähle einen Namen, an dem du diesen Passkey später wiedererkennst."
 
-#: src/Modules/Passkeys/ProfileController.php:74
+#: src/Modules/Passkeys/ProfileController.php:76
 msgid "Add passkey"
 msgstr "Passkey hinzufügen"
 
-#: src/Modules/Passkeys/ProfileController.php:75
+#: src/Modules/Passkeys/ProfileController.php:77
 msgid "Registered passkeys"
 msgstr "Registrierte Passkeys"
 
 #: sw-securelogin.php:42
 msgid "SW Securelogin requires its Composer dependencies. Run composer install in the plugin directory."
 msgstr "SW Securelogin benötigt seine Composer-Abhängigkeiten. Führen Sie composer install im Pluginverzeichnis aus."
-
-

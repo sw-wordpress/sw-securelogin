@@ -10,6 +10,7 @@ $fixture = json_decode( file_get_contents( dirname( __DIR__ ) . '/Fixtures/WebAu
 $decode = static fn( string $value ): string => SW\Securelogin\Modules\Passkeys\Base64Url::decode( $value, 16384 );
 $service = new SW\Securelogin\Modules\Passkeys\WebAuthnService( new SW\Securelogin\Modules\Passkeys\RelyingParty( $fixture['origin'], $fixture['rpId'] ) );
 $verified = $service->verify( $fixture['clientDataJSON'], $fixture['attestationObject'], $fixture['rawId'], $decode( $fixture['challenge'] ) );
+$assertion = $service->assertion( $fixture['assertion'] + array( 'rawId' => $fixture['rawId'], 'userHandle' => $fixture['handle'] ), array( 'credential_id' => $verified->id, 'user_handle' => $decode( $fixture['handle'] ), 'public_key' => $verified->public_key, 'backup_eligible' => $verified->backup_eligible ), $decode( $fixture['challenge'] ) );
 $library = new SW\Securelogin\Dependencies\lbuchs\WebAuthn\WebAuthn( 'Test', $fixture['rpId'], array( 'none' ), true );
 $args = array( $decode( $fixture['assertion']['clientDataJSON'] ), $decode( $fixture['assertion']['authenticatorData'] ), $decode( $fixture['assertion']['signature'] ), $verified->public_key, $decode( $fixture['challenge'] ), null, true, true );
 if ( true !== $library->processGet( ...$args ) ) {

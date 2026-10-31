@@ -6,7 +6,8 @@ use PHPUnit\Framework\TestCase;
 use SW\Securelogin\Admin\SettingsPage;
 
 // This isolated test suite deliberately has no WordPress session.
-function current_user_can( string $capability ): bool {
+// Signature matches core so static analysis resolves production calls correctly.
+function current_user_can( string $capability, mixed ...$args ): bool {
 	return false;
 }
 

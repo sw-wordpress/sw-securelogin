@@ -30,8 +30,9 @@ final class ProfileController {
 		if ( 'profile.php' !== $hook ) {
 			return;
 		}
-		wp_enqueue_style( 'swsl-passkeys', plugins_url( 'assets/css/passkeys.css', dirname( __DIR__, 3 ) . '/sw-securelogin.php' ), array(), '0.2.1' );
-		wp_enqueue_script( 'swsl-passkeys', plugins_url( 'assets/js/passkeys.js', dirname( __DIR__, 3 ) . '/sw-securelogin.php' ), array(), '0.2.1', true );
+		wp_enqueue_style( 'swsl-passkeys', plugins_url( 'assets/css/passkeys.css', dirname( __DIR__, 3 ) . '/sw-securelogin.php' ), array(), '0.3.0' );
+		wp_enqueue_script( 'swsl-assertion', plugins_url( 'assets/js/passkey-assertion.js', dirname( __DIR__, 3 ) . '/sw-securelogin.php' ), array(), '0.3.0', true );
+		wp_enqueue_script( 'swsl-passkeys', plugins_url( 'assets/js/passkeys.js', dirname( __DIR__, 3 ) . '/sw-securelogin.php' ), array( 'swsl-assertion' ), '0.3.0', true );
 		wp_localize_script(
 			'swsl-passkeys',
 			'swslPasskeys',
@@ -41,7 +42,7 @@ final class ProfileController {
 				'created'     => __( 'Registered (UTC)', 'sw-securelogin' ),
 				'lastUsed'    => __( 'Last used (UTC)', 'sw-securelogin' ),
 				'never'       => __( 'Never', 'sw-securelogin' ),
-				'error'       => __( 'The passkey operation could not be completed. Please confirm your password again and retry.', 'sw-securelogin' ),
+				'error'       => __( 'The passkey operation could not be completed. Confirm again with your password or a passkey and retry.', 'sw-securelogin' ),
 				'unsupported' => __( 'Passkeys require a supported browser and a secure connection.', 'sw-securelogin' ),
 				'empty'       => __( 'No passkeys registered.', 'sw-securelogin' ),
 				'rename'      => __( 'Rename', 'sw-securelogin' ),
@@ -63,10 +64,11 @@ final class ProfileController {
 		echo '<section id="swsl-passkeys" class="swsl-passkeys" aria-labelledby="swsl-passkeys-heading">';
 		echo '<div class="swsl-passkeys-heading"><span class="swsl-passkeys-icon dashicons dashicons-lock" aria-hidden="true"></span><div><h2 id="swsl-passkeys-heading">' . esc_html__( 'My passkeys', 'sw-securelogin' ) . '</h2>';
 		echo '<p class="description">' . esc_html__( 'Manage the passkeys linked to your account.', 'sw-securelogin' ) . '</p></div></div>';
-		echo '<p class="swsl-passkeys-note">' . esc_html__( 'Passkey registration is available. Passkey login will follow in a later milestone. Password login remains available.', 'sw-securelogin' ) . '</p>';
-		echo '<div class="swsl-passkeys-auth"><div><label for="swsl-passkey-password">' . esc_html__( 'Confirm your current password for each change', 'sw-securelogin' ) . '</label>';
-		echo '<p id="swsl-passkey-password-help" class="description">' . esc_html__( 'Enter your password before adding, renaming or revoking a passkey. The field is cleared after each confirmation.', 'sw-securelogin' ) . '</p></div>';
-		echo '<input id="swsl-passkey-password" type="password" autocomplete="current-password" aria-describedby="swsl-passkey-password-help"></div>';
+		echo '<p class="swsl-passkeys-note">' . esc_html__( 'Use your passkeys to sign in. Password login remains available.', 'sw-securelogin' ) . '</p>';
+		echo '<div class="swsl-passkeys-auth"><div><h3>' . esc_html__( 'Confirm each change', 'sw-securelogin' ) . '</h3>';
+		echo '<p id="swsl-passkey-password-help" class="description">' . esc_html__( 'Confirm with your password or an existing passkey before each change. The password field is cleared after confirmation.', 'sw-securelogin' ) . '</p></div>';
+		echo '<div class="swsl-passkeys-proof"><label for="swsl-passkey-proof">' . esc_html__( 'Confirm with', 'sw-securelogin' ) . '</label><select id="swsl-passkey-proof"><option value="password">' . esc_html__( 'Password', 'sw-securelogin' ) . '</option><option value="passkey">' . esc_html__( 'Existing passkey', 'sw-securelogin' ) . '</option></select>';
+		echo '<div id="swsl-passkey-password-fields"><label for="swsl-passkey-password">' . esc_html__( 'Current password', 'sw-securelogin' ) . '</label><input id="swsl-passkey-password" type="password" autocomplete="current-password" aria-describedby="swsl-passkey-password-help"></div></div></div>';
 		echo '<div id="swsl-passkey-status" class="swsl-passkeys-status" role="status" aria-live="polite" aria-atomic="true"></div>';
 		echo '<div class="swsl-passkeys-grid"><div class="swsl-passkeys-card"><h3>' . esc_html__( 'Add a new passkey', 'sw-securelogin' ) . '</h3>';
 		echo '<p class="description">' . esc_html__( 'Choose a name that helps you recognize this passkey later.', 'sw-securelogin' ) . '</p>';

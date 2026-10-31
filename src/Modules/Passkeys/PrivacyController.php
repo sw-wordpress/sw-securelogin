@@ -48,7 +48,7 @@ final class PrivacyController {
 		}
 		// Retry account-deletion cleanup after an earlier interrupted request.
 		foreach ( array( 'swsl_passkeys', 'swsl_user_handles', 'swsl_transactions' ) as $suffix ) {
-			$this->database->query( $this->database->prepare( 'DELETE owned FROM %i AS owned LEFT JOIN %i AS users ON users.ID = owned.user_id WHERE users.ID IS NULL', $this->database->prefix . $suffix, $this->database->users ) );
+			$this->database->query( $this->database->prepare( 'DELETE owned FROM %i AS owned LEFT JOIN %i AS users ON users.ID = owned.user_id WHERE users.ID IS NULL AND owned.user_id <> 0', $this->database->prefix . $suffix, $this->database->users ) );
 		}
 	}
 

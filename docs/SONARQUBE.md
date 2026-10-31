@@ -33,17 +33,17 @@ plugin path assertion. Afterward the disposable site switches to build/sw-secure
 for integration and browser tests of the isolated artifact. Rewriting compiled file
 paths back to src would produce incorrect line numbers and is deliberately rejected.
 
-The Sonar job merges reports into coverage/clover.xml with repository-relative original
+The independent PHP coverage job merges reports into coverage/clover.xml with repository-relative original
 source paths. Overlapping line hits use the maximum count, never a fabricated sum.
 The merger rejects foreign files, tests/compiled source paths and reports with no
-executed production statements. Three unit tests cover these properties. All three
-report artifacts are retained for 14 days; generated reports and .scannerwork are ignored
+executed production statements. Three unit tests cover these properties. Report artifacts are retained for 14 days; generated reports and .scannerwork are ignored
 by Git and are not included in the plugin build.
 
 Analysis covers PHP source/entry points, profile JavaScript and CSS. Tests are classified
-separately; generated dependencies and synthetic fixture files are excluded. The coverage
-report is PHP-only. Existing browser E2E validates JavaScript behavior but does not yet
-produce JavaScript LCOV coverage. No coverage exclusion is used to conceal that limitation.
+separately; generated dependencies and synthetic fixture files are excluded. Chromium V8 coverage is converted through v8-to-istanbul/Istanbul to
+coverage/js/lcov.info and imported by Sonar. Every production script starts uncovered;
+only executed browser ranges add hits. Both language gates require strictly >80% line
+coverage, including on fork PRs. No production files are excluded.
 
 ## Local checks
 
@@ -56,6 +56,8 @@ composer analyse
 XDEBUG_MODE=coverage composer test:coverage
 SWSL_TEST_WORDPRESS=/tmp/swsl-test-wordpress SWSL_EXPECT_PLUGIN_ROOT="$PWD" XDEBUG_MODE=coverage composer test:integration:coverage
 composer coverage:merge
+composer coverage:check
+npm run test:e2e # disposable site required; writes LCOV and checks JavaScript >80%
 ```
 
 Use the disposable setup from TESTING.md; never point integration tests at production.
@@ -65,15 +67,16 @@ is required for the GitHub Actions integration.
 
 Verification performed locally: unit and WordPress suites with an isolated Xdebug PHP
 container, Clover merging, path guards, configuration parsing and existing quality checks.
-The actual Cloud upload, project permissions, GitHub secrets and remote quality gate
-remain unverified until the first repository workflow run. Test percentages must be read
-from the generated report/Sonar result, not inferred from the number of passing tests.
+Actions run 41090636610 (attempt 2): all four test jobs pass; the scanner accepts the
+configured project and credentials but rejects CI analysis while Automatic Analysis is
+enabled. Disable Automatic Analysis in the Cloud project, then rerun the failed job.
+Coverage import and the quality gate remain unverified.
 
 ## What to test as a user
 
 1. Commit/push the configuration and open Actions > Tests and SonarQube: PHP and
    WordPress matrix jobs should start automatically.
-2. Open a successful test run: unit and WordPress Clover artifacts should exist.
+2. Open a successful test run: unit/WordPress Clover and JavaScript LCOV artifacts should exist.
 3. On a default-branch run or internal PR, check the SonarQube Cloud job: merged
    php-coverage should be attached, and missing token/organization should be reported clearly.
 4. Once credentials and the Cloud project are configured, check that Sonar imports PHP

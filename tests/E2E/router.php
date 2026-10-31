@@ -2,6 +2,9 @@
 /** HTTPS test adapter for PHP's loopback-only development server. */
 declare(strict_types=1);
 if ( 'cli-server' !== PHP_SAPI ) exit;
+// Browser tests exercise local authentication, not background updates or remote feeds.
+define( 'DISABLE_WP_CRON', true );
+define( 'WP_HTTP_BLOCK_EXTERNAL', true );
 $_SERVER['HTTPS'] = 'on';
 $_SERVER['SERVER_PORT'] = 8443;
 $swsl_path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );

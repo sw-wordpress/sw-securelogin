@@ -236,6 +236,6 @@ final class RegistrationController {
 	 * @return WP_Error Neutral failure.
 	 */
 	private function error( int $status ): WP_Error {
-		return new WP_Error( 'swsl_passkey_failed', __( 'The passkey operation could not be completed. Please confirm your password again and retry.', 'sw-securelogin' ), array( 'status' => $status ) );
+		return new WP_Error( 'swsl_passkey_failed', __( 'The passkey operation could not be completed. Confirm again with your password or a passkey and retry.', 'sw-securelogin' ), array( 'status' => $status ) );
 	}
 }

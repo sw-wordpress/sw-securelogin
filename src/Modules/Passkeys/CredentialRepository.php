@@ -128,14 +128,77 @@ final class CredentialRepository {
 	 * @return bool Whether a matching row was deleted.
 	 */
 	public function revoke( int $user_id, int $id ): bool {
-		return 1 === $this->database->delete(
-			$this->database->prefix . 'swsl_passkeys',
-			array(
-				'id'      => $id,
-				'user_id' => $user_id,
+		return $this->withUserLock(
+			$user_id,
+			fn(): bool => 1 === $this->database->delete(
+				$this->database->prefix . 'swsl_passkeys',
+				array(
+					'id'      => $id,
+					'user_id' => $user_id,
+				)
 			)
 		);
 	}
+	/** Verify, record use and complete authentication while excluding revocation.
+	 *
+	 * @param int      $user_id Selected owner.
+	 * @param string   $id Binary credential ID.
+	 * @param callable $verify Verifier receiving the owned credential row.
+	 * @param callable $complete Action after verified state has been persisted.
+	 * @return mixed Completion result.
+	 * @throws RuntimeException For missing credentials or storage failures.
+	 */
+	public function authenticate( int $user_id, string $id, callable $verify, callable $complete ): mixed {
+		return $this->withUserLock(
+			$user_id,
+			function () use ( $user_id, $id, $verify, $complete ): mixed {
+				$row = $this->database->get_row( $this->database->prepare( 'SELECT * FROM %i WHERE user_id = %d AND credential_id = %s', $this->database->prefix . 'swsl_passkeys', $user_id, $id ), ARRAY_A );
+				if ( ! is_array( $row ) ) {
+					throw new RuntimeException( 'Credential is unavailable.' );
+				}
+				$assertion = $verify( $row );
+				if ( ! $assertion instanceof VerifiedAssertion ) {
+					throw new RuntimeException( 'Assertion verification did not complete.' );
+				}
+				$result = $this->database->update(
+					$this->database->prefix . 'swsl_passkeys',
+					array(
+						'sign_count'   => max( (int) $row['sign_count'], $assertion->sign_count ),
+						'backup_state' => (int) $assertion->backup_state,
+						'last_used_at' => gmdate( 'Y-m-d H:i:s' ),
+					),
+					array(
+						'id'      => $row['id'],
+						'user_id' => $user_id,
+					)
+				);
+				if ( false === $result ) {
+					throw new RuntimeException( 'Credential usage could not be persisted.' );
+				}
+				return $complete();
+			}
+		);
+	}
+
+	/** Serialize authentication and revocation with enrollment and privacy erasure.
+	 *
+	 * @param int      $user_id Account owner.
+	 * @param callable $operation Protected operation.
+	 * @return mixed Operation result.
+	 * @throws RuntimeException On lock contention.
+	 */
+	private function withUserLock( int $user_id, callable $operation ): mixed {
+		$lock = $this->userLockName( $user_id );
+		if ( '1' !== (string) $this->database->get_var( $this->database->prepare( 'SELECT GET_LOCK(%s, 0)', $lock ) ) ) {
+			throw new RuntimeException( 'Concurrent credential mutation.' );
+		}
+		try {
+			return $operation();
+		} finally {
+			$this->database->get_var( $this->database->prepare( 'SELECT RELEASE_LOCK(%s)', $lock ) );
+		}
+	}
+
 	/** Delete the owner's data while excluding in-flight credential inserts.
 	 *
 	 * @param int $user_id Account or privacy-request owner.

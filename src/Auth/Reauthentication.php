@@ -49,7 +49,15 @@ final class Reauthentication {
 		if ( ! $this->limiter->allow( 'passkeys_reauth', $user->ID, 5, 300 ) || '' === $password || strlen( $password ) > 4096 || ! wp_check_password( $password, $user->user_pass, $user->ID ) ) {
 			throw new RuntimeException( 'Reauthentication was not accepted.' );
 		}
-		return $this->transactions->issue( $user->ID, $this->binding(), 'reauth', array(), time() + 300 );
+		return $this->verifiedPasskey();
+	}
+
+	/** Issue a grant only after a server-verified proof in the existing session.
+	 *
+	 * @return string Single-use management grant, never a login cookie.
+	 */
+	public function verifiedPasskey(): string {
+		return $this->transactions->issue( get_current_user_id(), $this->binding(), 'reauth', array(), time() + 300 );
 	}
 
 	/** Consume a proof grant for the current session.

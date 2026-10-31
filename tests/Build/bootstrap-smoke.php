@@ -8,7 +8,7 @@ if ( ! is_file( $swsl_build . '/sw-securelogin.php' ) ) {
 }
 define( 'ABSPATH', '/tmp/swsl-build-smoke/' );
 $swsl_hooks = array();
-function add_action( string $hook, callable $callback ): void {
+function add_action( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 	$GLOBALS['swsl_hooks'][ $hook ][] = $callback;
 }
 function is_multisite(): bool {
