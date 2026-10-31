@@ -1,15 +1,16 @@
 # SW Securelogin — Aufgaben und Meilensteine
 
-Stand: 30.10.2026. Architektur und Abnahmekriterien stehen in [PLAN.md](PLAN.md),
+Stand: 31.10.2026. Architektur und Abnahmekriterien stehen in [PLAN.md](PLAN.md),
 verbindliche Implementierungsregeln in [CODE-STYLE.md](CODE-STYLE.md).
 Diese Datei dokumentiert den Arbeitsstand und die nächsten konkreten Aufgaben.
 Bei Änderungen an Meilensteinen beide Dateien konsistent halten.
 
 ## Aktueller Stand
 
-M0 und M1 sind implementiert und lokal geprüft (Entwicklungsvorschau 0.2.1).
+M0 bis M2 sind implementiert (Entwicklungsvorschau 0.3.0).
 Passkeys lassen sich im eigenen Profil registrieren, benennen und widerrufen.
-Die Passkey-Anmeldung folgt in M2; OIDC ist noch nicht implementiert. Der Passwortlogin bleibt erhalten.
+Benutzernamenbasierte Passkey-Anmeldung und Passkey-Reauthentication sind verfügbar.
+OIDC ist noch nicht implementiert; der Passwortlogin bleibt erhalten.
 Das Modul ist standardmäßig deaktiviert und wird auf der Adminübersicht ausdrücklich aktiviert.
 Aktuell vorgesehen: PHP ab 8.2, WordPress ab 6.7, Einzelinstallationen,
 GPL-2.0-or-later. Vor Veröffentlichung die unterstützte Versionsmatrix erneut prüfen.
@@ -32,11 +33,11 @@ Lokal geprüft mit WordPress 6.7, PHP 8.3 und MariaDB. Tests umfassen unter ande
 Migrationsfehler, Wiederaufnahme, Sperrkonkurrenz, ungültige Versionen, Berechtigungen
 sowie Passwortauthentifizierung und Sitzungserhalt bei Deaktivierung.
 
-Noch ausstehende Verifikation der eingerichteten CI:
+CI-Verifikation (Actions-Lauf 41090636610, zweiter Versuch):
 
-- [ ] GitHub-Actions-Läufe ausführen und Ergebnisse prüfen.
-- [ ] Matrix WordPress 6.7 / PHP 8.2 / MySQL 8.0 bestätigen.
-- [ ] Matrix aktuelle WordPress-Version / PHP 8.3 / MariaDB 11.4 bestätigen.
+- [x] GitHub-Actions-Läufe prüfen; alle vier Test-Jobs erfolgreich. Login-Timeout beim ersten Versuch, Ursache offen; Fehlerdiagnose im Browser-Test ergänzen.
+- [x] Matrix WordPress 6.7 / PHP 8.2 / MySQL 8.0 bestätigen.
+- [x] Matrix WordPress 7.1.4 / PHP 8.3 / MariaDB 11.4 bestätigen.
 
 ## M1 — Passkey-Registrierung
 
@@ -80,25 +81,34 @@ bleiben offen. Details und Grenzen stehen in [ADR 004](docs/ADR-004-passkey-enro
 - [x] Clover-Berichte mit Pfadprüfung und nachvollziehbarer Zusammenführung bereitstellen; lokal mit Xdebug verifiziert (28 Unit-/25 Integrationstests).
 - [x] Workflow für Push, PR und manuellen Start mit Artefakten und Quality-Gate-Prüfung erweitern; YAML und Ausdrücke mit actionlint geprüft.
 - [x] Mozart-Standardaufruf mit dem eigenen Adapter vergleichen; notwendige Root-Import-Verarbeitung durch Kollisions-Test bestätigen (ADR 003).
-- [ ] SONAR_TOKEN und SONAR_ORGANIZATION im GitHub-Repository bzw. der Organisation prüfen/freigeben.
-- [ ] SonarQube-Cloud-Projekt auf CI-basierte Analyse einstellen und ersten Remote-Lauf prüfen.
+- [x] SONAR_TOKEN und SONAR_ORGANIZATION: Remote-Scanner akzeptiert Zugriff und Projektzuordnung.
+- [ ] In SonarQube Cloud „Automatic Analysis“ deaktivieren und Sonar-Job erneut starten; Lauf 41090636610 scheitert am Konflikt mit CI-Analyse.
 
 ## M2 — Passkey-Login
 
-- [ ] Benutzernamenbasierte Passkey-Anmeldung auf der WordPress-Loginseite ergänzen.
-- [ ] Frische Reauthentication alternativ per vorhandenem Passkey ergänzen.
-- [ ] Transaktionsgebundene Assertion-Optionen und vollständige Bibliotheksvalidierung implementieren.
-- [ ] Neutrale Antworten und Schutz vor Benutzernamen-Erkennung implementieren.
-- [ ] Gemeinsame Dienste für Authentifizierungspolicies und WordPress-Sitzungsausstellung implementieren.
-- [ ] Login-Hooks, bestehende Sicherheits-/MFA-Policies und sichere interne Adminweiterleitung integrieren.
-- [ ] Rate Limits, Replay-Schutz, datensparsames Audit und Aufbewahrungsregeln ergänzen.
-- [ ] Signaturzähler und Backup-/Sync-Eigenschaften ohne pauschale Klonsperre behandeln.
-- [ ] Passwortfallback erhalten; Recovery dokumentieren.
-- [ ] Geräte-/Browsertests und Negativtests für Challenge, Ablauf, Origin, RP-ID, Signatur, Credential-ID, Benutzerbindung und UP/UV ausführen.
-- [ ] Nachweisen, dass fehlgeschlagene Authentifizierung keine Sitzung erzeugt.
+- [x] Benutzernamenbasierte Passkey-Anmeldung auf der WordPress-Loginseite ergänzen.
+- [x] Frische Reauthentication alternativ per vorhandenem Passkey ergänzen.
+- [x] Transaktionsgebundene Assertion-Optionen und vollständige Bibliotheksvalidierung implementieren.
+- [x] Neutrale Antworten und Schutz vor Benutzernamen-Erkennung implementieren.
+- [x] Gemeinsame Dienste für Authentifizierungspolicies und WordPress-Sitzungsausstellung implementieren.
+- [x] WordPress-Login-Hooks und sichere Adminweiterleitung integrieren; unbekannte Authentifizierungs-Erweiterungen bis zur Adapterprüfung sperren.
+- [x] Rate Limits, Replay-Schutz, datensparsames Audit und Aufbewahrungsregeln ergänzen.
+- [x] Signaturzähler und Backup-/Sync-Eigenschaften ohne pauschale Klonsperre behandeln.
+- [x] Passwortfallback erhalten; Recovery dokumentieren.
+- [x] Chromium mit zwei virtuellen Authenticatoren sowie Negativtests für Challenge, Ablauf, Origin, RP-ID, Signatur, Credential-ID, Benutzerbindung und UP/UV ausführen.
+- [x] Nachweisen, dass fehlgeschlagene Authentifizierung keine Sitzung erzeugt.
+- [x] Separate Coverage-Gates >80% für PHP und JavaScript samt LCOV-Import in SonarQube ergänzen.
+- [x] Geprüften Adapter für WP Armour Honeypot (`wpae_wplogin_extra_validation`) ergänzen; dessen Login-Filter blockierte die Passkey-Anmeldung.
+- [x] Loginseite: standardmäßig nur Benutzername/E-Mail und Passkey-Button; „Log in with password“ blendet das Passwortformular ein. Anmeldung auch per E-Mail-Adresse.
 
 Abnahme: Anmeldung mit mehreren Credentials funktioniert; manipulierte, abgelaufene
 oder wiederverwendete Assertions werden ohne Sitzungsausstellung abgewiesen.
+
+Verifiziert: 53 Unit-/60 Integrationstests; PHP 8.2/8.3, WordPress 6.7/7.1.4,
+Mozart und Chromium. Finale Coverage: PHP 89,44 %, JavaScript 95,9 %; beide >80 %.
+
+Entscheidungen und Grenzen: [ADR 005](docs/ADR-005-passkey-login.md).
+Reale Geräte, Firefox/Safari und konkrete MFA-/Security-Plugin-Adapter bleiben M3-Abnahmen.
 
 ## M3 — Stabilisierung und Release 1.0
 

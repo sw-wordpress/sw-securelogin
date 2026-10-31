@@ -1,4 +1,4 @@
-/* global swslPasskeys */
+/* global swslPasskeys, swslAssertion */
 (() => {
 	'use strict';
 	const panel = document.getElementById('swsl-passkeys');
@@ -28,6 +28,12 @@
 		} finally { clearTimeout(timeout); }
 	}
 	async function proof() {
+		if (document.getElementById('swsl-passkey-proof').value === 'passkey') {
+			password.value = '';
+			const options = await request('/reauthentication/options', 'POST', {});
+			const result = await request('/reauthentication/verify', 'POST', await swslAssertion(options));
+			return result.grant;
+		}
 		const value = password.value;
 		password.value = '';
 		const result = await request('/reauthenticate', 'POST', { password: value });
@@ -48,7 +54,8 @@
 		} catch {
 			status.textContent = swslPasskeys.error;
 			status.dataset.state = 'error';
-			password.focus();
+			if (!document.getElementById('swsl-passkey-password-fields').hidden) password.focus();
+			else document.getElementById('swsl-passkey-proof').focus();
 		} finally {
 			busy = false;
 			panel.removeAttribute('aria-busy');
@@ -102,6 +109,10 @@
 		document.getElementById('swsl-passkey-add').disabled = true;
 		return;
 	}
+	document.getElementById('swsl-passkey-proof').addEventListener('change', (event) => {
+		password.value = '';
+		document.getElementById('swsl-passkey-password-fields').hidden = event.target.value === 'passkey';
+	});
 	document.getElementById('swsl-passkey-add').addEventListener('click', () => run(async () => {
 		const grant = await proof();
 		const options = await request('/registration/options', 'POST', { grant, name: document.getElementById('swsl-passkey-name').value });

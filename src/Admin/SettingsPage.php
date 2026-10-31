@@ -31,9 +31,9 @@ final class SettingsPage {
 			return;
 		}
 		echo '<div class="wrap"><h1>' . esc_html__( 'SW Securelogin', 'sw-securelogin' ) . '</h1>';
-		echo '<p>' . esc_html__( 'Passkey registration can be enabled below. Password login remains available; passkey login is not available yet.', 'sw-securelogin' ) . '</p>';
+		echo '<p>' . esc_html__( 'Passkey registration and login can be enabled below. Password login remains available.', 'sw-securelogin' ) . '</p>';
 		echo '<h2>' . esc_html__( 'Modules', 'sw-securelogin' ) . '</h2><ul>';
-		echo '<li>' . esc_html__( 'Passkeys — registration preview', 'sw-securelogin' ) . '</li>';
+		echo '<li>' . esc_html__( 'Passkeys — registration and login', 'sw-securelogin' ) . '</li>';
 		echo '<li>' . esc_html__( 'External OpenID Connect login — planned for version 1.1+', 'sw-securelogin' ) . '</li>';
 		echo '<li>' . esc_html__( 'Authorization Server — requires a separate security review', 'sw-securelogin' ) . '</li></ul>';
 		echo '<h2>' . esc_html__( 'Security status', 'sw-securelogin' ) . '</h2><p>';

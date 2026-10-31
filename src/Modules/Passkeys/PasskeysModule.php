@@ -1,6 +1,6 @@
 <?php
 /**
- * Optional enrollment module and its administration controls.
+ * Optional passkey module and its administration controls.
  *
  * @package SW\Securelogin
  */
@@ -15,6 +15,10 @@ defined( 'ABSPATH' ) || exit;
 use lbuchs\WebAuthn\WebAuthn;
 use RuntimeException;
 use SW\Securelogin\Auth\Reauthentication;
+use SW\Securelogin\Auth\AuthPolicy;
+use SW\Securelogin\Auth\LoginSessionIssuer;
+use SW\Securelogin\Security\AuditLogger;
+use SW\Securelogin\Security\BrowserBinding;
 use SW\Securelogin\Core\ModuleInterface;
 use SW\Securelogin\Core\SettingsRepository;
 use SW\Securelogin\Security\RateLimiter;
@@ -24,7 +28,7 @@ use wpdb;
 use WP_REST_Request;
 use WP_REST_Response;
 
-/** No login or session issuance is exposed by this enrollment-only milestone. */
+/** Enrollment and login share the pinned RP policy and lifecycle controls. */
 final class PasskeysModule implements ModuleInterface {
 	/** Compose the module from the WordPress database and validated settings.
 	 *
@@ -73,13 +77,17 @@ final class PasskeysModule implements ModuleInterface {
 		);
 	}
 
-	/** Wire authenticated enrollment only after registry checks succeed. */
+	/** Wire registration and login only after registry checks succeed. */
 	public function register(): void {
 		$transactions = new TransactionRepository( $this->database );
 		$limiter      = new RateLimiter( $this->database );
 		$rp           = RelyingParty::configured();
 		$controller   = new RegistrationController( $rp, new CredentialRepository( $this->database ), $transactions, new Reauthentication( $transactions, $limiter ), $limiter, new WebAuthnService( $rp ) );
 		add_action( 'rest_api_init', array( $controller, 'register' ) );
+		$policy = new AuthPolicy();
+		$login  = new LoginController( $rp, new CredentialRepository( $this->database ), $transactions, new Reauthentication( $transactions, $limiter ), $limiter, new WebAuthnService( $rp ), $policy, new LoginSessionIssuer( $policy ), new BrowserBinding(), new AuditLogger( $limiter ) );
+		add_action( 'rest_api_init', array( $login, 'register' ) );
+		( new LoginPage() )->register();
 		( new ProfileController() )->register();
 	}
 
@@ -120,11 +128,16 @@ final class PasskeysModule implements ModuleInterface {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		echo '<h2>' . esc_html__( 'Passkey registration', 'sw-securelogin' ) . '</h2>';
+		echo '<h2>' . esc_html__( 'Passkeys', 'sw-securelogin' ) . '</h2>';
+		try {
+			( new AuthPolicy() )->assertCompatible();
+		} catch ( RuntimeException $exception ) {
+			echo '<p class="notice notice-warning">' . esc_html__( 'Additional authentication extensions require a reviewed passkey adapter. Password login remains available.', 'sw-securelogin' ) . '</p>';
+		}
 		echo '<p>' . esc_html__( 'Requires HTTPS. Enabling pins the configured site origin; domain changes require a separate migration.', 'sw-securelogin' ) . '</p>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="swsl_passkeys_settings">';
 		wp_nonce_field( 'swsl_passkeys_settings' );
-		echo '<label><input name="enabled" type="checkbox" value="1" ' . checked( in_array( 'passkeys', $this->settings->enabledModules(), true ), true, false ) . '> ' . esc_html__( 'Enable passkey registration', 'sw-securelogin' ) . '</label>';
+		echo '<label><input name="enabled" type="checkbox" value="1" ' . checked( in_array( 'passkeys', $this->settings->enabledModules(), true ), true, false ) . '> ' . esc_html__( 'Enable passkey registration and login', 'sw-securelogin' ) . '</label>';
 		submit_button( __( 'Save', 'sw-securelogin' ) );
 		echo '</form>';
 	}

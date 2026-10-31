@@ -113,10 +113,47 @@ jobs:
       - run: npm audit --audit-level=high
       - run: npx playwright-core install --with-deps chromium
       - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: matrix.php == '8.2'
+        with:
+          name: js-coverage
+          path: coverage/js/lcov.info
+          if-no-files-found: error
+          retention-days: 14
+
+  coverage:
+    name: PHP coverage gate
+    needs: [php, wordpress]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: dom
+          coverage: none
+      - uses: actions/download-artifact@v4
+        with:
+          name: php-unit-coverage
+          path: coverage
+      - uses: actions/download-artifact@v4
+        with:
+          name: php-wordpress-coverage
+          path: coverage
+      - name: Merge and normalize original-source coverage
+        run: php tests/coverage/merge.php coverage/clover.xml coverage/unit.xml coverage/wordpress.xml
+      - name: Enforce PHP line coverage above 80 percent
+        run: php tests/coverage/check.php coverage/clover.xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: php-coverage
+          path: coverage/clover.xml
+          if-no-files-found: error
+          retention-days: 14
 
   sonarqube:
     name: SonarQube Cloud
-    needs: [php, wordpress]
+    needs: [coverage]
     if: >-
       (github.event_name == 'pull_request' &&
        github.event.pull_request.head.repo.full_name == github.repository) ||
@@ -134,20 +171,12 @@ jobs:
           coverage: none
       - uses: actions/download-artifact@v4
         with:
-          name: php-unit-coverage
+          name: php-coverage
           path: coverage
       - uses: actions/download-artifact@v4
         with:
-          name: php-wordpress-coverage
-          path: coverage
-      - name: Merge and normalize original-source coverage
-        run: php tests/coverage/merge.php coverage/clover.xml coverage/unit.xml coverage/wordpress.xml
-      - uses: actions/upload-artifact@v4
-        with:
-          name: php-coverage
-          path: coverage/clover.xml
-          if-no-files-found: error
-          retention-days: 14
+          name: js-coverage
+          path: coverage/js
       - name: Check SonarQube configuration
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

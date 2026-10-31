@@ -1,4 +1,5 @@
 import https from 'node:https';
+import { createHash } from 'node:crypto';
 import http from 'node:http';
 import net from 'node:net';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -13,6 +14,15 @@ const temporary = mkdtempSync(join(tmpdir(),'swsl-e2e-'));
 let php, proxy;
 try {
  execFileSync('openssl',['req','-x509','-newkey','rsa:2048','-nodes','-keyout',join(temporary,'key.pem'),'-out',join(temporary,'cert.pem'),'-days','1','-subj','/CN=localhost','-addext','subjectAltName=DNS:localhost'],{stdio:'ignore'});
+ const publicKey=execFileSync('openssl',['x509','-in',join(temporary,'cert.pem'),'-pubkey','-noout']);
+ const publicDer=execFileSync('openssl',['pkey','-pubin','-outform','DER'],{input:publicKey});
+ const certificatePin=createHash('sha256').update(publicDer).digest('base64');
+ // Refuse an occupied port rather than accidentally testing an unrelated server.
+ await new Promise((resolve,reject)=>{
+  const probe=net.createServer();
+  probe.once('error',reject);
+  probe.listen(8089,'127.0.0.1',()=>probe.close(resolve));
+ });
  php=spawn('php',['-S','127.0.0.1:8089','-t',wordpress,fileURLToPath(new URL('./router.php',import.meta.url))],{stdio:'ignore'});
  await new Promise((resolve,reject)=>{
   let attempts=0;
@@ -36,7 +46,7 @@ try {
  });
  await new Promise((resolve,reject)=>{proxy.once('error',reject);proxy.listen(8443,'127.0.0.1',resolve);});
  const status=await new Promise((resolve,reject)=>{
-  const child=spawn(process.execPath,[fileURLToPath(new URL('./passkeys.mjs',import.meta.url))],{stdio:'inherit',env:{...process.env,SWSL_TEST_ORIGIN:'https://localhost:8443'}});
+  const child=spawn(process.execPath,[fileURLToPath(new URL('./passkeys.mjs',import.meta.url))],{stdio:'inherit',env:{...process.env,SWSL_TEST_ORIGIN:'https://localhost:8443',SWSL_TEST_CERT_SPKI:certificatePin,NODE_EXTRA_CA_CERTS:join(temporary,'cert.pem')}});
   child.once('error',reject);child.once('exit',code=>resolve(code));
  });
  if (status!==0) throw new Error('Passkey browser tests failed.');

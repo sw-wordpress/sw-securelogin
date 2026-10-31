@@ -36,7 +36,8 @@
     "test:mozart": "bash tests/Build/mozart-smoke.sh",
     "test:coverage": "@php vendor/bin/phpunit --coverage-clover coverage/unit.xml --fail-on-warning",
     "test:integration:coverage": "@php vendor/bin/phpunit -c phpunit.integration.xml.dist --coverage-clover coverage/wordpress.xml --fail-on-warning",
-    "coverage:merge": "@php tests/coverage/merge.php coverage/clover.xml coverage/unit.xml coverage/wordpress.xml"
+    "coverage:merge": "@php tests/coverage/merge.php coverage/clover.xml coverage/unit.xml coverage/wordpress.xml",
+    "coverage:check": "@php tests/coverage/check.php coverage/clover.xml"
   },
   "extra": {
     "mozart": {

@@ -1,6 +1,6 @@
 # SW Securelogin — PLAN.md
 
-> Status: Architektur- und Implementierungsplan · Stand: 30.10.2026  
+> Status: Architektur- und Implementierungsplan · Stand: 31.10.2026
 > Produkt: SW Securelogin · Plugin-Slug: `sw-securelogin` · Textdomain: `sw-securelogin`  
 > Projektziel: Modulare Authentifizierungsplattform für WordPress mit Passkeys, externem OpenID-Connect-Login und später einem eigenen OAuth-2.0-/OpenID-Connect-Provider.
 
@@ -262,12 +262,16 @@ Global: Modulauswahl, Sicherheitsstatus (HTTPS, PHP-Erweiterungen, korrektes Ori
 
 ### M2 — Passkey-Login (v1.0-Kern)
 
-- [ ] Benutzername + Passkey-UI, neutraler Fehlerpfad.
-- [ ] Assertion-Verifikation mit Tests für alle Prüfpunkte.
-- [ ] WordPress-Session, Login-Hooks, sichere Admin-Weiterleitung.
-- [ ] Rate Limits, Audit, Passwortfallback und Geräte-/Browser-Tests.
+- [x] Benutzername + Passkey-UI, neutraler Fehlerpfad.
+- [x] Assertion-Verifikation mit Tests für alle Prüfpunkte.
+- [x] WordPress-Session, Login-Hooks, sichere Admin-Weiterleitung.
+- [x] Rate Limits, Audit, Passwortfallback und Chromium-Tests mit zwei virtuellen Geräten.
 
 **Abnahme:** Login klappt mit mehreren Credentials; falsche Signatur, falscher User, falsche Origin, Replay und abgelaufene Challenge schlagen fehl; WordPress-Session nur nach erfolgreicher Prüfung.
+
+Implementiert als Vorschau 0.3.0; öffentliche Optionen verwenden aus Datenschutzgründen
+auffindbare Credentials ohne ID-Liste. Benutzerbindung bleibt serverseitig verpflichtend.
+Reale Geräte, weitere Browser und MFA-Adapter siehe [ADR 005](docs/ADR-005-passkey-login.md) und M3.
 
 ### M3 — Stabilisierung / v1.0-Release
 

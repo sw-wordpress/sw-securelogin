@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 
 use lbuchs\WebAuthn\WebAuthn;
+use lbuchs\WebAuthn\Attestation\AuthenticatorData;
 use RuntimeException;
 use stdClass;
 
@@ -44,7 +45,8 @@ final class WebAuthnService {
 	 * @return stdClass Options consumed by navigator.credentials.create.
 	 */
 	public function options( string $handle, string $name, string $display_name, array $excluded ): stdClass {
-		$options = $this->library->getCreateArgs( $handle, $name, $display_name, 120, 'preferred', 'required', null, $excluded );
+		$this->library = new WebAuthn( 'SW Securelogin', $this->rp->id, array( 'none' ), true );
+		$options       = $this->library->getCreateArgs( $handle, $name, $display_name, 120, 'required', 'required', null, $excluded );
 		// M1's tested algorithm policy: ES256 on P-256 only.
 		$options->publicKey->pubKeyCredParams = array(
 			(object) array(
@@ -53,6 +55,54 @@ final class WebAuthnService {
 			),
 		);
 		return $options;
+	}
+
+	/** Create assertion options. Anonymous callers use discoverable credentials.
+	 *
+	 * @param string[] $ids Credential IDs, only for authenticated reauthentication.
+	 * @return stdClass Browser options.
+	 */
+	public function assertionOptions( array $ids = array() ): stdClass {
+		// The library caches its challenge per instance; each ceremony needs a new one.
+		$this->library = new WebAuthn( 'SW Securelogin', $this->rp->id, array( 'none' ), true );
+		return $this->library->getGetArgs( $ids, 120, true, true, true, true, true, 'required' );
+	}
+
+	/** Verify a signed assertion using a server-selected credential.
+	 *
+	 * @param array<string, mixed> $body Encoded assertion fields.
+	 * @param array<string, mixed> $credential Owned database credential.
+	 * @param string               $challenge Server challenge bytes.
+	 * @return VerifiedAssertion Signed metadata.
+	 * @throws RuntimeException For mismatched credential ownership or metadata.
+	 */
+	public function assertion( array $body, array $credential, string $challenge ): VerifiedAssertion {
+		if ( ! hash_equals( $credential['credential_id'], Base64Url::decode( $body['rawId'], 1023 ) ) || ! hash_equals( $credential['user_handle'], Base64Url::decode( $body['userHandle'], 32 ) ) ) {
+			throw new RuntimeException( 'Assertion ownership mismatch.' );
+		}
+		$client        = $this->clientContext( Base64Url::decode( $body['clientDataJSON'], 4096 ) );
+		$authenticator = Base64Url::decode( $body['authenticatorData'], 4096 );
+		// Counter policy is evaluated separately, accounting for synchronized passkeys.
+		$this->library->processGet( $client, $authenticator, Base64Url::decode( $body['signature'], 256 ), $credential['public_key'], $challenge, null, true, true );
+		$data = new AuthenticatorData( $authenticator );
+		if ( $data->getIsBackupEligible() !== (bool) $credential['backup_eligible'] || ( $data->getIsBackup() && ! $data->getIsBackupEligible() ) ) {
+			throw new RuntimeException( 'Invalid signed backup state.' );
+		}
+		return new VerifiedAssertion( $data->getSignCount(), $data->getIsBackupEligible(), $data->getIsBackup() );
+	}
+
+	/** Enforce the exact site origin and reject cross-origin embedding.
+	 *
+	 * @param string $client Binary clientDataJSON.
+	 * @return string Checked client data.
+	 * @throws RuntimeException On invalid origin or embedding context.
+	 */
+	private function clientContext( string $client ): string {
+		$context = json_decode( $client, true, 16, JSON_THROW_ON_ERROR );
+		if ( ! is_array( $context ) || ( $context['origin'] ?? null ) !== $this->rp->origin || ( array_key_exists( 'crossOrigin', $context ) && false !== $context['crossOrigin'] ) || array_key_exists( 'topOrigin', $context ) ) {
+			throw new RuntimeException( 'Unsupported WebAuthn origin or embedding context.' );
+		}
+		return $client;
 	}
 
 	/** Return the generated challenge bytes. */
@@ -70,12 +120,8 @@ final class WebAuthnService {
 	 * @throws RuntimeException For an unsupported context or mismatched credential ID.
 	 */
 	public function verify( string $client, string $attestation, string $raw_id, string $challenge ): VerifiedCredential {
-		$client_binary = Base64Url::decode( $client, 4096 );
-		$context       = json_decode( $client_binary, true, 16, JSON_THROW_ON_ERROR );
-		if ( ! is_array( $context ) || ( $context['origin'] ?? null ) !== $this->rp->origin || ( array_key_exists( 'crossOrigin', $context ) && false !== $context['crossOrigin'] ) || array_key_exists( 'topOrigin', $context ) ) {
-			throw new RuntimeException( 'Unsupported enrollment origin or embedding context.' );
-		}
-		$data = $this->library->processCreate( $client_binary, Base64Url::decode( $attestation, 16384 ), $challenge, true, true );
+		$client_binary = $this->clientContext( Base64Url::decode( $client, 4096 ) );
+		$data          = $this->library->processCreate( $client_binary, Base64Url::decode( $attestation, 16384 ), $challenge, true, true );
 		if ( ! hash_equals( $data->credentialId, Base64Url::decode( $raw_id, 1023 ) ) || ( $data->isBackedUp && ! $data->isBackupEligible ) ) {
 			throw new RuntimeException( 'Invalid credential metadata.' );
 		}

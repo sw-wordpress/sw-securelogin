@@ -2,10 +2,14 @@
   "name": "sw-securelogin-dev",
   "private": true,
   "scripts": {
-    "lint": "node --check assets/js/passkeys.js && node --check tests/E2E/passkeys.mjs && node --check tests/E2E/run.mjs",
+    "lint": "node --check assets/js/passkeys.js && node --check tests/E2E/passkeys.mjs && node --check tests/E2E/run.mjs && node --check assets/js/passkey-assertion.js && node --check assets/js/passkey-login.js && node --check tests/coverage/javascript.mjs",
     "test:e2e": "node tests/E2E/run.mjs"
   },
   "devDependencies": {
-    "playwright-core": "1.55.1"
+    "istanbul-lib-coverage": "3.2.2",
+    "istanbul-lib-report": "3.0.1",
+    "istanbul-reports": "3.2.0",
+    "playwright-core": "1.55.1",
+    "v8-to-istanbul": "9.3.0"
   }
 }

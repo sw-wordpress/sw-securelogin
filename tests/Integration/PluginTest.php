@@ -42,7 +42,7 @@ final class PluginTest extends TestCase {
 			ob_end_clean();
 		}
 		$this->assertStringContainsString( 'SW Securelogin', $output );
-		$this->assertStringContainsString( 'passkey login is not available yet', $output );
+		$this->assertStringContainsString( 'Password login remains available', $output );
 	}
 
 	public function testPasswordAuthenticationAndSessionSurviveDeactivation(): void {

@@ -11,6 +11,8 @@
 #swsl-passkeys .description { color: #646970; font-size: 13px; line-height: 1.6; }
 #swsl-passkeys .swsl-passkeys-note { margin: 0 0 20px; padding: 12px 16px; border-left: 3px solid #72aee6; background: #f0f6fc; line-height: 1.6; }
 #swsl-passkeys .swsl-passkeys-auth { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 320px); gap: 24px; align-items: center; padding: 20px 24px; margin-bottom: 20px; background: #fff; border: 1px solid #c3c4c7; border-radius: 8px; }
+#swsl-passkeys .swsl-passkeys-auth h3 { margin: 0; font-size: 14px; }
+#swsl-passkeys .swsl-passkeys-proof select { box-sizing: border-box; width: 100%; max-width: 100%; min-height: 40px; margin-bottom: 12px; }
 #swsl-passkeys .swsl-passkeys-auth p { margin: 6px 0 0; max-width: 570px; }
 #swsl-passkeys label { display: block; margin: 0 0 7px; color: #1d2327; font-size: 13px; font-weight: 600; }
 #swsl-passkeys input[type="text"], #swsl-passkeys input[type="password"] { box-sizing: border-box; width: 100%; min-width: 0; max-width: 100%; min-height: 40px; padding: 7px 11px; border: 1px solid #8c8f94; border-radius: 4px; background: #fff; color: #1d2327; font: inherit; font-size: 14px; }
