@@ -1,11 +1,11 @@
 /* Shared browser transport; all identity and signature checks run on the server. */
 (() => {
 	'use strict';
-	const decode = (value) => Uint8Array.from(atob(value.replace(/-/g, '+').replace(/_/g, '/')), (char) => char.charCodeAt(0));
+	const decode = (value) => Uint8Array.from(atob(value.replaceAll('-', '+').replaceAll('_', '/')), (char) => char.charCodeAt(0));
 	const encode = (buffer) => {
 		let binary = '';
 		for (const byte of new Uint8Array(buffer)) binary += String.fromCharCode(byte);
-		return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+		return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
 	};
 	window.swslAssertion = async (options) => {
 		const publicKey = { ...options.publicKey, challenge: decode(options.publicKey.challenge) };
