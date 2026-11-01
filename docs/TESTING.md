@@ -8,7 +8,7 @@ composer lint
 composer cs
 composer analyse
 composer test
-composer audit
+composer audit --locked --no-dev
 ```
 
 `composer test` is isolated from WordPress. Integration tests use an actual disposable
@@ -143,3 +143,14 @@ Repeat with real devices and target browsers; virtual Chromium tests do not esta
 Coverage gates: `composer coverage:merge && composer coverage:check` after PHP coverage;
 `npm run test:e2e` writes `coverage/js/lcov.info` and checks JavaScript. Each language
 must exceed 80%; see [SonarQube setup](SONARQUBE.md).
+
+## Dependency security
+
+Every push/PR fails on known advisories in shipped dependencies (`composer audit --locked --no-dev`,
+`npm audit --omit=dev --audit-level=high`). `.github/workflows/security-audit.yml` audits all
+dependencies, including dev tooling, daily and keeps one open `security-audit` issue (closed once
+clean). `.github/dependabot.yml` opens weekly grouped PRs; Dependabot PRs get no secrets, so the
+SonarQube job skips them. Enable Dependabot alerts and security updates in the repository settings.
+Use Node 22 locally. PHPStan level 8 (`composer analyse`/`composer stan`)
+covers `src`, `sw-securelogin.php` and `uninstall.php` without baseline; constants live in
+`tests/phpstan/bootstrap.php`.

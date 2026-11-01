@@ -44,11 +44,22 @@ final class PrivacyController {
 	/** Remove expired transactions and counters, retaining no authentication logs. */
 	public function cleanup(): void {
 		foreach ( array( 'swsl_transactions', 'swsl_limits' ) as $suffix ) {
-			$this->database->query( $this->database->prepare( 'DELETE FROM %i WHERE expires_at <= %d', $this->database->prefix . $suffix, time() ) );
+			$this->run( $this->database->prepare( 'DELETE FROM %i WHERE expires_at <= %d', $this->database->prefix . $suffix, time() ) );
 		}
 		// Retry account-deletion cleanup after an earlier interrupted request.
 		foreach ( array( 'swsl_passkeys', 'swsl_user_handles', 'swsl_transactions' ) as $suffix ) {
-			$this->database->query( $this->database->prepare( 'DELETE owned FROM %i AS owned LEFT JOIN %i AS users ON users.ID = owned.user_id WHERE users.ID IS NULL AND owned.user_id <> 0', $this->database->prefix . $suffix, $this->database->users ) );
+			$this->run( $this->database->prepare( 'DELETE owned FROM %i AS owned LEFT JOIN %i AS users ON users.ID = owned.user_id WHERE users.ID IS NULL AND owned.user_id <> 0', $this->database->prefix . $suffix, $this->database->users ) );
+		}
+	}
+
+	/** Run a prepared maintenance statement; a failed preparation is skipped.
+	 *
+	 * @param string|null $sql Prepared SQL.
+	 */
+	private function run( ?string $sql ): void {
+		if ( null !== $sql ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Prepared by the caller.
+			$this->database->query( $sql );
 		}
 	}
 

@@ -7,3 +7,4 @@
 /coverage/
 /.scannerwork/
 /strix_runs/
+/.phpstan.cache/

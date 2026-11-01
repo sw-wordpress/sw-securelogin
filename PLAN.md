@@ -35,7 +35,7 @@ sw-securelogin/
 ├── sw-securelogin.php
 ├── composer.json
 ├── composer.lock
-├── readme.txt
+├── README.md
 ├── uninstall.php
 ├── PLAN.md
 ├── CODE-STYLE.md
@@ -277,7 +277,7 @@ Reale Geräte, weitere Browser und MFA-Adapter siehe [ADR 005](docs/ADR-005-pass
 
 - [ ] Security Review, Plugin Check, WPCS, PHPStan, PHPUnit, Browser-E2E.
 - [ ] Multisite-/Reverse-Proxy-Verhalten dokumentieren, unterstützte Matrix testen.
-- [ ] i18n (Deutsch/Englisch), Accessibility, readme.txt, Datenschutzhinweise, Upgradepfad.
+- [ ] i18n (Deutsch/Englisch), Accessibility, README.md, Datenschutzhinweise, Upgradepfad.
 - [ ] GitHub Release mit reproduzierbarem ZIP einschließlich produktionsfähiger Vendor-Abhängigkeiten.
 
 **Abnahme:** Keine offenen Critical/High Findings; dokumentierte Recovery; Releases ohne Dev-Abhängigkeiten.
