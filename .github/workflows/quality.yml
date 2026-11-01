@@ -20,6 +20,9 @@ jobs:
           coverage: ${{ matrix.php == '8.2' && 'xdebug' || 'none' }}
       - run: composer install --no-interaction --prefer-dist
       - run: composer validate --strict
+      - name: Audit shipped Composer packages
+        if: matrix.php == '8.2'
+        run: composer audit --locked --no-dev
       - run: find . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
       - run: composer cs
       - run: composer analyse
@@ -37,7 +40,6 @@ jobs:
           path: coverage/unit.xml
           if-no-files-found: error
           retention-days: 14
-      - run: composer audit
 
   wordpress:
     runs-on: ubuntu-latest
@@ -109,8 +111,10 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci --ignore-scripts
+      - name: Audit shipped npm packages
+        if: matrix.php == '8.2'
+        run: npm audit --omit=dev --audit-level=high
       - run: npm run lint
-      - run: npm audit --audit-level=high
       - run: npx playwright-core install --with-deps chromium
       - run: npm run test:e2e
       - uses: actions/upload-artifact@v4
@@ -156,7 +160,8 @@ jobs:
     needs: [coverage]
     if: >-
       (github.event_name == 'pull_request' &&
-       github.event.pull_request.head.repo.full_name == github.repository) ||
+       github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.user.login != 'dependabot[bot]') ||
       ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
        github.ref_name == github.event.repository.default_branch)
     runs-on: ubuntu-latest

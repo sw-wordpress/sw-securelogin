@@ -76,7 +76,8 @@ final class RegistrationController {
 	public function permission( WP_REST_Request $request ): true|WP_Error {
 		$user_id = get_current_user_id();
 		$origin  = $request->get_header( 'origin' );
-		if ( ! is_ssl() || ! $user_id || ! current_user_can( 'read' ) || ! current_user_can( 'edit_user', $user_id ) || '' === wp_get_session_token() || ! wp_verify_nonce( $request->get_header( 'x_wp_nonce' ), 'wp_rest' ) ) {
+		$nonce   = $request->get_header( 'x_wp_nonce' );
+		if ( ! is_ssl() || ! $user_id || ! current_user_can( 'read' ) || ! current_user_can( 'edit_user', $user_id ) || '' === wp_get_session_token() || ! is_string( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 			return $this->error( 403 );
 		}
 		if ( ( null !== $origin && $origin !== $this->rp->origin ) || ( 'GET' !== $request->get_method() && $origin !== $this->rp->origin ) ) {

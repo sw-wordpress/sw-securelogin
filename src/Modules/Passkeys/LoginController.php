@@ -73,7 +73,8 @@ final class LoginController {
 		$reauth = 'reauthentication' === ( $request->get_attributes()['swsl_purpose'] ?? '' );
 		if ( $reauth ) {
 			$user_id = get_current_user_id();
-			if ( ! $user_id || '' === wp_get_session_token() || ! current_user_can( 'read' ) || ! current_user_can( 'edit_user', $user_id ) || ! wp_verify_nonce( $request->get_header( 'x_wp_nonce' ), 'wp_rest' ) ) {
+			$nonce   = $request->get_header( 'x_wp_nonce' );
+			if ( ! $user_id || '' === wp_get_session_token() || ! current_user_can( 'read' ) || ! current_user_can( 'edit_user', $user_id ) || ! is_string( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
 				return $this->error( 403 );
 			}
 		} elseif ( is_user_logged_in() || wp_validate_auth_cookie( '', 'logged_in' ) ) {

@@ -102,7 +102,7 @@ final class LoginSessionIssuer {
 		$target   = wp_validate_redirect( $requested, $fallback );
 		$base     = wp_parse_url( $fallback );
 		$parts    = wp_parse_url( $target );
-		if ( ! is_array( $parts ) || ! is_array( $base ) || isset( $parts['user'] ) || isset( $parts['pass'] ) || ( $parts['scheme'] ?? '' ) !== ( $base['scheme'] ?? '' ) || ( $parts['host'] ?? '' ) !== ( $base['host'] ?? '' ) || ( $parts['port'] ?? 443 ) !== ( $base['port'] ?? 443 ) ) {
+		if ( ! is_array( $parts ) || ! is_array( $base ) || ! isset( $base['path'] ) || isset( $parts['user'] ) || isset( $parts['pass'] ) || ( $parts['scheme'] ?? '' ) !== ( $base['scheme'] ?? '' ) || ( $parts['host'] ?? '' ) !== ( $base['host'] ?? '' ) || ( $parts['port'] ?? 443 ) !== ( $base['port'] ?? 443 ) ) {
 			return $fallback;
 		}
 		$path = rawurldecode( $parts['path'] ?? '' );

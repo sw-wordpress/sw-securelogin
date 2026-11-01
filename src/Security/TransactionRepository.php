@@ -84,7 +84,7 @@ final class TransactionRepository {
 		}
 		$delete = $this->database->prepare( 'DELETE FROM %i WHERE token_hash = %s AND user_id = %d AND binding = %s AND purpose = %s AND expires_at > %d', $table, hash( 'sha256', $token ), $user_id, $binding, $purpose, time() );
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Prepared DELETE; affected rows arbitrate parallel readers.
-		if ( 1 !== $this->database->query( $delete ) || (int) $row['expires_at'] <= time() ) {
+		if ( null === $delete || 1 !== $this->database->query( $delete ) || (int) $row['expires_at'] <= time() ) {
 			return null;
 		}
 

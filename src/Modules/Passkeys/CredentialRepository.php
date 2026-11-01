@@ -32,7 +32,12 @@ final class CredentialRepository {
 	 * @throws RuntimeException On storage failure.
 	 */
 	public function handle( int $user_id ): string {
-		$this->database->query( $this->database->prepare( 'INSERT IGNORE INTO %i (user_id, handle) SELECT ID, %s FROM %i WHERE ID = %d', $this->database->prefix . 'swsl_user_handles', random_bytes( 32 ), $this->database->users, $user_id ) );
+		$insert = $this->database->prepare( 'INSERT IGNORE INTO %i (user_id, handle) SELECT ID, %s FROM %i WHERE ID = %d', $this->database->prefix . 'swsl_user_handles', random_bytes( 32 ), $this->database->users, $user_id );
+		if ( null === $insert ) {
+			throw new RuntimeException( 'Unable to persist user handle.' );
+		}
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Prepared query above.
+		$this->database->query( $insert );
 		$handle = $this->database->get_var( $this->database->prepare( 'SELECT handle FROM %i WHERE user_id = %d', $this->database->prefix . 'swsl_user_handles', $user_id ) );
 		if ( ! is_string( $handle ) || 32 !== strlen( $handle ) ) {
 			throw new RuntimeException( 'Unable to persist user handle.' );
@@ -56,7 +61,7 @@ final class CredentialRepository {
 	 * @return string[] Credential IDs.
 	 */
 	public function ids( int $user_id ): array {
-		return $this->database->get_col( $this->database->prepare( 'SELECT credential_id FROM %i WHERE user_id = %d ORDER BY id ASC', $this->database->prefix . 'swsl_passkeys', $user_id ) );
+		return array_values( array_filter( $this->database->get_col( $this->database->prepare( 'SELECT credential_id FROM %i WHERE user_id = %d ORDER BY id ASC', $this->database->prefix . 'swsl_passkeys', $user_id ) ), 'is_string' ) );
 	}
 
 	/** Persist a verified credential with uniqueness and a serialized per-user limit.
