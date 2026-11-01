@@ -4,7 +4,7 @@
 - Verfasse Dokumentation möglichst knapp und ohne Wiederholungen, um Tokens zu sparen. Beschränke sie auf nötige Entscheidungen, Sicherheitsdetails und Testhinweise; verlinke vorhandene Dokumentation statt Inhalte zu duplizieren.
 - Gib nach jeder Implementierung eine konkrete Übersicht, was der Benutzer selbst testen kann oder sollte. Nenne den Einstiegspunkt, die Schritte und das erwartete Ergebnis. Unterscheide automatisierte Prüfungen von noch offenen manuellen Prüfungen.
 - Halte TODO.md nach abgeschlossenen Arbeitspaketen aktuell.
-- PHPStan Level 8 deckt den gesamten produktiven PHP-Code ab (`composer analyse`), ohne Baseline und ohne Ignores.
+- PHPStan Level 8 deckt den gesamten produktiven PHP-Code ab (`composer analyse`), ohne Baseline und ohne Ignores. `bin/` (Build-Skripte, werden nicht ausgeliefert) liegt bewusst außerhalb.
 
 ## Tests und Coverage
 
