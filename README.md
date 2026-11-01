@@ -1,8 +1,13 @@
 # SW Securelogin
 
 [![Release](https://img.shields.io/github/v/release/sw-wordpress/sw-securelogin?sort=semver)](https://github.com/sw-wordpress/sw-securelogin/releases)
+[![CI](https://github.com/sw-wordpress/sw-securelogin/actions/workflows/quality.yml/badge.svg)](https://github.com/sw-wordpress/sw-securelogin/actions/workflows/quality.yml)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=sw-wordpress_sw-securelogin&metric=coverage)](https://sonarcloud.io/summary/overall?id=sw-wordpress_sw-securelogin)
 [![SonarQube Issues](https://sonarcloud.io/api/project_badges/measure?project=sw-wordpress_sw-securelogin&metric=vulnerabilities)](https://sonarcloud.io/project/issues?id=sw-wordpress_sw-securelogin&impactSoftwareQualities=SECURITY&resolved=false)
+![PHPStan level 6](https://img.shields.io/badge/phpstan%20level-6%20of%209-yellowgreen?style=flat-square&logo=php)
+![PHP 8.2+](https://img.shields.io/badge/PHP-8.2%2B-777bb4?style=flat-square&logo=php&logoColor=white)
+![WordPress 6.7+](https://img.shields.io/badge/WordPress-6.7%2B-21759b?style=flat-square&logo=wordpress&logoColor=white)
+[![License GPL-2.0-or-later](https://img.shields.io/badge/License-GPL--2.0--or--later-blue?style=flat-square)](https://www.gnu.org/licenses/gpl-2.0.html)
 
 Adds [passkey](https://en.wikipedia.org/wiki/Passkey_(credential)) login to the WordPress login page.
 Password login stays available. Preview, disabled until an administrator enables it.

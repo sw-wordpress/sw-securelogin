@@ -7,7 +7,7 @@ Abschnitte in dieser Reihenfolge. Referenzumsetzung: [README.md](../README.md).
 | # | Abschnitt | Regeln |
 |---|-----------|--------|
 | 1 | `# <Plugin-Name>` | Anzeigename aus dem Plugin-Header, keine weitere H1. |
-| 2 | Badges | Eine Zeile, genau drei Badges in dieser Reihenfolge (siehe unten). |
+| 2 | Badges | Ein Block aus acht Badges in dieser Reihenfolge (siehe unten). |
 | 3 | Beschreibung (ohne Überschrift) | 2–3 kurze Sätze, max. 6: was das Plugin tut, nicht wie die Technik dahinter funktioniert. Fachbegriffe beim ersten Vorkommen auf Wikipedia o. Ä. verlinken statt erklären. Status nur bei Preview/Beta. |
 | 4 | `## Features` | Liste: `- **Kurzer Titel** — 1 kurzer Satz.` Nur Key Facts (3–6 Punkte), die das Plugin auszeichnen. Keine Sprachen, Anforderungen, Roadmap oder allgemeinen Erklärungen. |
 | 5 | `## Languages` | Unterstützte UI-Sprachen als kommagetrennte Liste. |
@@ -26,14 +26,22 @@ Abschnitte in dieser Reihenfolge. Referenzumsetzung: [README.md](../README.md).
 ## Badges
 
 `<repo>` = Repository-Name, `<key>` = `sonar.projectKey` aus `sonar-project.properties`
-(Konvention `sw-wordpress_<repo>`).
+(Konvention `sw-wordpress_<repo>`), `<php>` = `Requires PHP`, `<wp>` = `Requires at least` aus dem
+Plugin-Header, `<lvl>` = `level` aus `phpstan.neon.dist` (Skala 0–9). PHPStan-, PHP- und WordPress-Badge
+sind statisch und müssen bei Änderungen mitgezogen werden. `quality.yml` muss PHPUnit, PHPCS und PHPStan ausführen, damit das CI-Badge sie abdeckt.
 
 ```markdown
 [![Release](https://img.shields.io/github/v/release/sw-wordpress/<repo>?sort=semver)](https://github.com/sw-wordpress/<repo>/releases)
+[![CI](https://github.com/sw-wordpress/<repo>/actions/workflows/quality.yml/badge.svg)](https://github.com/sw-wordpress/<repo>/actions/workflows/quality.yml)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=<key>&metric=coverage)](https://sonarcloud.io/summary/overall?id=<key>)
 [![SonarQube Issues](https://sonarcloud.io/api/project_badges/measure?project=<key>&metric=vulnerabilities)](https://sonarcloud.io/project/issues?id=<key>&impactSoftwareQualities=SECURITY&resolved=false)
+![PHPStan level <lvl>](https://img.shields.io/badge/phpstan%20level-<lvl>%20of%209-<farbe>?style=flat-square&logo=php)
+![PHP <php>+](https://img.shields.io/badge/PHP-<php>%2B-777bb4?style=flat-square&logo=php&logoColor=white)
+![WordPress <wp>+](https://img.shields.io/badge/WordPress-<wp>%2B-21759b?style=flat-square&logo=wordpress&logoColor=white)
+[![License GPL-2.0-or-later](https://img.shields.io/badge/License-GPL--2.0--or--later-blue?style=flat-square)](https://www.gnu.org/licenses/gpl-2.0.html)
 ```
 
+`<farbe>`: `brightgreen` ab Level 8, `green` ab 7, sonst `yellowgreen`.
 Das SonarQube-Cloud-Projekt muss öffentlich sein, sonst zeigen die Badges keinen Wert.
 
 ## Abgrenzung
