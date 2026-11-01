@@ -12,7 +12,7 @@ jobs:
       matrix:
         php: ['8.2', '8.3']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -33,7 +33,7 @@ jobs:
         env:
           XDEBUG_MODE: coverage
         run: composer test:coverage
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.php == '8.2'
         with:
           name: php-unit-coverage
@@ -69,7 +69,7 @@ jobs:
     env:
       SWSL_TEST_WORDPRESS: /tmp/swsl-ci-wordpress
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
@@ -92,7 +92,7 @@ jobs:
           XDEBUG_MODE: coverage
           SWSL_EXPECT_PLUGIN_ROOT: ${{ github.workspace }}
         run: composer test:integration:coverage
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.php == '8.2'
         with:
           name: php-wordpress-coverage
@@ -106,7 +106,7 @@ jobs:
           XDEBUG_MODE: 'off'
           SWSL_EXPECT_PLUGIN_ROOT: ${{ github.workspace }}/build/sw-securelogin
         run: composer test:integration
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: npm
@@ -117,7 +117,7 @@ jobs:
       - run: npm run lint
       - run: npx playwright-core install --with-deps chromium
       - run: npm run test:e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.php == '8.2'
         with:
           name: js-coverage
@@ -130,17 +130,17 @@ jobs:
     needs: [php, wordpress]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           extensions: dom
           coverage: none
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: php-unit-coverage
           path: coverage
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: php-wordpress-coverage
           path: coverage
@@ -148,7 +148,7 @@ jobs:
         run: php tests/coverage/merge.php coverage/clover.xml coverage/unit.xml coverage/wordpress.xml
       - name: Enforce PHP line coverage above 80 percent
         run: php tests/coverage/check.php coverage/clover.xml
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: php-coverage
           path: coverage/clover.xml
@@ -166,7 +166,7 @@ jobs:
        github.ref_name == github.event.repository.default_branch)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: shivammathur/setup-php@v2
@@ -174,11 +174,11 @@ jobs:
           php-version: '8.2'
           extensions: dom
           coverage: none
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: php-coverage
           path: coverage
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: js-coverage
           path: coverage/js
@@ -197,7 +197,7 @@ jobs:
           fi
           test -s coverage/clover.xml
       - name: Analyze code, import coverage and check quality gate
-        uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9
+        uses: SonarSource/sonarqube-scan-action@4d1dc0c91ee400dcf8a6dddf2f705ac36542e304
         with:
           args: >-
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
