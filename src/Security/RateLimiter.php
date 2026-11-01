@@ -39,7 +39,7 @@ final class RateLimiter {
 			( $window + 1 ) * $seconds
 		);
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Prepared query above.
-		if ( false === $this->database->query( $query ) ) {
+		if ( null === $query || false === $this->database->query( $query ) ) {
 			return false;
 		}
 		$count = $this->database->get_var( $this->database->prepare( 'SELECT attempts FROM %i WHERE bucket = %s', $this->database->prefix . 'swsl_limits', $bucket ) );

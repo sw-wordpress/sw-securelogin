@@ -9,11 +9,12 @@
     "lbuchs/webauthn": "^2.2"
   },
   "require-dev": {
-    "phpunit/phpunit": "^11.5",
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+    "phpstan/extension-installer": "^1.4",
     "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^11.5",
     "szepeviktor/phpstan-wordpress": "^2.0",
-    "wp-coding-standards/wpcs": "^3.0",
-    "dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+    "wp-coding-standards/wpcs": "^3.0"
   },
   "autoload": {
     "psr-4": {
@@ -22,9 +23,13 @@
   },
   "config": {
     "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpstan/extension-installer": true
     },
-    "sort-packages": true
+    "sort-packages": true,
+    "audit": {
+      "abandoned": "report"
+    }
   },
   "scripts": {
     "test": "@php vendor/bin/phpunit",
@@ -37,7 +42,8 @@
     "test:coverage": "@php vendor/bin/phpunit --coverage-clover coverage/unit.xml --fail-on-warning",
     "test:integration:coverage": "@php vendor/bin/phpunit -c phpunit.integration.xml.dist --coverage-clover coverage/wordpress.xml --fail-on-warning",
     "coverage:merge": "@php tests/coverage/merge.php coverage/clover.xml coverage/unit.xml coverage/wordpress.xml",
-    "coverage:check": "@php tests/coverage/check.php coverage/clover.xml"
+    "coverage:check": "@php tests/coverage/check.php coverage/clover.xml",
+    "stan": "@analyse"
   },
   "extra": {
     "mozart": {

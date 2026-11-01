@@ -1,7 +1,11 @@
-includes:
-    - vendor/szepeviktor/phpstan-wordpress/extension.neon
 parameters:
-    level: 6
+    level: 8
     paths:
         - src
-    tmpDir: .phpstan-cache
+        - sw-securelogin.php
+        - uninstall.php
+    bootstrapFiles:
+        - tests/phpstan/bootstrap.php
+    dynamicConstantNames:
+        - SWSL_MIN_PHP
+    tmpDir: .phpstan.cache
