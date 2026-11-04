@@ -168,6 +168,17 @@ Die echte WP-CLI-Deinstallation entfernt alle vier Tabellen und vier Optionen;
 Passwortlogin bleibt möglich. Ein echtes Multisite-Netzwerk bewahrt Tabellen und
 Einstellungen selbst bei zuvor gespeicherter Löschzustimmung.
 
+CI-Nacharbeit: Die ersten Läufe von PR #11 scheiterten bei der JS-Coverage, weil V8
+nach Navigation teils ausgeführte Bereiche ohne Quelltext liefert (`settings.js`).
+Der Browser-Harness puffert nun die tatsächliche HTTP-Scriptantwort vor Ausführung
+und prüft deren Inhalt sowie jeden vorhandenen V8-Quelltext gegen die Produktivdatei.
+Neun Regressionstests sichern fehlende/geänderte Quellen und die Reihenfolge ab;
+der Coverage-Grenzwert und die gemessenen Ausführungsbereiche bleiben unverändert.
+Formular-Weiterleitungen zur gleichen Übersichts-URL warten jetzt auf die neue
+Navigation statt auf eine bereits passende URL. Lokal bestehen die neun Regressionen,
+JS-Lint, actionlint und beide vollständigen WordPress-7.1.4-Browserflüsse (normal sowie
+WP Armour mit geändertem Loginpfad); JavaScript-Coverage weiterhin 96,1 %.
+
 ## M4 — Externer OIDC-Login, Version 1.1+
 
 - [ ] Providerverwaltung, geschützte Konfiguration und validierte Discovery-/JWKS-Abfragen implementieren.

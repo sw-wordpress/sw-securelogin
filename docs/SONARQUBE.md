@@ -45,6 +45,13 @@ coverage/js/lcov.info and imported by Sonar. Every production script starts unco
 only executed browser ranges add hits. Both language gates require strictly >80% line
 coverage, including on fork PRs. No production files are excluded.
 
+The browser harness captures plugin script responses before delivering them to Chromium.
+If V8 discards script text after navigation, conversion uses those captured bytes;
+both HTTP and available V8 source must exactly match the production file. Missing
+evidence or changed source fails the run. Executed ranges still come exclusively from
+V8. `npm run test:coverage-tools` checks these invariants, including capture before
+delivery and rejection of changed responses on repeated loads.
+
 ## Local checks
 
 With Xdebug or PCOV available and the disposable WordPress database running:

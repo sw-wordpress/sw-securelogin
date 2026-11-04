@@ -19,6 +19,7 @@ try {
  await measured.start(page);
  await context.route('**/*',async route=>{
   if (new URL(route.request().url()).origin!==origin) return route.abort();
+  if (await measured.captureScript(route)) return;
   if (route.request().url().includes('/passkeys/login/verify')) {
    try {
     const response=await route.fetch();
@@ -41,7 +42,7 @@ try {
    if (process.env.SWSL_E2E_DEBUG) console.log(navigation);
   }
  });
- page.on('pageerror',error=>errors.push(error.message));
+ page.on('pageerror',error=>errors.push(error.stack || error.message));
  if (process.env.SWSL_E2E_DEBUG) page.on('requestfailed',request=>console.log('Request failed:',new URL(request.url()).pathname,request.failure()?.errorText));
  if (process.env.SWSL_E2E_DEBUG) page.on('response',response=>{ if(response.url().includes('passkeys')) console.log(response.request().method(),response.status(),response.url().split('rest_route=')[1] || 'asset'); });
  await navigate(`${origin}${loginPath}`);
@@ -77,7 +78,7 @@ try {
  assert.equal(await removal.isChecked(),false,'Deletion consent can be withdrawn.');
  if (process.env.SWSL_SCREENSHOTS) await page.screenshot({path:`${process.env.SWSL_SCREENSHOTS}/swsl-settings.png`});
  await page.locator('input[name="enabled"]').check();
- await Promise.all([page.waitForURL('**/wp-admin/admin.php?page=swsl-overview'),page.locator('input#submit').click()]);
+ await Promise.all([page.waitForNavigation(),page.locator('input#submit').click()]);
  // Progressive enhancement: password recovery must work without JavaScript.
  const plain=await browser.newContext({javaScriptEnabled:false,ignoreHTTPSErrors:true});
  const plainPage=await plain.newPage();
@@ -203,7 +204,7 @@ try {
  // Disabling must remove routes and profile UI on subsequent requests without logging out.
  await navigate(`${origin}/wp-admin/admin.php?page=swsl-overview`);
  await page.locator('input[name="enabled"]').uncheck();
- await Promise.all([page.waitForURL('**/wp-admin/admin.php?page=swsl-overview'),page.locator('input#submit').click()]);
+ await Promise.all([page.waitForNavigation(),page.locator('input#submit').click()]);
  await navigate(`${origin}/wp-admin/profile.php`);
  assert.equal(await page.locator('#swsl-passkeys').count(),0);
  const disabled=await context.newPage();
