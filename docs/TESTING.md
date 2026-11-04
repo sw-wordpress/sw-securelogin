@@ -154,3 +154,58 @@ SonarQube job skips them. Enable Dependabot alerts and security updates in the r
 Use Node 22 locally. PHPStan level 8 (`composer analyse`/`composer stan`)
 covers `src`, `sw-securelogin.php` and `uninstall.php` without baseline; constants live in
 `tests/phpstan/bootstrap.php`.
+
+
+## M3 release and compatibility checks
+
+`composer build:release` creates the production ZIP and checksum; `composer test:release`
+checks deterministic packaging, forbidden files/symlinks, missing files and version mismatch.
+Use PHP ZipArchive on the build/test machine. The final archive is installed in a fresh
+site for the same integration and browser tests; do not use a build-directory symlink
+as evidence for final-ZIP acceptance. See [release gates](RELEASE.md).
+
+With WP Armour 2.4.02 and WPS Hide Login 1.9.19 installed and activated in the disposable
+site, set its `whl_page` option to `swsl-test-login` and run:
+
+```sh
+SWSL_TEST_LOGIN_PATH=/swsl-test-login npm run test:e2e
+```
+
+Deactivate both before ordinary integration tests. Install Two Factor 0.14.2 (inactive
+is sufficient; the isolated script loads its real hooks), then run:
+
+```sh
+php tests/Compatibility/mfa.php
+```
+
+The expected result is a blocked passkey policy and no new session, not a working MFA
+adapter. At the end of all single-site tests, `wp core multisite-convert` in that same
+**disposable site only** permits `php tests/Compatibility/multisite.php` to verify that
+no feature or migration hooks register. Conversion changes the fixture: reinstall/reset
+it before running single-site tests again. CI runs this last.
+
+Local M3 checks used Node 22.22.3 / Chromium 156.0.8078.4, WordPress 6.7 / PHP 8.2.27 /
+MySQL 8.0 and WordPress 7.1.4 / PHP 8.3.16 / MariaDB 11.4.12. Both ZIP integration suites
+passed 65 tests. Full browser flows passed on both database combinations; the renamed
+login/WP Armour flow also passed. Browser checks include keyboard enrollment, mobile
+layout, no-script and no-WebAuthn password fallback. These runs used host Playwright;
+Docker supplied the matrix databases and Mozart. Physical devices, Firefox/Safari,
+human screen readers and a deployment-equivalent proxy remain unverified.
+
+After installing/activating Plugin Check 2.1.0 in the disposable site, run all checks
+(including runtime) on the installed archive:
+
+```sh
+wp --require="$SWSL_TEST_WORDPRESS/wp-content/plugins/plugin-check/cli.php" plugin check sw-securelogin --format=strict-json --path="$SWSL_TEST_WORDPRESS"
+```
+
+Plugin Check does not itself return failure for every finding. CI parses the JSON and
+fails on `ERROR`; all warnings remain in its artifact. Two reviewed warnings and their
+reasons are recorded in [the implementation review](SECURITY-REVIEW-M3.md).
+
+The M3 MariaDB fixture also passed a complete database export/import restoration:
+with the guarded disposable database, export using `--skip-comments --skip-dump-date
+--skip-extended-insert --order-by-primary`, change the module setting, import the dump,
+and repeat the export. `cmp` confirmed exact equality, including credential rows.
+Keep dumps private and apply this procedure only to the disposable database. A real
+operator backup/restore and recovery drill remains a deployment acceptance check.

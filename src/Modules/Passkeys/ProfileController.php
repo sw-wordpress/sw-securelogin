@@ -30,9 +30,9 @@ final class ProfileController {
 		if ( 'profile.php' !== $hook ) {
 			return;
 		}
-		wp_enqueue_style( 'swsl-passkeys', plugins_url( 'assets/css/passkeys.css', dirname( __DIR__, 3 ) . '/sw-securelogin.php' ), array(), '0.3.0' );
-		wp_enqueue_script( 'swsl-assertion', plugins_url( 'assets/js/passkey-assertion.js', dirname( __DIR__, 3 ) . '/sw-securelogin.php' ), array(), '0.3.0', true );
-		wp_enqueue_script( 'swsl-passkeys', plugins_url( 'assets/js/passkeys.js', dirname( __DIR__, 3 ) . '/sw-securelogin.php' ), array( 'swsl-assertion' ), '0.3.0', true );
+		wp_enqueue_style( 'swsl-passkeys', plugins_url( 'assets/css/passkeys.css', dirname( __DIR__, 3 ) . '/sw-securelogin.php' ), array(), SWSL_VERSION );
+		wp_enqueue_script( 'swsl-assertion', plugins_url( 'assets/js/passkey-assertion.js', dirname( __DIR__, 3 ) . '/sw-securelogin.php' ), array(), SWSL_VERSION, true );
+		wp_enqueue_script( 'swsl-passkeys', plugins_url( 'assets/js/passkeys.js', dirname( __DIR__, 3 ) . '/sw-securelogin.php' ), array( 'swsl-assertion' ), SWSL_VERSION, true );
 		wp_localize_script(
 			'swsl-passkeys',
 			'swslPasskeys',

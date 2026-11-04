@@ -41,17 +41,15 @@ PHP 8.2+ with OpenSSL, WordPress 6.7+, MySQL or MariaDB, single-site installatio
 The only setting is the switch under **SW Securelogin → Overview**. Enabling it binds passkeys
 to the current site address; changing the domain later is not supported yet.
 
-The plugin has no constants of its own. These existing `wp-config.php` settings matter:
+Asset URLs use the central plugin version automatically. There are no user-configurable plugin constants. These existing `wp-config.php` settings matter:
 
 ```php
 // Must be off (default). Passkeys are disabled while SQL query logging is active.
 define( 'SAVEQUERIES', false );
 
-// Behind a reverse proxy or load balancer, tell WordPress the request is HTTPS
-// (only if the proxy is trusted and always sets this header):
-if ( isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && 'https' === $_SERVER['HTTP_X_FORWARDED_PROTO'] ) {
-	$_SERVER['HTTPS'] = 'on';
-}
+// Proxy TLS recognition belongs in the trusted server configuration.
+// Validate the proxy peer and prevent direct access before trusting its headers.
+// Deployment instructions: docs/OPERATIONS.md.
 ```
 
 ### Background tasks
@@ -59,12 +57,18 @@ if ( isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && 'https' === $_SERVER['HTTP_X
 Expired login attempts are removed hourly by WP-Cron. On sites with little traffic or with
 `DISABLE_WP_CRON`, run WordPress cron from the server, e.g. `*/15 * * * * wp cron event run --due-now --path=/path/to/wordpress`.
 
+### Integrations
+
+WP Armour and WPS Hide Login have been checked with a renamed login path. Unreviewed
+MFA extensions block passkey authentication; password/MFA recovery stays with WordPress
+and the extension. See [release verification](docs/RELEASE.md) for tested versions and limits.
+
 ### Deactivation and removal
 
 Deactivating or deleting the plugin keeps all registered passkeys and settings; users simply
 sign in with their password again. Personal data can be exported or erased with the WordPress
 privacy tools, and a user's passkeys are removed when the user is deleted.
-Details: [docs/PRIVACY.md](docs/PRIVACY.md).
+Details: [privacy](docs/PRIVACY.md), [backup, upgrade and administrator recovery](docs/OPERATIONS.md).
 
 ## Troubleshooting
 
@@ -88,7 +92,7 @@ AI agents must follow the project rules before changing code:
 
 ## Development
 
-Requirements: PHP 8.2+, Composer, Node.js with npm, and Docker for the production build.
+Requirements: PHP 8.2+ with ZipArchive, Composer, Node.js with npm, and Docker for the production build.
 JavaScript and CSS are plain files; there is no frontend compile step.
 
 ```sh
@@ -101,7 +105,7 @@ composer test                                      # unit tests
 composer test:integration                          # needs a disposable WordPress, see docs/TESTING.md
 npm run lint && npm run test:e2e                   # JavaScript checks and browser tests
 
-composer build:prefixed                            # production build in build/sw-securelogin
+composer build:release                             # production ZIP and SHA-256 in build/
 ```
 
 Every change needs tests; line coverage must stay above 80 % for PHP and JavaScript.
@@ -115,3 +119,4 @@ Setup of the test site, coverage and SonarQube: [docs/TESTING.md](docs/TESTING.m
 Bundled third-party components (license texts in `vendor-prefixed/licenses/` of the release build):
 
 - [lbuchs/webauthn](https://github.com/lbuchs/WebAuthn) — MIT
+- [Composer ClassLoader](https://github.com/composer/composer) — MIT (`vendor-prefixed/composer/LICENSE`)

@@ -18,6 +18,7 @@ declare(strict_types=1);
 defined( 'ABSPATH' ) || exit;
 
 // Keep this entry point parseable on older PHP installations.
+defined( 'SWSL_VERSION' ) || define( 'SWSL_VERSION', '0.3.0' );
 defined( 'SWSL_MIN_PHP' ) || define( 'SWSL_MIN_PHP', '8.2' );
 if ( version_compare( PHP_VERSION, SWSL_MIN_PHP, '<' ) ) {
 	return;

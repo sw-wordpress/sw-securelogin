@@ -16,6 +16,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+          extensions: zip
           tools: composer:v2
           coverage: ${{ matrix.php == '8.2' && 'xdebug' || 'none' }}
       - run: composer install --no-interaction --prefer-dist
@@ -73,12 +74,12 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mysqli
+          extensions: mysqli, zip
           tools: composer:v2, wp-cli
           coverage: ${{ matrix.php == '8.2' && 'xdebug' || 'none' }}
       - run: composer install --no-interaction --prefer-dist
       - run: composer test:mozart
-      - run: composer build:prefixed
+      - run: composer build:release
       - name: Install disposable WordPress
         run: |
           wp core download --path="$SWSL_TEST_WORDPRESS" --version="${{ matrix.wordpress }}"
@@ -99,13 +100,38 @@ jobs:
           path: coverage/wordpress.xml
           if-no-files-found: error
           retention-days: 14
-      - name: Switch disposable site to the isolated build
-        run: ln -sfn "$GITHUB_WORKSPACE/build/sw-securelogin" "$SWSL_TEST_WORDPRESS/wp-content/plugins/sw-securelogin"
+      - name: Install the final ZIP in the disposable site
+        run: |
+          wp plugin deactivate sw-securelogin --path="$SWSL_TEST_WORDPRESS"
+          unlink "$SWSL_TEST_WORDPRESS/wp-content/plugins/sw-securelogin"
+          wp plugin install "$GITHUB_WORKSPACE/build/"*.zip --activate --path="$SWSL_TEST_WORDPRESS"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-candidate-php-${{ matrix.php }}
+          path: |
+            build/*.zip
+            build/*.zip.sha256
+          if-no-files-found: error
+          retention-days: 14
       - name: Test isolated WordPress build
         env:
           XDEBUG_MODE: 'off'
-          SWSL_EXPECT_PLUGIN_ROOT: ${{ github.workspace }}/build/sw-securelogin
+          SWSL_EXPECT_PLUGIN_ROOT: /tmp/swsl-ci-wordpress/wp-content/plugins/sw-securelogin
         run: composer test:integration
+      - name: Check the installed ZIP with Plugin Check
+        run: |
+          wp plugin install plugin-check --version=2.1.0 --activate --path="$SWSL_TEST_WORDPRESS"
+          wp --require="$SWSL_TEST_WORDPRESS/wp-content/plugins/plugin-check/cli.php" plugin check sw-securelogin --format=strict-json --path="$SWSL_TEST_WORDPRESS" > build/plugin-check.json
+          cat build/plugin-check.json
+          php -r '$items = json_decode(file_get_contents("build/plugin-check.json"), true, 512, JSON_THROW_ON_ERROR); if (!is_array($items)) exit(1); foreach ($items as $item) { if ($item["type"] === "ERROR") exit(1); }'
+          wp plugin deactivate plugin-check --path="$SWSL_TEST_WORDPRESS"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: plugin-check-php-${{ matrix.php }}
+          path: build/plugin-check.json
+          if-no-files-found: warn
+          retention-days: 14
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
@@ -117,6 +143,21 @@ jobs:
       - run: npm run lint
       - run: npx playwright-core install --with-deps chromium
       - run: npm run test:e2e
+      - name: Test WP Armour and a renamed login URL
+        run: |
+          wp plugin install honeypot --version=2.4.02 --activate --path="$SWSL_TEST_WORDPRESS"
+          wp plugin install wps-hide-login --version=1.9.19 --activate --path="$SWSL_TEST_WORDPRESS"
+          wp option update whl_page swsl-test-login --path="$SWSL_TEST_WORDPRESS"
+          SWSL_TEST_LOGIN_PATH=/swsl-test-login npm run test:e2e
+          wp plugin deactivate honeypot wps-hide-login --path="$SWSL_TEST_WORDPRESS"
+      - name: Reject an unreviewed real MFA plugin
+        run: |
+          wp plugin install two-factor --version=0.14.2 --path="$SWSL_TEST_WORDPRESS"
+          php tests/Compatibility/mfa.php
+      - name: Verify the unsupported multisite boundary
+        run: |
+          wp core multisite-convert --title='Unsupported test network' --base=/ --path="$SWSL_TEST_WORDPRESS"
+          php tests/Compatibility/multisite.php
       - uses: actions/upload-artifact@v7
         if: matrix.php == '8.2'
         with:
