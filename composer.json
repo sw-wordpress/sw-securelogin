@@ -43,7 +43,9 @@
     "test:integration:coverage": "@php vendor/bin/phpunit -c phpunit.integration.xml.dist --coverage-clover coverage/wordpress.xml --fail-on-warning",
     "coverage:merge": "@php tests/coverage/merge.php coverage/clover.xml coverage/unit.xml coverage/wordpress.xml",
     "coverage:check": "@php tests/coverage/check.php coverage/clover.xml",
-    "stan": "@analyse"
+    "stan": "@analyse",
+    "build:release": "bash bin/build-release.sh",
+    "test:release": "@php vendor/bin/phpunit --filter ReleasePackageTest"
   },
   "extra": {
     "mozart": {

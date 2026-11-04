@@ -22,9 +22,9 @@ final class LoginPage {
 	/** Enqueue the small browser assertion adapter and login controls. */
 	public function enqueue(): void {
 		$entry = dirname( __DIR__, 3 ) . '/sw-securelogin.php';
-		wp_enqueue_script( 'swsl-assertion', plugins_url( 'assets/js/passkey-assertion.js', $entry ), array(), '0.4.0', true );
-		wp_enqueue_script( 'swsl-login', plugins_url( 'assets/js/passkey-login.js', $entry ), array( 'swsl-assertion' ), '0.4.0', true );
-		wp_enqueue_style( 'swsl-login', plugins_url( 'assets/css/passkey-login.css', $entry ), array(), '0.4.0' );
+		wp_enqueue_script( 'swsl-assertion', plugins_url( 'assets/js/passkey-assertion.js', $entry ), array(), SWSL_VERSION, true );
+		wp_enqueue_script( 'swsl-login', plugins_url( 'assets/js/passkey-login.js', $entry ), array( 'swsl-assertion' ), SWSL_VERSION, true );
+		wp_enqueue_style( 'swsl-login', plugins_url( 'assets/css/passkey-login.css', $entry ), array(), SWSL_VERSION );
 		wp_localize_script(
 			'swsl-login',
 			'swslLogin',

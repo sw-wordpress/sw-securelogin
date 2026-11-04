@@ -6,3 +6,5 @@
  */
 
 define( 'SWSL_MIN_PHP', '8.2' );
+
+define( 'SWSL_VERSION', '0.3.0' );

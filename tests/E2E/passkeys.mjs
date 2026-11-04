@@ -5,6 +5,7 @@ import { BrowserCoverage } from '../coverage/javascript.mjs';
 
 const wordpress = process.env.SWSL_TEST_WORDPRESS;
 const origin = process.env.SWSL_TEST_ORIGIN || 'https://localhost:8443';
+const loginPath = process.env.SWSL_TEST_LOGIN_PATH || '/wp-login.php';
 if (!wordpress) throw new Error('Set SWSL_TEST_WORDPRESS to the disposable test site.');
 execFileSync('php', ['tests/E2E/prepare.php', wordpress, origin], {stdio:'inherit'});
 const browser = await chromium.launch({
@@ -43,7 +44,7 @@ try {
  page.on('pageerror',error=>errors.push(error.message));
  if (process.env.SWSL_E2E_DEBUG) page.on('requestfailed',request=>console.log('Request failed:',new URL(request.url()).pathname,request.failure()?.errorText));
  if (process.env.SWSL_E2E_DEBUG) page.on('response',response=>{ if(response.url().includes('passkeys')) console.log(response.request().method(),response.status(),response.url().split('rest_route=')[1] || 'asset'); });
- await navigate(`${origin}/wp-login.php`);
+ await navigate(`${origin}${loginPath}`);
  await page.locator('#user_login').fill('swsl-test-admin');
  await page.locator('#user_pass').fill('swsl-disposable-test-password');
  try {
@@ -56,6 +57,22 @@ try {
  if (process.env.SWSL_SCREENSHOTS) await page.screenshot({path:`${process.env.SWSL_SCREENSHOTS}/swsl-settings.png`});
  await page.locator('input[name="enabled"]').check();
  await Promise.all([page.waitForURL('**/wp-admin/admin.php?page=swsl-overview'),page.locator('input#submit').click()]);
+ // Progressive enhancement: password recovery must work without JavaScript.
+ const plain=await browser.newContext({javaScriptEnabled:false,ignoreHTTPSErrors:true});
+ const plainPage=await plain.newPage();
+ await plainPage.goto(`${origin}${loginPath}`);
+ assert.equal(await plainPage.locator('#user_pass').isVisible(),true);
+ assert.equal(await plainPage.locator('#wp-submit').isEnabled(),true);
+ await plain.close();
+ // Browsers without WebAuthn must expose the password form and explain the requirement.
+ const unsupported=await browser.newContext({ignoreHTTPSErrors:true});
+ await unsupported.addInitScript(()=>{Object.defineProperty(window,'PublicKeyCredential',{value:undefined});});
+ const unsupportedPage=await unsupported.newPage();
+ await unsupportedPage.goto(`${origin}${loginPath}`);
+ assert.equal(await unsupportedPage.locator('#user_pass').isVisible(),true);
+ assert.equal(await unsupportedPage.locator('#swsl-passkey-login').isDisabled(),true);
+ assert.equal(await unsupportedPage.locator('#swsl-login-status').textContent(),'Passkeys require a supported browser and a secure connection.');
+ await unsupported.close();
  await navigate(`${origin}/wp-admin/profile.php`);
  await page.locator('#swsl-passkeys').waitFor();
  const cdp=await context.newCDPSession(page);
@@ -67,7 +84,8 @@ try {
   ({authenticatorId:authenticator}=await cdp.send('WebAuthn.addVirtualAuthenticator',{options:{protocol:'ctap2',transport:'internal',hasResidentKey:true,hasUserVerification:true,isUserVerified:true,automaticPresenceSimulation:true}}));
   await page.locator('#swsl-passkey-name').fill(name);
   await page.locator('#swsl-passkey-password').fill('swsl-disposable-test-password');
-  await page.locator('#swsl-passkey-add').click();
+  await page.locator('#swsl-passkey-add').focus();
+  await page.keyboard.press('Enter');
   await page.waitForFunction(()=>!document.getElementById('swsl-passkey-add').disabled && document.getElementById('swsl-passkey-status').textContent !== '',{},{timeout:150000});
   assert.equal(await page.locator('#swsl-passkey-status').textContent(),'Passkey operation completed.');
   devices.push((await cdp.send('WebAuthn.getCredentials',{authenticatorId:authenticator})).credentials[0]);
@@ -168,7 +186,7 @@ try {
  await navigate(`${origin}/wp-admin/profile.php`);
  assert.equal(await page.locator('#swsl-passkeys').count(),0);
  const disabled=await context.newPage();
- await disabled.goto(`${origin}/wp-login.php`);
+ await disabled.goto(`${origin}${loginPath}`);
  assert.equal(await disabled.locator('#swsl-passkey-login').count(),0);
  await disabled.close();
  assert.equal(await page.locator('#your-profile').count(),1);

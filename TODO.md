@@ -1,6 +1,6 @@
 # SW Securelogin — Aufgaben und Meilensteine
 
-Stand: 31.10.2026. Architektur und Abnahmekriterien stehen in [PLAN.md](PLAN.md),
+Stand: 04.11.2026. Architektur und Abnahmekriterien stehen in [PLAN.md](PLAN.md),
 verbindliche Implementierungsregeln in [CODE-STYLE.md](CODE-STYLE.md).
 Diese Datei dokumentiert den Arbeitsstand und die nächsten konkreten Aufgaben.
 Bei Änderungen an Meilensteinen beide Dateien konsistent halten.
@@ -114,14 +114,39 @@ Reale Geräte, Firefox/Safari und konkrete MFA-/Security-Plugin-Adapter bleiben 
 
 - [ ] Security Review, Plugin Check und vollständige Qualitätsprüfungen durchführen.
 - [ ] Unterstützte WordPress-/PHP-/Datenbankmatrix und Browser-E2E prüfen.
-- [ ] Sicherheitsplugins, geänderte Login-URLs und MFA-Integration testen.
+- [x] Sicherheitsplugins, geänderte Login-URLs und MFA-Integration testen (WP Armour/WPS Hide Login; Two Factor ohne Adapter sicher gesperrt).
 - [ ] Multisite-Einschränkungen, Reverse Proxies und Domain-/RP-ID-Migration dokumentieren und testen.
 - [ ] Übersetzungen aller neuen Oberflächen sowie Accessibility vervollständigen.
-- [ ] Readme, Datenschutzhinweise, Upgrade-/Backupverfahren und Admin-Recovery vervollständigen.
+- [x] Readme, Datenschutzhinweise, Upgrade-/Backupverfahren und Admin-Recovery vervollständigen.
 - [ ] Bewusste Datenlöschoption und Uninstall-Policy festlegen.
-- [ ] Reproduzierbares Release-ZIP mit Produktionsabhängigkeiten ohne Dev-Abhängigkeiten bauen.
-- [ ] Finales ZIP in frischer WordPress-Instanz einschließlich Registrierung und Login prüfen.
+- [x] Reproduzierbares Release-ZIP mit Produktionsabhängigkeiten ohne Dev-Abhängigkeiten bauen.
+- [x] Finales ZIP in frischer WordPress-Instanz einschließlich Registrierung und Login mit virtuellen Authenticatoren prüfen.
 - [ ] Release erst ohne offene Critical-/High-Findings veröffentlichen.
+
+M3-Arbeitspakete vom 04.11.2026 (weiterhin Vorschau, kein 1.0-Release):
+
+- [x] Zentrale Plugin-Version für alle Login-/Profil-Assets und Regressionstests ergänzen.
+- [x] WordPress.org-Readme und Betriebsdokumentation für Backup, Upgrade, Rollback, Proxy, Domainmigration und Admin-Recovery ergänzen.
+- [x] Deterministisches Produktions-ZIP mit SHA-256, Paket-Negativtests und Smoke-Tests des entpackten ZIPs bereitstellen.
+- [x] Finales ZIP in frischer WordPress-6.7-/MySQL-8.0-Instanz installieren; Registrierung/Login mit zwei virtuellen Passkeys prüfen.
+- [x] ZIP-Integration auf WordPress 6.7 / PHP 8.2 / MySQL 8.0 und WordPress 7.1.4 / PHP 8.3 / MariaDB 11.4 ausführen.
+- [x] WP Armour 2.4.02 und WPS Hide Login 1.9.19 mit geändertem Loginpfad im vollständigen Browserfluss prüfen.
+- [x] Reales Two Factor 0.14.2 ohne Adapter abweisen; keine Sitzung erzeugen. Keine allgemeine MFA-Kompatibilität behaupten.
+- [x] Tatsächliches Multisite-Netzwerk sowie gefälschte Proxy-Header und Domain-/Port-/Schemawechsel prüfen.
+- [x] Deutsch-/Englisch-Kataloge gegen aktuellen Quelltext und kompilierte MO-Dateien prüfen; Tastatur- und Fallback-Browsertests ergänzen.
+- [x] CI um ZIP-Installation, Plugin Check, Kompatibilitäts- und Multisite-Tests sowie ZIP-/Berichtsartefakte erweitern; actionlint lokal erfolgreich.
+- [ ] Bewusste Uninstall-Löschoption: Rückfrage offen; bestehende Datenaufbewahrung unverändert.
+- [ ] Reale Geräte, Firefox/Safari, Screenreader und produktionsgleicher Restore/Proxy: noch ungeprüft.
+- [ ] Remote-CI/SonarQube für den finalen M3-Stand: noch ungeprüft. MCP-Zugriff funktioniert; `master` besteht das Gate (Analyse 01.11.2026), enthält aber noch nicht die uncommitteten M3-Änderungen. Zwei bestehende Critical-Findings zu Lock-Hashes sind offen; siehe Security Review.
+
+Lokale Prüfergebnisse: 56 Unit-/65 Integrationstests; PHP-Coverage 89,44 %, JavaScript
+95,9 %. Composer-Audit für Produktionsabhängigkeiten und npm-Audit ohne Dev-Abhängigkeiten
+melden keine bekannten Schwachstellen. Plugin Check 2.1.0: Readme-Header ergänzt;
+null Fehler und zwei begründete Warnungen. Zwei vollständige Builds sind bytegleich;
+Export/Import der isolierten Testdatenbank reproduziert den vollständigen Dump exakt.
+Vollständiger Nachweis und Grenzen:
+[Release-Prüfungen](docs/RELEASE.md), [Security Review](docs/SECURITY-REVIEW-M3.md),
+[Betrieb und Recovery](docs/OPERATIONS.md).
 
 ## M4 — Externer OIDC-Login, Version 1.1+
 

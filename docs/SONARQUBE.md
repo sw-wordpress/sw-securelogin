@@ -87,3 +87,19 @@ References:
 
 - https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/test-coverage/test-coverage-parameters
 - https://github.com/SonarSource/sonarqube-scan-action
+
+
+## Authenticated MCP verification during M3
+
+The SonarQube MCP connection now successfully queries organization `sw-wordpress`
+and project `sw-wordpress_sw-securelogin`. Its only analyzed branch is `master`,
+with latest analysis `2026-11-01T22:23:25+0000`; the quality gate is `OK`.
+All gate conditions pass: new reliability, security and maintainability ratings A;
+new-code coverage 96.2%; new duplication 0.0%; new security-hotspot review 100.0%.
+This does not establish CI analysis of the uncommitted M3 changes, nor resolve the
+historical Automatic Analysis/CI mode question documented above.
+
+Two existing Critical `php:S4790` findings on database lock-name hashes remain open.
+See [the M3 security review](SECURITY-REVIEW-M3.md) for issue keys and code context.
+A green gate on new code does not establish zero existing Critical/High findings.
+The final M3 revision still requires a fresh CI analysis and review of those issues.

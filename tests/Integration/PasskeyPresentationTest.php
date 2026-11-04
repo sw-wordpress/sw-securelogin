@@ -64,6 +64,8 @@ final class PasskeyPresentationTest extends TestCase {
 		$profile->enqueue('profile.php');
 		$this->assertTrue(wp_script_is('swsl-passkeys','enqueued'));
 		$this->assertSame(array('swsl-assertion'),wp_scripts()->registered['swsl-passkeys']->deps);
+		foreach (array('swsl-passkeys','swsl-assertion') as $handle) $this->assertSame(SWSL_VERSION,wp_scripts()->registered[$handle]->ver);
+		$this->assertSame(SWSL_VERSION,wp_styles()->registered['swsl-passkeys']->ver);
 		$this->assertStringContainsString('"nonce"',wp_scripts()->get_data('swsl-passkeys','data'));
 		$this->assertStringContainsString('passkeys',wp_scripts()->get_data('swsl-passkeys','data'));
 		$html=$this->captureHtml(fn()=>$profile->render(wp_get_current_user()));
@@ -79,6 +81,8 @@ final class PasskeyPresentationTest extends TestCase {
 		$this->assertNotFalse(has_action('login_form',array($page,'render')));
 		$this->assertTrue(wp_script_is('swsl-login','enqueued'));
 		$this->assertSame(array('swsl-assertion'),wp_scripts()->registered['swsl-login']->deps);
+		foreach (array('swsl-login','swsl-assertion') as $handle) $this->assertSame(SWSL_VERSION,wp_scripts()->registered[$handle]->ver);
+		$this->assertSame(SWSL_VERSION,wp_styles()->registered['swsl-login']->ver);
 		$html=$this->captureHtml(fn()=>$page->render());
 		$this->assertStringContainsString('type="button"',$html);
 		$this->assertStringNotContainsString('type="password"',$html);

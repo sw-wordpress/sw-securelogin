@@ -1,6 +1,6 @@
 # SW Securelogin — PLAN.md
 
-> Status: Architektur- und Implementierungsplan · Stand: 31.10.2026
+> Status: Architektur- und Implementierungsplan · Stand: 04.11.2026
 > Produkt: SW Securelogin · Plugin-Slug: `sw-securelogin` · Textdomain: `sw-securelogin`  
 > Projektziel: Modulare Authentifizierungsplattform für WordPress mit Passkeys, externem OpenID-Connect-Login und später einem eigenen OAuth-2.0-/OpenID-Connect-Provider.
 
@@ -281,6 +281,10 @@ Reale Geräte, weitere Browser und MFA-Adapter siehe [ADR 005](docs/ADR-005-pass
 - [ ] GitHub Release mit reproduzierbarem ZIP einschließlich produktionsfähiger Vendor-Abhängigkeiten.
 
 **Abnahme:** Keine offenen Critical/High Findings; dokumentierte Recovery; Releases ohne Dev-Abhängigkeiten.
+
+M3-Arbeitspakete sind implementiert und lokal geprüft; 1.0 bleibt bis zu den offenen
+Abnahmen gesperrt. Status und Nachweise: [TODO.md](TODO.md), [Release-Prüfungen](docs/RELEASE.md),
+[Security Review](docs/SECURITY-REVIEW-M3.md), [Betrieb/Recovery](docs/OPERATIONS.md).
 
 ### M4 — OIDC Client / externer Login (v1.1+)
 
