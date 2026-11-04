@@ -65,8 +65,10 @@ and the extension. See [release verification](docs/RELEASE.md) for tested versio
 
 ### Deactivation and removal
 
-Deactivating or deleting the plugin keeps all registered passkeys and settings; users simply
-sign in with their password again. Personal data can be exported or erased with the WordPress
+Deactivation always keeps data. Deletion keeps data by default. Administrators can opt into
+permanent removal under SW Securelogin > Overview > Data on plugin deletion and confirm
+the warning before saving. This removes plugin data only when WordPress deletes the plugin;
+WordPress users, passwords and sessions remain. Personal data can be exported or erased with the WordPress
 privacy tools, and a user's passkeys are removed when the user is deleted.
 Details: [privacy](docs/PRIVACY.md), [backup, upgrade and administrator recovery](docs/OPERATIONS.md).
 

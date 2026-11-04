@@ -33,6 +33,8 @@ final class Plugin {
 		add_action( 'admin_init', array( $this, 'upgrade' ) );
 		$page = new SettingsPage();
 		add_action( 'admin_menu', array( $page, 'register' ) );
+		add_action( 'admin_post_swsl_uninstall_settings', array( $page, 'saveRemovalSettings' ) );
+		add_action( 'admin_enqueue_scripts', array( $page, 'enqueue' ) );
 	}
 
 	/** Register bundled translations after WordPress has initialized its locale. */

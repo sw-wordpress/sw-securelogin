@@ -60,7 +60,7 @@ independent security audit. The final 1.0 tag and publication require these gate
 - Installed ZIP: WordPress 6.7 / PHP 8.2.27 / MySQL 8.0 and WordPress 7.1.4 /
   PHP 8.3.16 / MariaDB 11.4.12. Full Chromium virtual-authenticator flows pass in fresh
   ZIP installations. Chromium: 156.0.8078.4; Node: 22.22.3. Browser tests ran on the host;
-  databases and Mozart ran in Docker. CI changes are locally linted, not remotely run.
+  databases and Mozart ran in Docker. Remote verification is recorded below.
 - WP Armour 2.4.02 with WPS Hide Login 1.9.19 and `/secure-entry`: complete browser
   flow passes. Two Factor 0.14.2: unreviewed policy/session issuance is blocked without
   creating a session. No MFA adapter is asserted. Actual multisite refusal passes.
@@ -70,5 +70,30 @@ independent security audit. The final 1.0 tag and publication require these gate
   Details: [implementation review](https://github.com/sw-wordpress/sw-securelogin/blob/main/docs/SECURITY-REVIEW-M3.md).
 
 Release remains gated on physical devices, Firefox/Safari, human screen-reader review,
-restore/proxy deployment evidence, the explicit uninstall-policy decision and the final
-remote CI/SonarQube result. See [operations](OPERATIONS.md) before acceptance testing.
+restore/proxy deployment evidence, remote CI for the subsequent uninstall implementation and the two
+open Critical SonarQube findings. See [operations](OPERATIONS.md) before acceptance testing.
+
+## Merged M3 remote verification
+
+[Actions run 41922137903](https://github.com/sw-wordpress/sw-securelogin/actions/runs/41922137903)
+passes all six jobs for `fc085483ff2e2742de16e98fcdfa25e37a80d827`:
+
+- PHP 8.2/8.3 quality checks and 56 unit tests pass; 65 integration tests pass against
+  the original sources and installed ZIP as configured by the matrix.
+- WordPress 6.7 / MySQL 8.0 and WordPress 7.1.4 / MariaDB 11.4 pass ZIP installation,
+  Chromium, WP Armour/renamed-login, unsupported-MFA and actual-multisite checks.
+- Both Plugin Check reports contain zero errors and two reviewed warnings.
+- PHP coverage is 89.54% (890/994), JavaScript 95.9%; SonarQube imports both reports
+  and passes its gate (analysis 2026-11-04, 22:09 UTC; new-code coverage 96.0%).
+
+The two existing Critical lock-hash findings remain open; see the
+[security review](SECURITY-REVIEW-M3.md). This evidence covers the named commit;
+subsequent implementation changes need another CI run before publication.
+
+## Subsequent uninstall policy implementation
+
+The approved opt-in removal policy is documented in [ADR 006](ADR-006-uninstall.md).
+Local source verification: 56 unit tests, 74 integration tests, WPCS and PHPStan 8 pass.
+PHP line coverage is 89.93% (938/1043); JavaScript is 96.1%. Chromium verifies
+confirmation cancellation, persisted consent and withdrawal alongside enrollment/login.
+This subsequent implementation requires a fresh remote CI/SonarQube run before release.

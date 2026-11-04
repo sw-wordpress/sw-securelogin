@@ -2,7 +2,7 @@
   "name": "sw-securelogin-dev",
   "private": true,
   "scripts": {
-    "lint": "node --check assets/js/passkeys.js && node --check tests/E2E/passkeys.mjs && node --check tests/E2E/run.mjs && node --check assets/js/passkey-assertion.js && node --check assets/js/passkey-login.js && node --check tests/coverage/javascript.mjs",
+    "lint": "node --check assets/js/passkeys.js && node --check tests/E2E/passkeys.mjs && node --check tests/E2E/run.mjs && node --check assets/js/passkey-assertion.js && node --check assets/js/passkey-login.js && node --check assets/js/settings.js && node --check tests/coverage/javascript.mjs",
     "test:e2e": "node tests/E2E/run.mjs"
   },
   "devDependencies": {

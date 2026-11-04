@@ -54,6 +54,27 @@ try {
   throw new Error(`Disposable WordPress login failed: ${loginError || new URL(page.url()).pathname}; ${navigations.join(', ')}`,{cause:error});
  }
  await navigate(`${origin}/wp-admin/admin.php?page=swsl-overview`);
+ // Explicit deletion consent is separate from module activation and can be cancelled.
+ const removal=page.locator('#swsl-delete-data');
+ const saveRemoval=page.getByRole('button',{name:'Save removal setting',exact:true});
+ assert.equal(await removal.isChecked(),false);
+ await removal.check();
+ page.once('dialog',async dialog=>{
+  assert.equal(dialog.type(),'confirm');
+  assert.match(dialog.message(),/Really delete all SW Securelogin/);
+  await dialog.dismiss();
+ });
+ await saveRemoval.click();
+ assert.equal(await removal.evaluate(element=>document.activeElement===element),true);
+ await navigate(`${origin}/wp-admin/admin.php?page=swsl-overview`);
+ assert.equal(await removal.isChecked(),false,'Cancelling must not save deletion consent.');
+ await removal.check();
+ page.once('dialog',async dialog=>dialog.accept());
+ await Promise.all([page.waitForNavigation(),saveRemoval.click()]);
+ assert.equal(await removal.isChecked(),true);
+ await removal.uncheck();
+ await Promise.all([page.waitForNavigation(),saveRemoval.click()]);
+ assert.equal(await removal.isChecked(),false,'Deletion consent can be withdrawn.');
  if (process.env.SWSL_SCREENSHOTS) await page.screenshot({path:`${process.env.SWSL_SCREENSHOTS}/swsl-settings.png`});
  await page.locator('input[name="enabled"]').check();
  await Promise.all([page.waitForURL('**/wp-admin/admin.php?page=swsl-overview'),page.locator('input#submit').click()]);

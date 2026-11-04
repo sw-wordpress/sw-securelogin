@@ -25,7 +25,11 @@ cleanup. These hooks stay active when enrollment is disabled in plugin settings.
 
 Passwords are checked through WordPress and are never persisted by this plugin. Existing
 WordPress password recovery remains available. Passkey login creates ordinary WordPress sessions after successful verification.
-Deactivation and uninstall preserve all plugin data; an explicit destructive-uninstall
-policy remains future work. Backups and database administrator logging follow the site's
+Deactivation always preserves data. Uninstall preserves data by default; an administrator
+can explicitly opt into deleting this site's plugin tables and settings on uninstall.
+The overview explains the scope and asks for additional browser confirmation on saving.
+Users, passwords and WordPress sessions remain intact; multisite cleanup is refused.
+See [removal instructions](OPERATIONS.md#removal), including withdrawal of consent,
+WP-CLI behavior and recovery after partial failure. Backups and database administrator logging follow the site's
 own retention policy. Disable SAVEQUERIES and avoid third-party logging of auth requests
 or transaction SQL. Never include proof tokens, challenges or passwords in support logs.
