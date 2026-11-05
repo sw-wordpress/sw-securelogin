@@ -58,6 +58,14 @@ No. Authentication modules remain disabled on multisite installations.
 No. Deactivation preserves data and existing WordPress sessions. See
 docs/OPERATIONS.md for removal policy, backups and upgrade instructions.
 
+= Does deleting the plugin remove passkeys? =
+
+Data is kept by default. Under SW Securelogin > Overview > Data on plugin deletion,
+an administrator can explicitly enable permanent removal and confirm the warning.
+WordPress deletion then removes this plugin's passkeys, handles, transactions, rate
+limits and settings. WordPress accounts, passwords and sessions remain. Back up first.
+The setting can be withdrawn before deactivation; multisite cleanup is unsupported.
+
 == Changelog ==
 
 = 0.3.0 =

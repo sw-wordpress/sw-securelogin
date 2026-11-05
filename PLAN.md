@@ -282,8 +282,11 @@ Reale Geräte, weitere Browser und MFA-Adapter siehe [ADR 005](docs/ADR-005-pass
 
 **Abnahme:** Keine offenen Critical/High Findings; dokumentierte Recovery; Releases ohne Dev-Abhängigkeiten.
 
-M3-Arbeitspakete sind implementiert und lokal geprüft; 1.0 bleibt bis zu den offenen
-Abnahmen gesperrt. Status und Nachweise: [TODO.md](TODO.md), [Release-Prüfungen](docs/RELEASE.md),
+Die bisherigen M3-Arbeitspakete sind lokal und per CI für `fc08548` geprüft;
+SonarQube besteht das Gate. 1.0 bleibt bis zu den offenen Abnahmen einschließlich
+zwei Critical-Findings gesperrt. Die bestätigte Uninstall-Policy mit optionaler Datenlöschung
+ist implementiert; diese Erweiterung benötigt vor Veröffentlichung einen neuen CI-Lauf.
+Status und Nachweise: [TODO.md](TODO.md), [Release-Prüfungen](docs/RELEASE.md),
 [Security Review](docs/SECURITY-REVIEW-M3.md), [Betrieb/Recovery](docs/OPERATIONS.md).
 
 ### M4 — OIDC Client / externer Login (v1.1+)

@@ -45,6 +45,13 @@ coverage/js/lcov.info and imported by Sonar. Every production script starts unco
 only executed browser ranges add hits. Both language gates require strictly >80% line
 coverage, including on fork PRs. No production files are excluded.
 
+The browser harness captures plugin script responses before delivering them to Chromium.
+If V8 discards script text after navigation, conversion uses those captured bytes;
+both HTTP and available V8 source must exactly match the production file. Missing
+evidence or changed source fails the run. Executed ranges still come exclusively from
+V8. `npm run test:coverage-tools` checks these invariants, including capture before
+delivery and rejection of changed responses on repeated loads.
+
 ## Local checks
 
 With Xdebug or PCOV available and the disposable WordPress database running:
@@ -67,10 +74,10 @@ is required for the GitHub Actions integration.
 
 Verification performed locally: unit and WordPress suites with an isolated Xdebug PHP
 container, Clover merging, path guards, configuration parsing and existing quality checks.
-Actions run 41090636610 (attempt 2): all four test jobs pass; the scanner accepts the
-configured project and credentials but rejects CI analysis while Automatic Analysis is
-enabled. Disable Automatic Analysis in the Cloud project, then rerun the failed job.
-Coverage import and the quality gate remain unverified.
+The earlier Actions run 41090636610 (attempt 2) failed because Automatic Analysis
+conflicted with CI analysis. The merged M3 revision now passes CI analysis, coverage
+import and the quality gate; see the verified run below. No configuration change is
+currently needed to resolve that historical failure.
 
 ## What to test as a user
 
@@ -93,13 +100,18 @@ References:
 
 The SonarQube MCP connection now successfully queries organization `sw-wordpress`
 and project `sw-wordpress_sw-securelogin`. Its only analyzed branch is `master`,
-with latest analysis `2026-11-01T22:23:25+0000`; the quality gate is `OK`.
+with latest analysis `2026-11-04T22:09:00+0000`; the quality gate is `OK`.
 All gate conditions pass: new reliability, security and maintainability ratings A;
-new-code coverage 96.2%; new duplication 0.0%; new security-hotspot review 100.0%.
-This does not establish CI analysis of the uncommitted M3 changes, nor resolve the
-historical Automatic Analysis/CI mode question documented above.
+new-code coverage 96.0%; new duplication 0.0%; new security-hotspot review 100.0%.
+[Actions run 41922137903](https://github.com/sw-wordpress/sw-securelogin/actions/runs/41922137903)
+passes all six jobs for merged M3 revision `fc085483ff2e2742de16e98fcdfa25e37a80d827`.
+The scanner log confirms that revision, PHP Clover and JavaScript LCOV import, and
+`QUALITY GATE STATUS: PASSED`. Whole-project language gates report PHP 89.54%
+(890/994 lines) and JavaScript 95.9%. This verifies the CI analysis path that failed
+in the historical run; it does not describe uncommitted changes made afterward.
 
 Two existing Critical `php:S4790` findings on database lock-name hashes remain open.
 See [the M3 security review](SECURITY-REVIEW-M3.md) for issue keys and code context.
 A green gate on new code does not establish zero existing Critical/High findings.
-The final M3 revision still requires a fresh CI analysis and review of those issues.
+Any subsequent implementation changes require a fresh CI analysis. Those two issues
+still require review before release, independently of the passing new-code gate.

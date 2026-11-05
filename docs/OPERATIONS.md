@@ -98,3 +98,27 @@ the scheduled cleanup hook. Retained authentication transactions expire and cann
 be used after their deadlines. WordPress privacy erasure and user deletion remove
 the affected account's keys while the plugin is installed. Backups are separate
 and are governed by the site's retention policy.
+
+For complete removal on a supported single site:
+
+1. Make a database backup and verify password login/recovery. In SW Securelogin >
+   Overview > Data on plugin deletion, explicitly check the permanent-deletion option.
+2. Save and accept the additional browser confirmation. Cancelling keeps the saved
+   policy unchanged. Without JavaScript the explicit checkbox and Save still work.
+   To withdraw consent, uncheck and save before deactivating the plugin.
+3. Deactivate, then choose Delete in the WordPress plugin list and confirm WordPress's
+   deletion prompt. Deactivation alone never removes data. A disabled plugin cannot
+   reliably add its own deletion dialog, so consent is saved while it is active.
+
+Uninstall removes exactly the current site's `swsl_passkeys`, `swsl_user_handles`,
+`swsl_transactions` and `swsl_limits` tables and the `swsl_settings`,
+`swsl_passkeys_rp`, `swsl_schema_version` and `swsl_delete_data_on_uninstall` options.
+It leaves WordPress users, passwords, sessions, unrelated tables/options and backups
+alone. The saved policy also applies to WP-CLI uninstall; manually removing files
+does not run WordPress uninstall. Network cleanup is refused even if an earlier
+single-site installation saved consent. Do not convert to multisite to remove data.
+
+Removal failures stop uninstall with a neutral error and preserve consent for retry.
+DDL is not transactional: some tables may already be gone. Keep the plugin files,
+fix the database failure and retry deletion, or restore the full matching backup
+before using the plugin again. Do not reactivate after a partial removal.

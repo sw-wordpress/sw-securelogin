@@ -34,11 +34,12 @@ composer test:integration
 Create the dedicated database before installation. These admin credentials are fixtures
 for a local disposable site only. CI provisions MySQL 8.0 / WordPress 6.7 / PHP 8.2 and
 MariaDB 11.4 / latest WordPress / PHP 8.3. The local verification used WordPress 6.7,
-PHP 8.2/8.3 and MariaDB 11.1.3; CI matrix verification is recorded in TODO.md; M2 changes still need their next pushed CI run.
+PHP 8.2/8.3 and MariaDB 11.1.3; current M3 CI matrix verification is recorded in
+[RELEASE.md](RELEASE.md#merged-m3-remote-verification).
 
-M1 includes virtual-authenticator browser enrollment tests. Real devices, additional
-browsers, security-plugin/MFA compatibility, multisite and release ZIP smoke tests remain
-later milestone gates. Passkey login and existing-passkey reauthentication are covered by M2 tests.
+Virtual-authenticator tests cover enrollment, passkey login and existing-passkey
+reauthentication. M3 also verifies compatibility boundaries, actual multisite refusal
+and release ZIP smoke tests; physical devices and additional browsers remain open.
 
 # Mozart build and isolation tests
 
@@ -108,8 +109,9 @@ Do not run these stateful suites concurrently against the same disposable databa
 
 Local M1 verification: 25 unit tests and 25 integration tests passed on both PHP 8.2
 and PHP 8.3 with WordPress 6.7 / MariaDB 11.1.3. Chromium E2E and Mozart protocol smoke
-tests also pass. GitHub CI, MySQL, latest WordPress, real devices and other browsers
-remain separately unverified; no production-conformance claim is made.
+tests also pass. Later M3 CI evidence for MySQL, WordPress 7.1.4 and installed ZIPs is
+recorded in [RELEASE.md](RELEASE.md#merged-m3-remote-verification). Real devices and
+other browsers remain unverified; no production-conformance claim is made.
 
 
 # Manual profile UI checks after restyling
@@ -209,3 +211,20 @@ with the guarded disposable database, export using `--skip-comments --skip-dump-
 and repeat the export. `cmp` confirmed exact equality, including credential rows.
 Keep dumps private and apply this procedure only to the disposable database. A real
 operator backup/restore and recovery drill remains a deployment acceptance check.
+
+## Uninstall policy acceptance
+
+`RemovalPolicyTest` exercises settings authorization/nonce/method checks, default
+retention, malformed consent, failed consent writes/withdrawal, exact table/option
+removal, retained WordPress accounts/sessions and partial failure/retry. It drops and
+recreates only plugin tables in the guarded disposable database; never run it against
+valuable data. The browser suite checks the extra confirmation on saving consent,
+cancellation, persistence and withdrawal. The final multisite script also proves
+that a saved single-site consent cannot authorize network cleanup.
+
+Manual check in a disposable installation: leave the option off and delete/reinstall;
+passkeys/settings must remain. Then enable it under Overview > Data on plugin deletion,
+cancel the warning and reload: it must remain off. Accept and save, deactivate and
+verify data is still present; delete through WordPress and verify the four plugin tables
+and settings are gone while password login still works. Repeat with consent withdrawn
+before deactivation: data must remain. Backups remain under operator control.

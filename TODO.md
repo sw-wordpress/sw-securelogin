@@ -82,7 +82,7 @@ bleiben offen. Details und Grenzen stehen in [ADR 004](docs/ADR-004-passkey-enro
 - [x] Workflow für Push, PR und manuellen Start mit Artefakten und Quality-Gate-Prüfung erweitern; YAML und Ausdrücke mit actionlint geprüft.
 - [x] Mozart-Standardaufruf mit dem eigenen Adapter vergleichen; notwendige Root-Import-Verarbeitung durch Kollisions-Test bestätigen (ADR 003).
 - [x] SONAR_TOKEN und SONAR_ORGANIZATION: Remote-Scanner akzeptiert Zugriff und Projektzuordnung.
-- [ ] In SonarQube Cloud „Automatic Analysis“ deaktivieren und Sonar-Job erneut starten; Lauf 41090636610 scheitert am Konflikt mit CI-Analyse.
+- [x] CI-basierte SonarQube-Analyse einschließlich Coverage-Import und Quality Gate bestätigen; Lauf 41922137903 ist erfolgreich. Der frühere Konflikt mit Automatic Analysis tritt dort nicht mehr auf.
 
 ## M2 — Passkey-Login
 
@@ -115,10 +115,10 @@ Reale Geräte, Firefox/Safari und konkrete MFA-/Security-Plugin-Adapter bleiben 
 - [ ] Security Review, Plugin Check und vollständige Qualitätsprüfungen durchführen.
 - [ ] Unterstützte WordPress-/PHP-/Datenbankmatrix und Browser-E2E prüfen.
 - [x] Sicherheitsplugins, geänderte Login-URLs und MFA-Integration testen (WP Armour/WPS Hide Login; Two Factor ohne Adapter sicher gesperrt).
-- [ ] Multisite-Einschränkungen, Reverse Proxies und Domain-/RP-ID-Migration dokumentieren und testen.
+- [x] Multisite-Einschränkungen, Proxy-Header und Domain-/RP-ID-Wechsel dokumentieren und automatisiert testen; produktionsgleiche Proxy-Abnahme bleibt separat offen.
 - [ ] Übersetzungen aller neuen Oberflächen sowie Accessibility vervollständigen.
 - [x] Readme, Datenschutzhinweise, Upgrade-/Backupverfahren und Admin-Recovery vervollständigen.
-- [ ] Bewusste Datenlöschoption und Uninstall-Policy festlegen.
+- [x] Bewusste Datenlöschoption und Uninstall-Policy festlegen und implementieren: Standardaufbewahrung, ausdrückliche Zustimmung mit zusätzlicher Browserabfrage; nur Plugin-Daten bei Deinstallation löschen.
 - [x] Reproduzierbares Release-ZIP mit Produktionsabhängigkeiten ohne Dev-Abhängigkeiten bauen.
 - [x] Finales ZIP in frischer WordPress-Instanz einschließlich Registrierung und Login mit virtuellen Authenticatoren prüfen.
 - [ ] Release erst ohne offene Critical-/High-Findings veröffentlichen.
@@ -135,9 +135,18 @@ M3-Arbeitspakete vom 04.11.2026 (weiterhin Vorschau, kein 1.0-Release):
 - [x] Tatsächliches Multisite-Netzwerk sowie gefälschte Proxy-Header und Domain-/Port-/Schemawechsel prüfen.
 - [x] Deutsch-/Englisch-Kataloge gegen aktuellen Quelltext und kompilierte MO-Dateien prüfen; Tastatur- und Fallback-Browsertests ergänzen.
 - [x] CI um ZIP-Installation, Plugin Check, Kompatibilitäts- und Multisite-Tests sowie ZIP-/Berichtsartefakte erweitern; actionlint lokal erfolgreich.
-- [ ] Bewusste Uninstall-Löschoption: Rückfrage offen; bestehende Datenaufbewahrung unverändert.
+- [x] Bewusste Uninstall-Löschoption nach bestätigter Entscheidung ergänzen; Deaktivierung erhält immer die Daten. Details: [ADR 006](docs/ADR-006-uninstall.md).
 - [ ] Reale Geräte, Firefox/Safari, Screenreader und produktionsgleicher Restore/Proxy: noch ungeprüft.
-- [ ] Remote-CI/SonarQube für den finalen M3-Stand: noch ungeprüft. MCP-Zugriff funktioniert; `master` besteht das Gate (Analyse 01.11.2026), enthält aber noch nicht die uncommitteten M3-Änderungen. Zwei bestehende Critical-Findings zu Lock-Hashes sind offen; siehe Security Review.
+- [x] Remote-CI/SonarQube für den gemergten M3-Stand `fc08548` prüfen: alle sechs Jobs in [Lauf 41922137903](https://github.com/sw-wordpress/sw-securelogin/actions/runs/41922137903) erfolgreich; SonarQube-Analyse vom 04.11.2026, 22:09 UTC, Gate `OK`. Zwei bestehende Critical-Findings zu Lock-Hashes bleiben offen; siehe Security Review.
+
+M3-Fortsetzung: Remote-Protokolle und aktuelle SonarQube-Abfragen bestätigen 56 Unit-
+und 65 Integrationstests, beide ZIP-/Browser-Matrixläufe, Plugin Check ohne Fehler
+(zwei geprüfte Warnungen), Kompatibilität und Multisite-Abweisung. CI-Coverage:
+PHP 89,54 % (890/994), JavaScript 95,9 %. Lokal erneut erfolgreich: Composer-Validierung,
+PHP-/JS-Lint, WPCS, PHPStan 8, 56 Unit-Tests und Produktionsabhängigkeitsaudits.
+Reale Geräte/Browser, Screenreader, produktionsgleicher Proxy/
+Restore und die zwei Critical-Findings bleiben Release-Blocker. Die folgende lokale
+Messung stammt aus dem ursprünglichen M3-Arbeitspaket.
 
 Lokale Prüfergebnisse: 56 Unit-/65 Integrationstests; PHP-Coverage 89,44 %, JavaScript
 95,9 %. Composer-Audit für Produktionsabhängigkeiten und npm-Audit ohne Dev-Abhängigkeiten
@@ -147,6 +156,28 @@ Export/Import der isolierten Testdatenbank reproduziert den vollständigen Dump 
 Vollständiger Nachweis und Grenzen:
 [Release-Prüfungen](docs/RELEASE.md), [Security Review](docs/SECURITY-REVIEW-M3.md),
 [Betrieb und Recovery](docs/OPERATIONS.md).
+
+Uninstall-Erweiterung nach bestätigter Policy: 56 Unit- und 74 Integrationstests
+erfolgreich; PHP-Coverage 89,93 % (938/1043), JavaScript 96,1 %.
+Browser bestätigt Abbrechen, Zustimmen und Zurücknehmen der Löschoption.
+WPCS und PHPStan 8 erfolgreich. Die neuen Änderungen benötigen erneut Remote-CI;
+der oben belegte grüne Lauf gilt für den vorherigen Stand `fc08548`.
+Das neu gebaute, installierte ZIP besteht ebenfalls 74 Integrationstests und Chromium.
+Plugin Check 2.1.0: null Fehler, dieselben zwei geprüften Warnungen.
+Die echte WP-CLI-Deinstallation entfernt alle vier Tabellen und vier Optionen;
+Passwortlogin bleibt möglich. Ein echtes Multisite-Netzwerk bewahrt Tabellen und
+Einstellungen selbst bei zuvor gespeicherter Löschzustimmung.
+
+CI-Nacharbeit: Die ersten Läufe von PR #11 scheiterten bei der JS-Coverage, weil V8
+nach Navigation teils ausgeführte Bereiche ohne Quelltext liefert (`settings.js`).
+Der Browser-Harness puffert nun die tatsächliche HTTP-Scriptantwort vor Ausführung
+und prüft deren Inhalt sowie jeden vorhandenen V8-Quelltext gegen die Produktivdatei.
+Neun Regressionstests sichern fehlende/geänderte Quellen und die Reihenfolge ab;
+der Coverage-Grenzwert und die gemessenen Ausführungsbereiche bleiben unverändert.
+Formular-Weiterleitungen zur gleichen Übersichts-URL warten jetzt auf die neue
+Navigation statt auf eine bereits passende URL. Lokal bestehen die neun Regressionen,
+JS-Lint, actionlint und beide vollständigen WordPress-7.1.4-Browserflüsse (normal sowie
+WP Armour mit geändertem Loginpfad); JavaScript-Coverage weiterhin 96,1 %.
 
 ## M4 — Externer OIDC-Login, Version 1.1+
 
@@ -197,4 +228,4 @@ Testbefehle und die isolierte WordPress-Testumgebung stehen in
 [docs/TESTING.md](docs/TESTING.md). Bisherige Sicherheitsentscheidungen:
 [ADR 001](docs/ADR-001-foundation.md), [ADR 002](docs/ADR-002-migrations.md),
 [ADR 003](docs/ADR-003-mozart.md), [ADR 004](docs/ADR-004-passkey-enrollment.md) und
-[Bedrohungsmodell](docs/THREAT-MODEL.md).
+[ADR 006](docs/ADR-006-uninstall.md) sowie [Bedrohungsmodell](docs/THREAT-MODEL.md).

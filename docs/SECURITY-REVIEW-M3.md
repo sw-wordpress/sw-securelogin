@@ -14,6 +14,7 @@ release gates in [RELEASE.md](RELEASE.md).
 | Sessions | wp_signon identity guard, reviewed-hook boundary and cleanup after cookie veto/throwing hooks; failed proof never issues a valid session in tests |
 | MFA compatibility | Real Two Factor 0.14.2 and 0.17.0 hooks make AuthPolicy and session issuance fail closed; session list and current user remain unchanged. This is refusal coverage, not a supported MFA adapter |
 | Persistence / privacy | Prepared identifiers/values, credential uniqueness/limits, user locks around enrollment/login/revocation, privacy export/erasure, expiry cleanup; integration tests cover ownership and storage failures |
+| Opt-in uninstall | Capability/nonce/POST-protected consent, strict flag, exact owned-table/option allowlists and authoritative deletion checks; failed option deletions clear misleading cache entries for retry. Installed-ZIP integration, browser confirmation, actual WP-CLI uninstall and actual network retention pass; see ADR 006 |
 | Deployment | Origin pin survives forged Host/forwarded headers and rejects changed domain/port/scheme; actual multisite conversion registers no feature/migration hooks |
 | UI / assets | Local escaped/translatable controls, labels/status/focus and password fallback; every enqueued asset uses SWSL_VERSION; browser checks include no-script/no-WebAuthn fallback and keyboard registration |
 | Distribution | Explicit staging allowlist, no-dev install, scoped library protocol/collision tests, archive rejection tests and extracted-ZIP smoke tests |
@@ -45,11 +46,13 @@ See the [official Plugin Check CLI](https://github.com/WordPress/plugin-check/bl
 
 ## Remaining decisions and external evidence
 
-- Data retention remains the existing default pending the requested explicit uninstall
-  policy choice. No destructive cleanup or data format change has been introduced.
-- The final M3 commit's remote CI/SonarQube gate is unverified. Authenticated MCP
-  access now works. The analyzed `master` passes its gate, but that analysis predates
-  the uncommitted M3 changes. Two existing Critical findings remain open (see below).
+- The administrator approved opt-in removal on uninstall. Default retention and
+  unconditional retention on deactivation remain in place. [ADR 006](ADR-006-uninstall.md)
+  records exact deletion scope, consent checks, failure handling and multisite refusal.
+  This subsequent implementation still needs its own remote CI/SonarQube analysis.
+- The merged M3 commit `fc08548` passes remote CI and the SonarQube gate;
+  the analysis includes the M3 changes. Two existing Critical findings remain open
+  despite that passing gate (see below).
 - Real devices, Firefox/Safari ceremonies, human assistive-technology checks, the operator's
   production backup restoration and a production-equivalent trusted proxy remain unverified.
 
@@ -66,11 +69,17 @@ mechanics on fixtures; it does not certify the operator's backup system or data.
 ## Authenticated SonarQube MCP follow-up
 
 Project `sw-wordpress_sw-securelogin`, organization `sw-wordpress`, main branch
-`master`: latest available analysis `2026-11-01T22:23:25+0000`, gate `OK`.
+`master`: latest available analysis `2026-11-04T22:09:00+0000`, gate `OK`.
 All six conditions pass: new reliability/security/maintainability ratings A,
-new-code coverage 96.2% (minimum 80%), new duplication 0.0% (maximum 3%),
+new-code coverage 96.0% (minimum 80%), new duplication 0.0% (maximum 3%),
 new security hotspots reviewed 100.0% (required 100%). New-code coverage is not
-whole-project coverage. This remote analysis does not cover the uncommitted M3 tree.
+whole-project coverage. The scanner log identifies revision
+`fc085483ff2e2742de16e98fcdfa25e37a80d827`, the merged M3 implementation.
+[CI run 41922137903](https://github.com/sw-wordpress/sw-securelogin/actions/runs/41922137903)
+passes all six jobs, including both WordPress/database matrices, installed-ZIP checks,
+Chromium, compatibility, multisite and coverage import. Whole-project PHP line coverage
+is 89.54% (890/994); JavaScript is 95.9%. Plugin Check reports zero errors and the same
+two reviewed warnings on both installed ZIPs.
 
 The unresolved High/Blocker-impact issue search returned two existing issues,
 both reported with legacy severity `CRITICAL` and rule `php:S4790`:

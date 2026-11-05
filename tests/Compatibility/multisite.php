@@ -11,7 +11,7 @@ $_SERVER['HTTP_HOST'] = 'localhost:8443';
 require $swsl_wordpress . '/wp-load.php';
 if ( 'swsl_m0_test' !== DB_NAME || 'swsltest_' !== $wpdb->prefix || ! is_multisite() ) throw new RuntimeException( 'Only the disposable test network is allowed.' );
 require dirname( __DIR__, 2 ) . '/vendor/autoload.php';
-foreach ( array( 'login_form', 'admin_init', 'admin_menu', 'rest_api_init', 'show_user_profile', 'swsl_module_overview' ) as $swsl_hook ) {
+foreach ( array( 'login_form', 'admin_init', 'admin_menu', 'admin_post_swsl_uninstall_settings', 'rest_api_init', 'show_user_profile', 'swsl_module_overview' ) as $swsl_hook ) {
 	foreach ( $wp_filter[ $swsl_hook ]->callbacks ?? array() as $swsl_callbacks ) {
 		foreach ( $swsl_callbacks as $swsl_callback ) {
 			$swsl_function = $swsl_callback['function'];
@@ -24,4 +24,18 @@ ob_start();
 ( new SW\Securelogin\Core\Plugin() )->multisiteNotice();
 $swsl_notice = ob_get_clean();
 if ( ! str_contains( $swsl_notice, 'single-site' ) || array() === ( new SW\Securelogin\Modules\Passkeys\PasskeysModule( $wpdb, new SW\Securelogin\Core\SettingsRepository() ) )->requirements() ) throw new RuntimeException( 'Missing multisite refusal.' );
+$swsl_consent = get_option( 'swsl_delete_data_on_uninstall' );
+$swsl_tables = $wpdb->get_col( 'SHOW TABLES' );
+$swsl_settings = get_option( 'swsl_settings' );
+try {
+	update_option( 'swsl_delete_data_on_uninstall', '1', false );
+	define( 'WP_UNINSTALL_PLUGIN', 'sw-securelogin/sw-securelogin.php' );
+	$swsl_root = dirname( ( new ReflectionClass( SW\Securelogin\Core\Plugin::class ) )->getFileName(), 3 );
+	require $swsl_root . '/uninstall.php';
+	if ( '1' !== get_option( 'swsl_delete_data_on_uninstall' ) || $swsl_settings !== get_option( 'swsl_settings' ) || $swsl_tables !== $wpdb->get_col( 'SHOW TABLES' ) ) throw new RuntimeException( 'Uninstall removed unsupported network data.' );
+} finally {
+	if ( false === $swsl_consent ) delete_option( 'swsl_delete_data_on_uninstall' );
+	else update_option( 'swsl_delete_data_on_uninstall', $swsl_consent, false );
+}
 echo "PASS: actual multisite registers no login, management or migration hooks and reports the restriction.\n";
+echo "PASS: uninstall preserves unsupported network data even with a pre-existing removal setting.\n";

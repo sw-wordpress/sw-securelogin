@@ -20,7 +20,8 @@ exceptions. Formatting is otherwise WordPress style. Runtime classes reject dire
 The M0 migration initializes swsl_settings with an empty enabled_modules list. The
 versioned migration runner is verified against a real WordPress database, including a
 dbDelta fixture upgrade. Production passkey tables remain part of M1. See ADR 002 for
-locking and failure handling. Uninstall retains data; explicit deletion must be designed first.
+locking and failure handling. M0 uninstall retains data; the subsequently accepted
+M3 opt-in removal policy is specified in [ADR 006](ADR-006-uninstall.md).
 
 Verification: registry negative cases, duplicate IDs, repeated startup, unauthorized admin
 render, PHP lint, WPCS, PHPStan and PHPUnit. CI runs on PHP 8.2 and 8.3.

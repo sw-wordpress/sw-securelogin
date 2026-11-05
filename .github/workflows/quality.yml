@@ -141,6 +141,7 @@ jobs:
         if: matrix.php == '8.2'
         run: npm audit --omit=dev --audit-level=high
       - run: npm run lint
+      - run: npm run test:coverage-tools
       - run: npx playwright-core install --with-deps chromium
       - run: npm run test:e2e
       - name: Test WP Armour and a renamed login URL
