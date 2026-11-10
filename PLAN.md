@@ -1,6 +1,6 @@
 # SW Securelogin — PLAN.md
 
-> Status: Architektur- und Implementierungsplan · Stand: 04.11.2026
+> Status: Architektur- und Implementierungsplan · Stand: 10.11.2026
 > Produkt: SW Securelogin · Plugin-Slug: `sw-securelogin` · Textdomain: `sw-securelogin`  
 > Projektziel: Modulare Authentifizierungsplattform für WordPress mit Passkeys, externem OpenID-Connect-Login und später einem eigenen OAuth-2.0-/OpenID-Connect-Provider.
 
@@ -290,6 +290,29 @@ Status und Nachweise: [TODO.md](TODO.md), [Release-Prüfungen](docs/RELEASE.md),
 [Security Review](docs/SECURITY-REVIEW-M3.md), [Betrieb/Recovery](docs/OPERATIONS.md).
 
 ### M4 — OIDC Client / externer Login (v1.1+)
+
+Umsetzungsentwurf mit Sicherheitsgrenzen, Arbeitspaketen M4.0–M4.5 und Angriffstests:
+[M4-OIDC-Plan](docs/M4-OIDC-PLAN.md). Vorgesehene Abnahmeprovider sind Keycloak und
+Google; zusätzlich ein Custom-Modus mit manuellen Endpunkten und identischen Prüfungen.
+Für die finale Konzeptreview konkretisiert: Keycloak öffentlich oder über VPN,
+Secrets ausschließlich über `wp-config.php`, zunächst keine zugesicherte Kompatibilität
+mit lokalen Security-/MFA-Plugins. Unbekannte Authentifizierungsrichtlinien bleiben
+gesperrt. Technische Designnachweise folgen in M4.0 vor der jeweiligen Implementierung.
+Bestätigte Review-Entscheidungen: Betreiberfreigabe für öffentliche Secret-Ziele,
+Schutz des letzten nutzbaren Zugangs und zuerst ein vollständiger Google-Ablauf,
+danach Keycloak und Custom/VPN. Eine Keycloak-Testinstanz steht derzeit noch nicht bereit.
+
+Implementierungsfortsetzung vom 10.11.2026: Isolierte Betreiberfreigabe und
+providergebundener Secret-Zugriff sind getestet ([ADR 007](docs/ADR-007-oidc-provider-trust.md)).
+Bootstrap-/HTTP-Anbindung und die technischen M4.0-Nachweise bleiben offen.
+Der erste ausführbare Bibliotheks-/cURL-Spike ist dokumentiert in
+[ADR 008](docs/ADR-008-oidc-library-transport-spike.md): HTTP-Injection ist nachgewiesen,
+Die Default-API-Lücken werden im isolierten Testadapter abgefangen; weitere
+Protokoll-/Transportnachweise verhindern noch die Produktionsfreigabe des Kandidaten.
+Die vier beobachteten Default-API-Lücken werden inzwischen im isolierten Testadapter
+abgewiesen (56 Negativfälle). Die Mozart-Hürden sind im Buildadapter behoben: echtes
+präfixiertes OIDC-Artefakt mit Signatur-/Kollisionstests unter PHP 8.2/8.3 erfolgreich;
+genaue Freigabegrenzen in [ADR 003](docs/ADR-003-mozart.md).
 
 - [ ] Provider-Discovery/JWKS, geschützte Konfiguration, SSRF-Schutz.
 - [ ] Authorization Code + PKCE, State, Nonce, Callback-Validierung.

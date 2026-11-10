@@ -16,7 +16,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: zip
+          extensions: curl, openssl, zip
           tools: composer:v2
           coverage: ${{ matrix.php == '8.2' && 'xdebug' || 'none' }}
       - run: composer install --no-interaction --prefer-dist
@@ -27,6 +27,8 @@ jobs:
       - run: find . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
       - run: composer cs
       - run: composer analyse
+      - name: OIDC Mozart artifact and collision checks
+        run: composer test:oidc-spike
       - run: composer test
         if: matrix.php != '8.2'
       - name: Unit coverage against source

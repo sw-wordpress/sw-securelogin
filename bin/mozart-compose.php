@@ -2,14 +2,27 @@
 /** Build-only Mozart entry point, executed inside the pinned container. */
 declare(strict_types=1);
 
-use CoenJacobs\Mozart\Commands\Compose;
-use CoenJacobs\Mozart\Replace\Namespace\NamespaceReplacer;
+use CoenJacobs\Mozart\Autoload\AutoloaderGenerator;
+use CoenJacobs\Mozart\Config\ConfigDefaultsResolver;
+use CoenJacobs\Mozart\Mover;
+use CoenJacobs\Mozart\FilesHandler;
+use CoenJacobs\Mozart\PackageFactory;
+use CoenJacobs\Mozart\PhpSymbols\BuiltInSymbols;
+use CoenJacobs\Mozart\Replace\Replacer;
+use CoenJacobs\Mozart\Replace\GlobalScope\NameReplacer;
+use CoenJacobs\Mozart\Replace\Support\AstUtils;
+use SW\Securelogin\Build\MozartGraph;
+use SW\Securelogin\Build\MozartVisitor;
+use SW\Securelogin\Build\MozartAutoload;
 
 if ( 'cli' !== PHP_SAPI ) {
 	exit;
 }
 
 require '/mozart/vendor/autoload.php';
+require __DIR__ . '/mozart-graph.php';
+require __DIR__ . '/mozart-visitor.php';
+require __DIR__ . '/mozart-autoload.php';
 
 $swsl_project = '/project';
 $swsl_config = json_decode( file_get_contents( $swsl_project . '/composer.json' ), true, 512, JSON_THROW_ON_ERROR );
@@ -19,29 +32,82 @@ if ( ! empty( $swsl_config['extra']['mozart']['packages'] ) || ! empty( $swsl_co
 }
 $swsl_namespaces = array();
 $swsl_notices = array();
+$swsl_license_metadata = array();
+$swsl_autoload_policy = new MozartAutoload();
+if ( ! empty( $swsl_installed['dev-package-names'] ) ) {
+	throw new RuntimeException( 'Mozart requires an installation without development packages.' );
+}
+$swsl_graph = ( new MozartGraph() )->resolve( $swsl_installed['packages'] );
 foreach ( $swsl_installed['packages'] as $swsl_package ) {
+	$swsl_license_metadata[] = array_intersect_key( $swsl_package, array_flip( array( 'name', 'version', 'license', 'source', 'authors' ) ) );
+	$swsl_manifest = json_decode( file_get_contents( $swsl_project . '/vendor/' . $swsl_package['name'] . '/composer.json' ), true, 512, JSON_THROW_ON_ERROR );
+	foreach ( $swsl_autoload_policy->validate( $swsl_package['name'], $swsl_package['autoload'] ?? array(), $swsl_manifest['autoload'] ?? array() ) as $swsl_namespace ) {
+		$swsl_namespaces[ $swsl_namespace ] = true;
+	}
 	foreach ( glob( $swsl_project . '/vendor/' . $swsl_package['name'] . '/{LICENSE*,LICENCE*,COPYING*,NOTICE*}', GLOB_BRACE ) as $swsl_notice ) {
 		if ( is_file( $swsl_notice ) ) {
 			$swsl_notices[ str_replace( '/', '-', $swsl_package['name'] ) . '/' . basename( $swsl_notice ) ] = file_get_contents( $swsl_notice );
 		}
 	}
-	foreach ( $swsl_package['autoload'] ?? array() as $swsl_type => $swsl_entries ) {
-		// New autoload forms need an explicit review of root reference rewriting.
-		if ( ! in_array( $swsl_type, array( 'psr-4', 'psr-0', 'exclude-from-classmap' ), true ) ) {
-			throw new RuntimeException( 'Review Mozart root rewriting for ' . $swsl_package['name'] . ': ' . $swsl_type );
-		}
-		if ( 'exclude-from-classmap' !== $swsl_type ) {
-			foreach ( array_keys( $swsl_entries ) as $swsl_namespace ) {
-				if ( '' === $swsl_namespace ) {
-					throw new RuntimeException( 'A dependency has an unbounded autoload namespace.' );
-				}
-				$swsl_namespaces[ $swsl_namespace ] = true;
-			}
+}
+
+// Use Mozart's public pipeline with Composer's resolved installed graph. Upstream
+// PackageFinder only looks for vendor/<requirement>, so cannot load virtual packages.
+// No dependency manifest, constraint or upstream source file is rewritten here.
+$swsl_factory = new PackageFactory();
+$swsl_root_package = $swsl_factory->createPackage( $swsl_project . '/composer.json' );
+$swsl_mozart = $swsl_factory->resolveConfig( $swsl_root_package );
+( new ConfigDefaultsResolver() )->apply( $swsl_mozart, $swsl_root_package );
+if ( ! $swsl_mozart->isValidMozartConfig() || ! empty( $swsl_config['extra']['mozart']['override_autoload'] ) ) {
+	throw new RuntimeException( 'Unsupported Mozart configuration.' );
+}
+$swsl_mozart->setWorkingDir( $swsl_project );
+$swsl_packages = array();
+// Flat, dependency-first inventory: every installed package is processed exactly
+// once. The final AST pass handles all cross-package references, including optional
+// ones; no recursive ParentReplacer traversal or invented Composer metadata is needed.
+foreach ( array_keys( $swsl_graph ) as $swsl_name ) {
+	$swsl_package = $swsl_factory->createPackage( $swsl_project . '/vendor/' . $swsl_name . '/composer.json' );
+	$swsl_packages[ $swsl_name ] = $swsl_package;
+}
+$swsl_packages = array_values( $swsl_packages );
+$swsl_targets = array();
+$swsl_files_handler = new FilesHandler( $swsl_mozart );
+foreach ( $swsl_packages as $swsl_package ) {
+	foreach ( $swsl_package->getAutoloaders() as $swsl_autoloader ) {
+		foreach ( $swsl_autoloader->getFiles( $swsl_files_handler ) as $swsl_file ) {
+			// Mover keeps the first target when PSR/files/classmap paths overlap.
+			$swsl_targets[ $swsl_file->getRealPath() ] ??= $swsl_autoloader->getTargetFilePath( $swsl_file );
 		}
 	}
 }
-
-( new Compose( $swsl_project ) )->execute();
+$swsl_eager_targets = array();
+$swsl_composer_files = $swsl_project . '/vendor/composer/autoload_files.php';
+if ( is_file( $swsl_composer_files ) ) {
+	// Generated by Composer: returns paths only, without loading dependency code.
+	$swsl_eager_files = require $swsl_composer_files;
+	if ( ! is_array( $swsl_eager_files ) ) {
+		throw new RuntimeException( 'Invalid Composer eager file metadata.' );
+	}
+	foreach ( $swsl_eager_files as $swsl_file ) {
+		if ( ! is_string( $swsl_file ) ) {
+			throw new RuntimeException( 'Invalid Composer eager file path.' );
+		}
+		$swsl_real_file = realpath( $swsl_file );
+		if ( false === $swsl_real_file || ! isset( $swsl_targets[ $swsl_real_file ] ) ) {
+			throw new RuntimeException( 'Unmapped Composer eager file.' );
+		}
+		$swsl_eager_targets[] = $swsl_targets[ $swsl_real_file ];
+	}
+}
+$swsl_mover = new Mover( $swsl_mozart );
+$swsl_mover->deleteTargetDirs( $swsl_packages );
+$swsl_mover->movePackages( $swsl_packages );
+$swsl_replacer = new Replacer( $swsl_mozart, new BuiltInSymbols() );
+$swsl_replacer->replacePackages( $swsl_packages );
+if ( $swsl_mozart->getGenerateAutoloader() ) {
+	( new AutoloaderGenerator( $swsl_mozart ) )->generate( $swsl_eager_targets );
+}
 foreach ( $swsl_notices as $swsl_relative => $swsl_contents ) {
 	$swsl_target = $swsl_project . '/vendor-prefixed/licenses/' . $swsl_relative;
 	if ( ! is_dir( dirname( $swsl_target ) ) && ! mkdir( dirname( $swsl_target ), 0755, true ) ) {
@@ -51,20 +117,35 @@ foreach ( $swsl_notices as $swsl_relative => $swsl_contents ) {
 		throw new RuntimeException( 'Unable to retain dependency license notices.' );
 	}
 }
+if ( ! is_dir( $swsl_project . '/vendor-prefixed/licenses' ) && ! mkdir( $swsl_project . '/vendor-prefixed/licenses', 0755, true ) ) {
+	throw new RuntimeException( 'Unable to retain dependency license metadata.' );
+}
+if ( false === file_put_contents( $swsl_project . '/vendor-prefixed/licenses/packages.json', json_encode( $swsl_license_metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR ) . "\n" ) ) {
+	throw new RuntimeException( 'Unable to write dependency license metadata.' );
+}
 
-// Mozart's parent pass handles dependency-to-dependency references. Apply its
-// AST rewriter to our source imports too; keep all source checkout files intact.
-$swsl_rewriter = new NamespaceReplacer( $swsl_config['extra']['mozart']['dep_namespace'] );
-foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $swsl_project . '/src', FilesystemIterator::SKIP_DOTS ) ) as $swsl_file ) {
-	if ( ! $swsl_file->isFile() || 'php' !== $swsl_file->getExtension() ) {
-		continue;
+// Also cover optional cross-package references absent from require graphs (e.g.
+// JOSE's AESKW algorithms). Use Mozart's AST visitor, not string substitutions.
+$swsl_ast = new AstUtils();
+$swsl_global_rewriter = new NameReplacer( $swsl_replacer->getReplacedClasses(), $swsl_replacer->getReplacedConstants(), $swsl_replacer->getReplacedFunctions() );
+foreach ( array( '/src', '/vendor-prefixed' ) as $swsl_directory ) {
+	foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $swsl_project . $swsl_directory, FilesystemIterator::SKIP_DOTS ) ) as $swsl_file ) {
+		if ( ! $swsl_file->isFile() || 'php' !== $swsl_file->getExtension() ) {
+			continue;
+		}
+		$swsl_contents = file_get_contents( $swsl_file->getPathname() );
+		$swsl_nodes = $swsl_ast->parseCode( $swsl_contents );
+		if ( null === $swsl_nodes ) {
+			throw new RuntimeException( 'Unable to parse staged dependency references.' );
+		}
+		$swsl_traverser = $swsl_ast->createTraverser( new MozartVisitor( $swsl_config['extra']['mozart']['dep_namespace'], array_keys( $swsl_namespaces ) ) );
+		$swsl_contents = $swsl_global_rewriter->replace( $swsl_ast->printCode( $swsl_traverser->traverse( $swsl_nodes ) ) );
+		if ( false === file_put_contents( $swsl_file->getPathname(), $swsl_contents ) ) {
+			throw new RuntimeException( 'Unable to rewrite plugin dependency references.' );
+		}
 	}
-	$swsl_contents = file_get_contents( $swsl_file->getPathname() );
-	foreach ( array_keys( $swsl_namespaces ) as $swsl_namespace ) {
-		$swsl_rewriter->setSearchNamespace( rtrim( $swsl_namespace, '\\' ) );
-		$swsl_contents = $swsl_rewriter->replace( $swsl_contents );
-	}
-	if ( false === file_put_contents( $swsl_file->getPathname(), $swsl_contents ) ) {
-		throw new RuntimeException( 'Unable to rewrite plugin dependency references.' );
-	}
+}
+if ( $swsl_mozart->getDeleteVendorDirectories() ) {
+	// Every installed production package was scoped; no unprocessed consumer remains.
+	$swsl_mover->deletePackageVendorDirectories();
 }
