@@ -1,0 +1,10 @@
+parameters:
+    level: 8
+    paths:
+        - StrictCodeFlow.php
+        - StrictVerifierBuilder.php
+        - ../../../bin/mozart-graph.php
+        - ../../../bin/mozart-autoload.php
+    stubFiles:
+        - library.stub
+    tmpDir: ../../../.phpstan.cache/oidc-spike

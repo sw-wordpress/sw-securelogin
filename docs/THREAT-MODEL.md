@@ -26,3 +26,30 @@ Negative tests must cover cross-user credential IDs, failed/expired/replayed cha
 concurrent replay, wrong signature/Origin/RP ID, missing UV/UP, CSRF, stale reauthentication,
 redirect injection, user enumeration and failure without session creation. No security claim
 about these future flows follows from the current foundation tests.
+
+## M4.0 OIDC evaluation boundaries
+
+Additional assets: operator-supplied client secrets, recoverable PKCE verifiers,
+browser-bound transactions and issuer/subject identity links. Additional boundaries:
+mutable provider settings to operator approval; approved URLs to DNS/TLS connections;
+provider responses to the OIDC library; validated identity to local policy/session
+issuance. Provider configuration approval does not itself authorize network access.
+
+The initial [library/transport spike](ADR-008-oidc-library-transport-spike.md) confirms
+that transport injection is possible, but identifies missing default nonce/azp checks
+and callback requirements. The configured test adapter rejects these cases using
+library configuration/JOSE presence checks and callback guards; production integration
+still requires the remaining transaction and profile proofs. Unchecked state or an
+OAuth token set without an ID token must never authorize a
+login/link. Foreign dependency collisions must not change verification behavior.
+The corrected project adapter passes scoped OIDC signature/profile tests with foreign
+symbols and original libraries loaded separately. It handles upstream's virtual-package,
+eager-file and optional-reference limitations; unknown autoload forms remain rejected.
+Exact tested boundaries are in [ADR 003](ADR-003-mozart.md).
+
+The cURL capability test proves a loopback test connection can pin an address while
+checking the TLS hostname. A full SSRF policy still needs DNS/IPv4/IPv6/private-network
+classification and connection-binding tests, with explicit budgets and no transport
+fallback. Remaining OIDC threats and mandatory attack cases are tracked in the
+[M4 plan](M4-OIDC-PLAN.md#verbindliche-angriffstests). Full M4.0 threat-model acceptance
+also requires the pending AEAD, routing, transaction, retention and local-policy ADRs.

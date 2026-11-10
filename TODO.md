@@ -1,6 +1,6 @@
 # SW Securelogin — Aufgaben und Meilensteine
 
-Stand: 04.11.2026. Architektur und Abnahmekriterien stehen in [PLAN.md](PLAN.md),
+Stand: 10.11.2026. Architektur und Abnahmekriterien stehen in [PLAN.md](PLAN.md),
 verbindliche Implementierungsregeln in [CODE-STYLE.md](CODE-STYLE.md).
 Diese Datei dokumentiert den Arbeitsstand und die nächsten konkreten Aufgaben.
 Bei Änderungen an Meilensteinen beide Dateien konsistent halten.
@@ -181,6 +181,57 @@ WP Armour mit geändertem Loginpfad); JavaScript-Coverage weiterhin 96,1 %.
 
 ## M4 — Externer OIDC-Login, Version 1.1+
 
+- [x] Ersten reproduzierbaren Bibliotheks-/Transport-Spike ausführen: getrennt gesperrte Testabhängigkeiten, echte RS256-Positiv-/Negativfälle, HTTP-Injection für Discovery/Token/JWKS, erwartete Mozart-Abweisung und lokaler TLS-/IP-Pinning-Test. [ADR 008](docs/ADR-008-oidc-library-transport-spike.md).
+- [ ] Vor Bibliotheksfreigabe: konfigurierten Testadapter mit vollständigen Claim-/JWKS-Negativfällen und tatsächlichen browsergebundenen Einmaltransaktionen nachweisen; Wartung bewerten. Default-Verhalten allein genügt nicht.
+- [x] Vier beobachtete Default-API-Lücken im isolierten Testadapter durch Bibliothekskonfiguration/JOSE-Pflichtprüfungen und Code-Callback-Grenze abfangen; 56 Ablehnungsfälle sowie gültige Einzel-/Mehrfach-Audiences nachweisen. Keine produktive Bibliotheksfreigabe.
+- [x] Virtuelle Composer-Abhängigkeiten aus dem aufgelösten Installationsgraphen im Mozart-Build berücksichtigen; keine Paketmanifeste oder Upstream-Dateien verändern.
+- [x] Exakte Funktions-/Polyfill-Autoloadlisten und bedingte Php83-Classmap für Mozart prüfen; gültige/manipulierte Tokens, dynamische/optionale Klassen und Kollisionen im präfixierten Artefakt unter PHP 8.2/8.3 nachweisen. Unbekannte Formen bleiben gesperrt; [ADR 003](docs/ADR-003-mozart.md).
+- [ ] Geprüften PSR-18-Transport mit DNS-/IPv4-/IPv6-/VPN-Policy und Ressourcenlimits spezifizieren und als zusammengesetzten Bibliotheks-/Netzwerkfluss testen. Der direkte cURL-Spike allein ist keine SSRF-Abnahme.
+
+Initialer M4.0-Spike vom 10.11.2026: `composer test:oidc-spike` reproduziert die dokumentierten
+Erfolge und Lücken. Composer-Audit des isolierten Testbaums ohne bekannte Advisories.
+Fortsetzung: Konfigurierter Adapter mit 56 Negativfällen erfolgreich, einschließlich
+ausbleibender HTTP-Aufrufe bei ungültigen Callback-/Transaktionsdaten und neutraler
+Fehler ohne Originalexception. Beide Adapterklassen zusätzlich mit WPCS und PHPStan 8
+ohne Baseline/Ignores geprüft. Virtuelles Composer-Paket als weitere konkrete
+Mozart-Hürde reproduziert. Details und verbleibende Grenzen in ADR 008.
+70 Unit-Tests/325 Assertions, PHPStan 8, WPCS, PHP-Lint, Composer-Validierung sowie
+Bash-Syntax/Python-Parsing erfolgreich. Keine Produktivabhängigkeit oder Loginroute
+ergänzt; Gesamt-Coverage, WordPress-/Browser-/ZIP- und Remote-Sonar-Prüfungen nicht
+erneut ausgeführt. Ausführung unter PHP 8.2 und reale Providerabnahme bleiben offen.
+
+Aktuelle Mozart-Fortsetzung: Der korrigierte Adapter berücksichtigt virtuelle Anbieter,
+erhält Composers Eager-Ladereihenfolge auch bei PSR-überdeckten Dateien und schreibt
+optionale Referenzen um, ohne lokale Klassennamen zu verwechseln. 83 Unit-Tests/363
+Assertions unter PHP 8.2/8.3, PHPStan 8, WPCS, Lint, synthetische Mozart-Tests und echte
+OIDC-Artefakttests mit Fremdbibliotheken erfolgreich. Reproduzierbares Produktions-ZIP
+mit WebAuthn-Smoke-Tests erfolgreich; CI-Schritte für beide PHP-Versionen ergänzt.
+Remote-CI, WordPress-/Browser- und Gesamt-Coverage-Prüfungen nicht erneut ausgeführt.
+Actionlint 1.7.7 meldet den vorhandenen SC2016-Hinweis beim absichtlich einfach
+gequoteten Inline-PHP des Plugin-Check-Schritts; keine Suppression ergänzt.
+
+- [x] Providergebundenen Secret-Zugriff als isolierten Baustein ergänzen: Betreiberfreigabe vor jedem Lesen, keine fremden Secret-Referenzen oder Fallbacks; siehe [ADR 007](docs/ADR-007-oidc-provider-trust.md#provider-bound-secret-access-2026-11-10).
+
+Fortsetzung vom 10.11.2026: `ProviderSecrets` mit sechs neuen Unit-Tests; insgesamt
+70 Unit-Tests/325 Assertions erfolgreich. Neuer Baustein 5/5 Statements abgedeckt;
+PHPStan 8, WPCS, Composer-Validierung sowie PHP-/JS-Lint erfolgreich. Weiterhin keine
+OIDC-Routen, wp-config-Zugriffe oder HTTP-Aufrufe. Gesamt-Coverage, WordPress-/Browser-/
+ZIP- und Remote-Sonar-Prüfungen für diesen Zwischenstand nicht erneut ausgeführt.
+Die Fortsetzung von M4 ist beauftragt; offene M4.0-Sicherheitsentscheidungen bleiben
+vor ihrer jeweiligen Umsetzung zu prüfen und abzustimmen.
+
+- [x] Ersten isolierten Sicherheitsbaustein `ProviderTrust` implementieren: exakte Betreiberfreigabe für Issuer/Client/Endpunkte, getrennte Discovery-Konfiguration, neutrale Fehler und Negativtests. [ADR 007](docs/ADR-007-oidc-provider-trust.md). Noch nicht verdrahtet; keine OIDC-Routen oder Secret-Verwendung.
+
+Erster Baustein lokal geprüft: 64 Unit-Tests (acht neue), 74 WordPress-Integrationstests,
+PHPStan 8, WPCS und PHP-Lint erfolgreich. PHP-Coverage 90,13 % (959/1064), neuer Baustein
+22/22 Statements abgedeckt. Kein JavaScript geändert; Browser-/ZIP- und Remote-Sonar-
+Prüfungen für diesen Zwischenstand nicht erneut ausgeführt.
+
+- [x] Konzept für Keycloak, Google und Custom-Provider zur finalen Review aktualisieren: [M4.0–M4.5](docs/M4-OIDC-PLAN.md). Abgestimmt: Keycloak öffentlich/VPN, Secrets ausschließlich in wp-config.php, zunächst keine lokalen Security-/MFA-Adapter. Planung, keine Implementierungsfreigabe.
+- [ ] Finale Konzeptreview einschließlich Netzwerkfreigaben, wp-config-Secret-/Transaktionsschlüsselvertrag und Erstabnahme ohne lokale Security-Plugins abschließen.
+- [x] 18 angehängte Review-Punkte prüfen und im [M4-Konzept](docs/M4-OIDC-PLAN.md#bearbeitung-der-review-punkte-06112026) mit Disposition dokumentieren; Google-/Sodium-Sachangaben korrigieren. Keine Produktivimplementierung.
+- [x] Review-Rückfragen 1/12/15 übernehmen: verbindliche öffentliche Secret-Zielfreigabe in wp-config.php, Schutz des letzten nutzbaren Zugangs mit frischem Nachweis eines verbleibenden lokalen Zugangs; Reihenfolge Google → Keycloak → Custom/VPN (Keycloak derzeit nicht verfügbar). Technische Vorschläge und M4.0-Nachweise bleiben gesondert zu prüfen.
+- [ ] M4.0: Threat Model und ADRs sowie Bibliotheks-/Transportnachweise, AEAD-/Datenformat, Callback-Routing und konkrete Limits erarbeiten.
 - [ ] Providerverwaltung, geschützte Konfiguration und validierte Discovery-/JWKS-Abfragen implementieren.
 - [ ] SSRF-Schutz einschließlich DNS, IP-Bereichen, Redirects und Antwortlimits umsetzen.
 - [ ] Authorization Code Flow mit PKCE S256 sowie einmaligem State und Nonce implementieren.
@@ -217,7 +268,7 @@ Vor freigegebenem Design keinen produktiven Authorization Server implementieren.
 
 ## Laufende Arbeitsregeln
 
-- Neue Autoload-Formen wie files/classmap und weitere Kryptografiepakete vor Mozart-Freigabe explizit prüfen; aktuell sind PSR-4/PSR-0 freigegeben.
+- Neue Autoload-Formen und weitere Kryptografiepakete vor Mozart-Freigabe explizit prüfen; neben PSR-4/PSR-0 sind nur die exakten geprüften files-/Php83-Classmap-Einträge aus [ADR 003](docs/ADR-003-mozart.md) freigegeben.
 - Nur den jeweils bearbeiteten Meilenstein umsetzen; optionale Module bis zur vollständigen Sicherheitsprüfung deaktiviert halten.
 - Sicherheitsentscheidungen als ADR dokumentieren; Abnahmekriterien und Negativtests vor der Implementierung festlegen.
 - Passende Checks nach jeder Implementierungsänderung ausführen und verbleibende Prüflücken ausdrücklich festhalten.

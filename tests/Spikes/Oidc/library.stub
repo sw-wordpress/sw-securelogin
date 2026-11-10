@@ -1,0 +1,21 @@
+<?php
+/** External Psalm aliases are not imported by PHPStan; describe the exercised API. */
+namespace Facile\OpenIDClient\Service;
+
+class AuthorizationService {
+	/** @param array{code?: string, state?: string, token_type?: string, access_token?: string, id_token?: string, refresh_token?: string, expires_in?: int, code_verifier?: string} $params */
+	public function callback(
+		\Facile\OpenIDClient\Client\ClientInterface $client,
+		array $params,
+		?string $redirectUri = null,
+		?\Facile\OpenIDClient\Session\AuthSessionInterface $authSession = null,
+		?int $maxAge = null
+	): \Facile\OpenIDClient\Token\TokenSetInterface {}
+}
+
+namespace Facile\OpenIDClient\Token;
+
+interface TokenSetInterface {
+	/** @return array<string, mixed> */
+	public function claims(): array;
+}

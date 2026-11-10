@@ -27,7 +27,7 @@ done
   composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress --no-scripts --no-plugins
 )
 mkdir -p "$SWSL_PLUGIN/bin"
-cp "$SWSL_ROOT/bin/mozart-compose.php" "$SWSL_PLUGIN/bin/"
+cp "$SWSL_ROOT/bin/mozart-compose.php" "$SWSL_ROOT/bin/mozart-graph.php" "$SWSL_ROOT/bin/mozart-visitor.php" "$SWSL_ROOT/bin/mozart-autoload.php" "$SWSL_PLUGIN/bin/"
 docker run --rm --user "$(id -u):$(id -g)" \
   -v "$SWSL_PLUGIN:/project" \
   coenjacobs/mozart:1.2.3 php -d memory_limit=1G /project/bin/mozart-compose.php

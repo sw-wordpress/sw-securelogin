@@ -74,6 +74,18 @@ setup described above and point its plugin symlink at `$PWD/build/sw-securelogin
 instead of the source checkout. The CI WordPress jobs use this staged variant.
 
 
+# Isolated M4.0 OIDC evaluation
+
+Run `composer test:oidc-spike` to reproduce the candidate-library, scoped Mozart artifact
+and local cURL/TLS checks. The artifact is tested without a vendor fallback and with
+foreign dependencies; build boundaries are in [ADR 003](ADR-003-mozart.md). For a
+local minimum-version run use `SWSL_SPIKE_PHP=/usr/bin/php8.2 composer test:oidc-spike`.
+CI runs both PHP versions. Requirements, isolation and the distinction between
+`PASS` capabilities and known `GAP` outcomes are in the
+[probe README](../tests/Spikes/Oidc/README.md); findings and remaining acceptance work
+are in [ADR 008](ADR-008-oidc-library-transport-spike.md). This command does not grant
+OIDC security acceptance or use the WordPress fixture.
+
 # Browser enrollment and login tests, M1/M2
 
 Use only the disposable WordPress/database setup above. Install development browser
