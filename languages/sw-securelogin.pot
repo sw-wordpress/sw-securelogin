@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-04T22:51:43+00:00\n"
+"POT-Creation-Date: 2026-11-15T22:09:04+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: sw-securelogin\n"
@@ -251,11 +251,171 @@ msgstr ""
 msgid "Registered passkeys"
 msgstr ""
 
-#: sw-securelogin.php:45
+#: src/Update/Manifest.php:51
+msgid "Release verification failed. The release was not accepted."
+msgstr ""
+
+#: src/Update/Package.php:33
+msgid "ZIP size or SHA-256 does not match, or ZIP verification is unavailable."
+msgstr ""
+
+#: src/Update/Package.php:37
+msgid "Invalid ZIP archive."
+msgstr ""
+
+#: src/Update/Package.php:43
+msgid "The update package failed the safety checks."
+msgstr ""
+
+#: src/Update/Provider.php:78
+msgid "Manual updates only"
+msgstr ""
+
+#: src/Update/Provider.php:98
+msgid "GitHub installation is only allowed manually in the WordPress backend."
+msgstr ""
+
+#: src/Update/Provider.php:102
+msgid "Automatic GitHub installation is blocked."
+msgstr ""
+
+#: src/Update/Provider.php:121
+msgid "No valid manual WordPress update request."
+msgstr ""
+
+#: src/Update/Provider.php:224
+msgid "Signed GitHub release. Install only manually through WordPress."
+msgstr ""
+
+#: src/Update/Provider.php:242
+msgid "Check for updates now"
+msgstr ""
+
+#: src/Update/Provider.php:253
+msgid "GitHub updates are blocked: no public release key is configured."
+msgstr ""
+
+#: src/Update/Provider.php:257
+msgid "No verified update check yet."
+msgstr ""
+
+#. translators: %s: time span, e.g. "2 hours"
+#: src/Update/Provider.php:260
+#, php-format
+msgid "Last verified check: %s ago."
+msgstr ""
+
+#. translators: %s: error message
+#: src/Update/Provider.php:264
+#, php-format
+msgid "Last error: %s"
+msgstr ""
+
+#: src/Update/Provider.php:300
+msgid "Checking signed releases …"
+msgstr ""
+
+#: src/Update/Provider.php:301
+msgid "Check finished."
+msgstr ""
+
+#: src/Update/Provider.php:302
+msgid "GitHub could not be reached. Please try again later."
+msgstr ""
+
+#: src/Update/Service.php:54
+msgid "Update checks are only allowed in an authorised backend session."
+msgstr ""
+
+#: src/Update/Service.php:57
+msgid "No public release key or Sodium is available. GitHub updates are blocked."
+msgstr ""
+
+#: src/Update/Service.php:61
+msgid "An update check is already running."
+msgstr ""
+
+#: src/Update/Service.php:67
+msgid "The last update check is still within the check interval."
+msgstr ""
+
+#: src/Update/Service.php:72
+#: src/Update/Service.php:81
+#: src/Update/Service.php:86
+msgid "The update state could not be saved."
+msgstr ""
+
+#: src/Update/Service.php:76
+msgid "The check took too long. The result was not adopted."
+msgstr ""
+
+#: src/Update/Service.php:88
+msgid "Signed release information verified. Install updates only through the WordPress plugin list."
+msgstr ""
+
+#: src/Update/Service.php:90
+msgid "Invalid release response."
+msgstr ""
+
+#: src/Update/Service.php:114
+msgid "No valid stable release response."
+msgstr ""
+
+#: src/Update/Service.php:123
+msgid "Release manifest or signature is missing."
+msgstr ""
+
+#: src/Update/Service.php:139
+msgid "An already verified newer version must not be rolled back."
+msgstr ""
+
+#: src/Update/Service.php:161
+msgid "Please check for updates again before installing."
+msgstr ""
+
+#: src/Update/Service.php:168
+msgid "Outdated release offer."
+msgstr ""
+
+#: src/Update/Service.php:189
+msgid "Package, version or system requirements do not match."
+msgstr ""
+
+#: src/Update/Service.php:197
+msgid "Temporary update file unavailable."
+msgstr ""
+
+#: src/Update/Transport.php:30
+msgid "Update address not allowed."
+msgstr ""
+
+#: src/Update/Transport.php:50
+msgid "GitHub could not be reached."
+msgstr ""
+
+#: src/Update/Transport.php:56
+msgid "Invalid redirect."
+msgstr ""
+
+#. translators: %d: HTTP status code
+#: src/Update/Transport.php:63
+#, php-format
+msgid "GitHub responded with HTTP %d."
+msgstr ""
+
+#: src/Update/Transport.php:71
+msgid "The update response exceeds the size limit."
+msgstr ""
+
+#: src/Update/Transport.php:75
+msgid "Too many update redirects."
+msgstr ""
+
+#: sw-securelogin.php:50
 msgid "SW Securelogin requires its Composer dependencies. Run composer install in the plugin directory."
 msgstr ""
 
-#: uninstall.php:24
-#: uninstall.php:36
+#: uninstall.php:29
+#: uninstall.php:41
 msgid "SW Securelogin data removal failed. Restore your backup or retry deletion before removing the plugin files."
 msgstr ""

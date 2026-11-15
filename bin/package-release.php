@@ -25,7 +25,7 @@ foreach ( $swsl_iterator as $swsl_file ) {
 	$swsl_relative = substr( $swsl_file->getPathname(), strlen( $swsl_stage ) + 1 );
 	if ( $swsl_file->isLink() ) throw new RuntimeException( 'Release symlinks are forbidden.' );
 	if ( $swsl_file->isDir() ) continue;
-	if ( ! $swsl_file->isFile() || ! preg_match( '~^(?:sw-securelogin\.php|uninstall\.php|readme\.txt|README\.md|LICENSE|composer\.(?:json|lock)|docs/(?:PRIVACY|OPERATIONS|RELEASE)\.md|(?:src|assets|languages|templates|vendor-prefixed)/[^\\\\]+)$~D', $swsl_relative ) || preg_match( '~(?:^|/)(?:\.[^/]*|tests?|node_modules|vendor|coverage|phpunit|phpstan)(?:/|$)|\.(?:pem|key|log|zip)$~i', $swsl_relative ) ) {
+	if ( ! $swsl_file->isFile() || ! preg_match( '~^(?:sw-securelogin\.php|uninstall\.php|readme\.txt|README\.md|LICENSE|composer\.(?:json|lock)|docs/(?:PRIVACY|OPERATIONS|RELEASE|GITHUB-UPDATES|GITHUB-UPDATES-BETRIEB)\.md|(?:src|assets|languages|templates|vendor-prefixed)/[^\\\\]+)$~D', $swsl_relative ) || preg_match( '~(?:^|/)(?:\.[^/]*|tests?|node_modules|vendor|coverage|phpunit|phpstan)(?:/|$)|\.(?:pem|key|log|zip|base64)$|signing[-_]key|secret[-_]key~i', $swsl_relative ) ) {
 		throw new RuntimeException( 'Unexpected release file: ' . $swsl_relative );
 	}
 	$swsl_files[ $swsl_relative ] = $swsl_file->getPathname();

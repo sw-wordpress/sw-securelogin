@@ -1,0 +1,11 @@
+# ADR 009: Verifizierte manuelle GitHub-Updates
+
+Entscheidung vom 15.11.2026: Bis zum Store-Wechsel einen lokalen, pluginspezifischen Provider aus ChurchTools Suite 49dc66f und der nativen sw-backupit-Pluginzeile adaptieren. Keine gemeinsame Laufzeitbibliothek oder dynamischer Code aus anderen Plugins. Login-/Passkey-Architektur bleibt unabhängig.
+
+Vertrauensgrenze ist das lokal vorab verteilte Ed25519-Public-Key-Material. Sodium prüft exakte Manifestbytes; SHA-256 bindet das tatsächlich heruntergeladene ZIP. Unsigned-/Hash-only-Verfahren und ein erstmals remote geladener Schlüssel sind ausgeschlossen. WordPress führt die manuell autorisierte Installation aus; der Provider prüft vor Core-Extraktion. Eigene Kopierinstaller und automatische Installation sind ausgeschlossen.
+
+Persistente Tagesgrenze und Höchstversion liegen außerhalb von Transients, auf Multisite im Netzwerkzustand. Ein kurzer MySQL/MariaDB-Mutex serialisiert Lease-Akquisition, Compare-and-Delete schützt den Nachfolger, Eigentümerprüfung und Ergebnisübernahme sind unter demselben Mutex wie die Lease-Akquisition atomar; ein alter Besitzer kann kein Nachfolgeergebnis überschreiben. Ohne atomaren Mutex oder dauerhaft speicherbaren Versuchszeitpunkt kein HTTP. Die Netzwerkmutex-ID bleibt auch nach `switch_to_blog()` gleich. GET_LOCK-inkompatible Datenbankproxies unterstützen diesen Updateweg deshalb nicht.
+
+Alternativen: ausschließlich manuelle ZIP-Verteilung vermeidet den Provider, bietet aber keine verifizierten Angebote in der Pluginübersicht. WordPress.org ist das spätere Ziel und benötigt einen Provider-/URI-freien Store-Build. Ein gemeinsamer globaler SW-Keyring würde Vertrauensbereiche vermischen und wird nicht verwendet.
+
+Grenzen: kompromittierter PHP-/Signierprozess liegt außerhalb dieser Schutzgrenze; ein erstmaliger Client erkennt ohne zeitgebundenen signierten Channel kein absichtlich vorenthaltenes neueres Release. GitHub-CDN-Änderungen können eine bewusste Clientanpassung verlangen. Produktive Aktivierung erfordert Betreiber-Schlüsselverteilung, geschützte GitHub-Umgebung und signierten Release. Teststrategie und Betrieb: [TESTING.md](TESTING.md), [GITHUB-UPDATES-BETRIEB.md](GITHUB-UPDATES-BETRIEB.md).

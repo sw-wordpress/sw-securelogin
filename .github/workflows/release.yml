@@ -1,0 +1,69 @@
+name: Signed manual GitHub release
+on:
+  push:
+    tags: ['[0-9]*.[0-9]*.[0-9]*', 'v[0-9]*.[0-9]*.[0-9]*']
+permissions:
+  contents: write
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: plugin-releases
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: sodium, zip, openssl
+          tools: composer:v2
+          coverage: none
+      - name: Validate stable tag and signing configuration; preserve public keyring
+        env:
+          SW_PLUGIN_RELEASE_SIGNING_KEY: ${{ secrets.SW_PLUGIN_RELEASE_SIGNING_KEY }}
+          SW_PLUGIN_RELEASE_KEY_ID: ${{ vars.SW_PLUGIN_RELEASE_KEY_ID }}
+        run: |
+          php bin/verify-release-version.php "$GITHUB_REF_NAME"
+          php bin/release-manifest.php public-key src/Update/Config/trusted-keys.php
+      - name: Build installable artifact (no test suite)
+        run: composer build:release
+      - name: Upload ZIP to an unpublished draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$RELEASE_TAG" --json isDraft > "$RUNNER_TEMP/existing-release.json"; then
+            php -r '$r=json_decode(file_get_contents($argv[1]),true,32,JSON_THROW_ON_ERROR); exit(($r["isDraft"] ?? false) === true ? 0 : 1);' "$RUNNER_TEMP/existing-release.json" \
+              || { echo 'Refusing to modify a published release.' >&2; exit 1; }
+          else
+            gh release create "$RELEASE_TAG" --draft --verify-tag --title "$RELEASE_TAG"
+          fi
+          gh release upload "$RELEASE_TAG" build/*.zip --clobber
+          RELEASE_API_URL="$(gh release view "$RELEASE_TAG" --json apiUrl --jq .apiUrl)"
+          gh api "$RELEASE_API_URL" > "$RUNNER_TEMP/release.json"
+      - name: Sign actual uploaded asset IDs
+        env:
+          SW_PLUGIN_RELEASE_SIGNING_KEY: ${{ secrets.SW_PLUGIN_RELEASE_SIGNING_KEY }}
+          SW_PLUGIN_RELEASE_KEY_ID: ${{ vars.SW_PLUGIN_RELEASE_KEY_ID }}
+        run: php bin/release-manifest.php sign "$RUNNER_TEMP/release.json" build "$GITHUB_SHA"
+      - name: Upload and independently verify every release asset before publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          KEY_ID: ${{ vars.SW_PLUGIN_RELEASE_KEY_ID }}
+        run: |
+          gh release upload "$RELEASE_TAG" build/sw-plugin-release.json build/sw-plugin-release.json.sig --clobber
+          mkdir "$RUNNER_TEMP/downloaded"
+          gh release download "$RELEASE_TAG" --dir "$RUNNER_TEMP/downloaded"
+          for artifact in build/*.zip build/sw-plugin-release.json build/sw-plugin-release.json.sig; do
+            cmp "$artifact" "$RUNNER_TEMP/downloaded/$(basename "$artifact")"
+          done
+          RELEASE_API_URL="$(gh release view "$RELEASE_TAG" --json apiUrl --jq .apiUrl)"
+          gh api "$RELEASE_API_URL" > "$RUNNER_TEMP/release.json"
+          php bin/verify-release.php "$RUNNER_TEMP/release.json" "$RUNNER_TEMP/downloaded" "$GITHUB_SHA"
+      - name: Publish complete verified release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release edit "$RELEASE_TAG" --draft=false

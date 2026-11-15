@@ -17,11 +17,9 @@ analysis (GitHub Actions). Automatic Analysis must be disabled when importing te
 coverage through this workflow. Existing sw-backupit secrets are not copied or exposed;
 organization secrets can be granted access to this repository by its administrator.
 
-Pushes and pull requests run PHP checks, unit tests, WordPress integration tests,
+Pull requests run PHP checks, unit tests, WordPress integration tests,
 Mozart isolation tests, JavaScript checks and virtual-authenticator browser tests.
-The Actions Run workflow button can also trigger them after this workflow is committed
-to the default branch. Sonar runs after all test jobs pass on the default branch or
-same-repository PRs. Fork PRs run tests without access to Sonar credentials. The scan
+Tag releases validate and sign artifacts without running test suites. Sonar runs after all test jobs pass on same-repository PRs. Fork PRs run tests without access to Sonar credentials. The scan
 uses the same pinned SonarSource action as sw-backupit, waits for the quality gate and
 fails if the gate fails. It reports a clear error when the required configuration is missing.
 
@@ -62,6 +60,7 @@ composer cs
 composer analyse
 XDEBUG_MODE=coverage composer test:coverage
 SWSL_TEST_WORDPRESS=/tmp/swsl-test-wordpress SWSL_EXPECT_PLUGIN_ROOT="$PWD" XDEBUG_MODE=coverage composer test:integration:coverage
+XDEBUG_MODE=coverage composer test:updates:coverage
 composer coverage:merge
 composer coverage:check
 npm run test:e2e # disposable site required; writes LCOV and checks JavaScript >80%
@@ -84,7 +83,7 @@ currently needed to resolve that historical failure.
 1. Commit/push the configuration and open Actions > Tests and SonarQube: PHP and
    WordPress matrix jobs should start automatically.
 2. Open a successful test run: unit/WordPress Clover and JavaScript LCOV artifacts should exist.
-3. On a default-branch run or internal PR, check the SonarQube Cloud job: merged
+3. On an internal PR, check the SonarQube Cloud job: merged
    php-coverage should be attached, and missing token/organization should be reported clearly.
 4. Once credentials and the Cloud project are configured, check that Sonar imports PHP
    coverage for src files and that the quality-gate result agrees with the Actions status.

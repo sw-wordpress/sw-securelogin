@@ -35,18 +35,21 @@
     "test": "@php vendor/bin/phpunit",
     "analyse": "@php vendor/bin/phpstan analyse --memory-limit=512M",
     "cs": "@php vendor/bin/phpcs",
-    "lint": "find src tests bin sw-securelogin.php uninstall.php -name '*.php' -print0 | xargs -0 -n1 php -l",
+    "lint": "find src tests bin sw-securelogin.php uninstall.php -path tests/wp/vendor -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l",
     "test:integration": "@php vendor/bin/phpunit -c phpunit.integration.xml.dist",
     "build:prefixed": "bash bin/build-prefixed.sh",
     "test:mozart": "bash tests/Build/mozart-smoke.sh",
     "test:oidc-spike": "bash tests/Spikes/Oidc/run.sh",
     "test:coverage": "@php vendor/bin/phpunit --coverage-clover coverage/unit.xml --fail-on-warning",
     "test:integration:coverage": "@php vendor/bin/phpunit -c phpunit.integration.xml.dist --coverage-clover coverage/wordpress.xml --fail-on-warning",
-    "coverage:merge": "@php tests/coverage/merge.php coverage/clover.xml coverage/unit.xml coverage/wordpress.xml",
+    "coverage:merge": "@php tests/coverage/merge.php coverage/clover.xml coverage/unit.xml coverage/wordpress.xml coverage/updates.xml",
     "coverage:check": "@php tests/coverage/check.php coverage/clover.xml",
     "stan": "@analyse",
     "build:release": "bash bin/build-release.sh",
-    "test:release": "@php vendor/bin/phpunit --filter ReleasePackageTest"
+    "test:release": "@php vendor/bin/phpunit --filter ReleasePackageTest",
+    "test:updates": "@php tests/wp/vendor/bin/phpunit -c tests/wp/phpunit.xml.dist",
+    "test:updates:coverage": "@php tests/wp/vendor/bin/phpunit -c tests/wp/phpunit.xml.dist --coverage-clover coverage/updates.xml --fail-on-warning",
+    "test:signed-build": "@php tests/release/verify-signed-build.php build"
   },
   "extra": {
     "mozart": {

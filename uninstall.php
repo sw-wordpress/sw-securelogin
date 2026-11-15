@@ -16,6 +16,11 @@ if ( is_multisite() || '1' !== get_option( 'swsl_delete_data_on_uninstall' ) ) {
 	return;
 }
 
+foreach ( array( 'swsl_verified_github_updates_v1', 'swsl_verified_github_updates_lock_v1', 'swsl_verified_updates_migrated' ) as $swsl_update_option ) {
+	delete_option( $swsl_update_option );
+}
+unset( $swsl_update_option );
+
 global $wpdb;
 // Fixed allowlist: no wildcard deletion of tables or options belonging to other code.
 foreach ( array( 'swsl_passkeys', 'swsl_user_handles', 'swsl_transactions', 'swsl_limits' ) as $swsl_suffix ) {

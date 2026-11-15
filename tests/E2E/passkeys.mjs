@@ -54,6 +54,13 @@ try {
   const loginError = await page.locator('#login_error').textContent({timeout:1000}).catch(()=>null);
   throw new Error(`Disposable WordPress login failed: ${loginError || new URL(page.url()).pathname}; ${navigations.join(', ')}`,{cause:error});
  }
+ await navigate(`${origin}/wp-admin/plugins.php`);
+ const updateRow=page.locator('tr[data-plugin="sw-securelogin/sw-securelogin.php"]');
+ assert.equal(await updateRow.locator('#swsl-verified-updates-check').count(),1);
+ assert.match(await updateRow.locator('#swsl-verified-updates-status').textContent(),/no public release key/i);
+ await updateRow.locator('#swsl-verified-updates-check').click();
+ await page.waitForFunction(()=>document.getElementById('swsl-verified-updates-result').textContent.includes('blocked'));
+ assert.equal(await page.locator('#swsl-verified-updates-check').isEnabled(),true);
  await navigate(`${origin}/wp-admin/admin.php?page=swsl-overview`);
  // Explicit deletion consent is separate from module activation and can be cancelled.
  const removal=page.locator('#swsl-delete-data');

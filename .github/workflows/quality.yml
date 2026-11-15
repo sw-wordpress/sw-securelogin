@@ -1,8 +1,6 @@
 name: Tests and SonarQube
 on:
-  push:
   pull_request:
-  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -16,11 +14,12 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: curl, openssl, zip
+          extensions: curl, openssl, zip, sodium
           tools: composer:v2
           coverage: ${{ matrix.php == '8.2' && 'xdebug' || 'none' }}
       - run: composer install --no-interaction --prefer-dist
       - run: composer validate --strict
+      - run: python3 tests/release/operator-commands.py
       - name: Audit shipped Composer packages
         if: matrix.php == '8.2'
         run: composer audit --locked --no-dev
@@ -76,7 +75,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mysqli, zip
+          extensions: mysqli, zip, sodium
           tools: composer:v2, wp-cli
           coverage: ${{ matrix.php == '8.2' && 'xdebug' || 'none' }}
       - run: composer install --no-interaction --prefer-dist
@@ -95,13 +94,6 @@ jobs:
           XDEBUG_MODE: coverage
           SWSL_EXPECT_PLUGIN_ROOT: ${{ github.workspace }}
         run: composer test:integration:coverage
-      - uses: actions/upload-artifact@v7
-        if: matrix.php == '8.2'
-        with:
-          name: php-wordpress-coverage
-          path: coverage/wordpress.xml
-          if-no-files-found: error
-          retention-days: 14
       - name: Install the final ZIP in the disposable site
         run: |
           wp plugin deactivate sw-securelogin --path="$SWSL_TEST_WORDPRESS"
@@ -115,6 +107,36 @@ jobs:
             build/*.zip.sha256
           if-no-files-found: error
           retention-days: 14
+      - name: Install isolated updater test dependencies
+        run: composer install --working-dir=tests/wp --no-interaction --prefer-dist
+      - name: Verify signed updates in single-site then multisite (shared DB, sequential)
+        env:
+          SWSL_WP_TEST_DB_NAME: swsl_wp_tests
+          SWSL_TEST_DB_USER: root
+          SWSL_TEST_DB_PASSWORD: swsl-test-root
+          SWSL_TEST_DB_PORT: '3306'
+        run: |
+          if [ '${{ matrix.php }}' = '8.2' ]; then
+            XDEBUG_MODE=coverage composer test:updates:coverage
+          else
+            composer test:updates
+          fi
+          WP_MULTISITE=1 XDEBUG_MODE=off composer test:updates
+      - name: Verify real ZIP using a disposable signing key
+        run: composer test:signed-build
+      - uses: actions/upload-artifact@v7
+        if: matrix.php == '8.2'
+        with:
+          name: php-wordpress-coverage
+          path: |
+            coverage/wordpress.xml
+            coverage/updates.xml
+          if-no-files-found: error
+          retention-days: 14
+      - name: Reject REST and CLI updates in independent processes
+        run: |
+          php tests/Compatibility/update-context.php REST_REQUEST
+          php tests/Compatibility/update-context.php WP_CLI
       - name: Test isolated WordPress build
         env:
           XDEBUG_MODE: 'off'
@@ -145,6 +167,7 @@ jobs:
       - run: npm run lint
       - run: npm run test:coverage-tools
       - run: npx playwright-core install --with-deps chromium
+      - run: node tests/E2E/updates.mjs
       - run: npm run test:e2e
       - name: Test WP Armour and a renamed login URL
         run: |
@@ -189,7 +212,7 @@ jobs:
           name: php-wordpress-coverage
           path: coverage
       - name: Merge and normalize original-source coverage
-        run: php tests/coverage/merge.php coverage/clover.xml coverage/unit.xml coverage/wordpress.xml
+        run: php tests/coverage/merge.php coverage/clover.xml coverage/unit.xml coverage/wordpress.xml coverage/updates.xml
       - name: Enforce PHP line coverage above 80 percent
         run: php tests/coverage/check.php coverage/clover.xml
       - uses: actions/upload-artifact@v7
@@ -205,9 +228,7 @@ jobs:
     if: >-
       (github.event_name == 'pull_request' &&
        github.event.pull_request.head.repo.full_name == github.repository &&
-       github.event.pull_request.user.login != 'dependabot[bot]') ||
-      ((github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
-       github.ref_name == github.event.repository.default_branch)
+       github.event.pull_request.user.login != 'dependabot[bot]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

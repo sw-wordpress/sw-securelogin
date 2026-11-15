@@ -122,3 +122,7 @@ Bundled third-party components (license texts in `vendor-prefixed/licenses/` of 
 
 - [lbuchs/webauthn](https://github.com/lbuchs/WebAuthn) — MIT
 - [Composer ClassLoader](https://github.com/composer/composer) — MIT (`vendor-prefixed/composer/LICENSE`)
+
+## Verifizierte GitHub-Updates
+
+Siehe [Konzept](docs/GITHUB-UPDATES.md) und [Betrieb/Schlüssel](docs/GITHUB-UPDATES-BETRIEB.md).
