@@ -1,8 +1,10 @@
-"""Policy fixtures use the unchanged strict-json output from CI run 43849906607."""
+"""Real fixtures: CI 43849906607's failing report and CI 43852016000's packaged configs."""
 import copy
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -13,6 +15,7 @@ SPEC = importlib.util.spec_from_file_location('plugin_check', ROOT / 'bin/check-
 gate = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(gate)
 REPORT = json.loads((Path(__file__).parent / 'fixtures/plugin-check-2.1.0.json').read_text())
+PACKAGED = json.loads((Path(__file__).parent / 'fixtures/packaged-updater-config-43852016000.json').read_text())
 
 
 class PluginCheckTest(unittest.TestCase):
@@ -36,6 +39,55 @@ class PluginCheckTest(unittest.TestCase):
     def test_real_failed_report_still_fails_on_direct_access(self):
         with self.assertRaisesRegex(ValueError, 'missing_direct_file_access_protection'):
             self.check(REPORT)
+
+    def test_actual_packaged_configs_match_distribution_policy(self):
+        for filename, fixture in PACKAGED['files'].items():
+            with self.subTest(filename=filename):
+                self.assertEqual(fixture['sha256'], hashlib.sha256(fixture['source'].encode()).hexdigest())
+                (self.source.parent / filename).write_text(fixture['source'])
+                gate.validate_distribution(self.plugin)
+            (self.source.parent / filename).write_text(
+                gate.SOURCE if filename == 'source.php' else gate.DESCRIPTORS)
+        for filename, fixture in PACKAGED['files'].items():
+            (self.source.parent / filename).write_text(fixture['source'])
+        self.assertEqual((7, 2), self.check(self.clean))
+        with self.assertRaisesRegex(ValueError, 'missing_direct_file_access_protection'):
+            self.check(REPORT)
+
+    def test_optional_trailing_commas_only_are_normalized(self):
+        for pinned in (gate.SOURCE, gate.DESCRIPTORS):
+            compact = re.sub(r',\s*\)', ')', pinned)
+            for formatted in (compact, compact.replace(')', ', /* trailing */ )')):
+                with self.subTest(formatted=formatted):
+                    self.assertEqual(gate.php_tokens(pinned), gate.php_tokens(formatted))
+        self.assertEqual(["'a,)b'", ',', "'c'"], gate.php_tokens("'a,)b', 'c'"))
+        self.assertEqual(['(', 'a', ',', ',', 'b', ')', ';'], gate.php_tokens('(a,,b);'))
+
+    def test_packaged_config_mutations_remain_fatal(self):
+        for filename, fixture in PACKAGED['files'].items():
+            source = fixture['source']
+            path = self.source.parent / filename
+            # Every required separator stays required, in both real packaged files.
+            mutations = [source[:i] + source[i + 1:] for i, char in enumerate(source)
+                         if char == ',' and not source[i + 1:].lstrip().startswith(')')]
+            mutations += [
+                source.replace("'sw-securelogin'", "'sw-securelogin,)'"),
+                source.replace("defined('ABSPATH') || exit;", ''),
+                source.replace('return array(', "echo 'unexpected'; return array(", 1),
+                source.replace('=>', '=', 1),
+                source.replace("'sw-securelogin'", "'other'"),
+                source.replace('return array(', 'return array(,', 1),
+                source.replace(');', ',,);', 1),
+                source.replace(');', '),;', 1),
+                source.replace(');', '); unexpected();', 1),
+            ]
+            for mutated in mutations:
+                with self.subTest(filename=filename, mutated=mutated):
+                    self.assertNotEqual(source, mutated)
+                    path.write_text(mutated)
+                    with self.assertRaisesRegex(ValueError, filename):
+                        gate.validate_distribution(self.plugin)
+            path.write_text(gate.SOURCE if filename == 'source.php' else gate.DESCRIPTORS)
 
     def test_only_fixed_report_passes_with_two_explicit_policy_findings(self):
         self.assertEqual((7, 2), self.check(self.clean))

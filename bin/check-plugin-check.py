@@ -21,7 +21,8 @@ UPDATE_WARNINGS = {
     for hook in ('auto_update_plugin', 'pre_set_site_transient_update_plugins', '_site_transient_update_plugins')
 }
 # Literal configuration only: additions/changes require policy review. Whitespace
-# and comments may vary; string values and all executable tokens must match.
+# and comments may vary, as may optional trailing commas before ')'; string
+# values and all other executable tokens must match.
 SOURCE = """<?php
 defined( 'ABSPATH' ) || exit;
 return array(
@@ -45,12 +46,14 @@ return array(
 
 
 def php_tokens(source):
-    """Compare literal PHP without dropping whitespace/comments inside strings."""
+    """Normalize formatting and optional trailing commas, preserving string tokens."""
     tokens = re.findall(
         r"'(?:\\.|[^'\\])*'|/\*.*?\*/|//[^\n]*|\s+|<\?php(?=\s)|=>|\|\||[A-Za-z_][A-Za-z0-9_]*|[0-9]+|.",
         source, re.S,
     )
-    return [t for t in tokens if not t.isspace() and not t.startswith(('/*', '//'))]
+    tokens = [t for t in tokens if not t.isspace() and not t.startswith(('/*', '//'))]
+    return [t for i, t in enumerate(tokens)
+            if not (t == ',' and i + 1 < len(tokens) and tokens[i + 1] == ')')]
 
 
 def validate_distribution(plugin):

@@ -22,7 +22,10 @@ Header `https://github.com/sw-wordpress/sw-securelogin`, die Textdomain und säm
 literalen Werte/Tokens aus `Config/source.php` und `Config/descriptors.php`
 (Repository einschließlich ID
 1439006733, einzig erlaubter Slug, Hauptslug und Speicherschlüssel, inklusive
-Direktzugriffsschutz). Es wird kein PHP aus dem Artefakt ausgeführt. Änderungen an
+Direktzugriffsschutz). Whitespace, Kommentare und optionale abschließende Kommas vor
+`)` werden für äquivalente Quell-/Mozart-Buildformatierung normalisiert; Strings,
+erforderliche Trennzeichen und alle übrigen Tokens bleiben exakt. Es wird kein PHP
+aus dem Artefakt ausgeführt. Änderungen an
 dieser Konfiguration erfordern eine erneute Prüfung der Distributionspolicy.
 
 Nur die beiden exakten `plugin_updater_detected`-ERROR-Meldungen aus dem versionierten

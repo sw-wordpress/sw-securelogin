@@ -230,6 +230,12 @@ fail. The three known update-modification warnings remain visible; a changed upd
 warning also requires review. Other warnings remain in the raw artifact, including
 the earlier [implementation review findings](SECURITY-REVIEW-M3.md).
 
+The packaged-config regression fixture preserves both exact config texts and SHA-256
+provenance from the CI 43852016000 ZIP. Tests cover optional trailing commas before
+`)` removed by Mozart, while required separators, strings, values, guards and
+executable additions remain strict. The older real report fixture retains its
+direct-access error and must still fail; filtered reports in unit tests are synthetic.
+
 `UpdateConfigTest` checks fresh-process direct access to every shipped updater config,
 normal bootstrapped reads and the real signer's guarded keyring regeneration,
 key preservation, idempotence and conflicting-ID refusal. The Bash/Zsh operator

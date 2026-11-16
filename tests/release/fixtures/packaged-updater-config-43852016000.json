@@ -1,0 +1,20 @@
+{
+  "provenance": {
+    "ci_run": 43852016000,
+    "artifact": "sw-securelogin-0.3.0.zip",
+    "artifact_sha256": "ebdf1097df1b7a328b0fa2b1f8b877b06b6c4c12864f58342dd628e8e025318d",
+    "note": "Exact UTF-8 config bytes read with Python zipfile; no packaged PHP executed."
+  },
+  "files": {
+    "source.php": {
+      "member": "sw-securelogin/src/Update/Config/source.php",
+      "sha256": "acdd13165ee6056367a7791c7c91ba5e0c5674fcd233cf1063395ca22633107c",
+      "source": "<?php\n\n/**\n * Local trust and storage configuration; never populated from release metadata.\n *\n * @package sw-securelogin\n */\ndefined('ABSPATH') || exit;\nreturn array('repository' => 'sw-wordpress/sw-securelogin', 'repository_id' => 1439006733, 'allowed_slugs' => array('sw-securelogin'), 'main_slug' => 'sw-securelogin', 'state_key' => 'swsl_verified_github_updates_v1', 'lock_key' => 'swsl_verified_github_updates_lock_v1');"
+    },
+    "descriptors.php": {
+      "member": "sw-securelogin/src/Update/Config/descriptors.php",
+      "sha256": "1218c135e7d4cb55041f6933c47cb10e9be0b043790b0680a71b3119eacedc37",
+      "source": "<?php\n\n/**\n * Local plugin identities. No requests or option reads.\n *\n * @package sw-securelogin\n */\ndefined('ABSPATH') || exit;\nreturn array(\n    // uninstall.php runs without the plugin's constants.\n    defined('SWSL_FILE') ? plugin_basename(SWSL_FILE) : 'sw-securelogin/sw-securelogin.php' => array('slug' => 'sw-securelogin', 'version' => defined('SWSL_VERSION') ? SWSL_VERSION : '0'),\n);"
+    }
+  }
+}
