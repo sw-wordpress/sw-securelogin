@@ -268,7 +268,7 @@ jobs:
           fi
           test -s coverage/clover.xml
       - name: Analyze code, import coverage and check quality gate
-        uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65
+        uses: SonarSource/sonarqube-scan-action@59202af334b4ba7b5db01b701b8e79f8b3bef0f4
         with:
           args: >-
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
