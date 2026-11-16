@@ -59,6 +59,8 @@ PHP
   php <<'PHP'
 <?php
 declare(strict_types=1);
+// Offline-Kontext für den geschützten lokalen Schlüsselring.
+define('ABSPATH', '/swsl-public-key-install/');
 $target = getenv('SWSL_PLUGIN_DIR') . '/src/Update/Config/trusted-keys.php';
 $existing = require $target;
 $incoming = require getenv('SWSL_RELEASE_KEYS_DIR') . '/public-keys.php';
@@ -77,7 +79,7 @@ $width = max(array_map(static fn($id) => strlen(var_export($id, true)), array_ke
 foreach ($existing as $id => $key) {
     $rows[] = "\t" . str_pad(var_export($id, true), $width) . ' => ' . var_export($key, true) . ',';
 }
-$contents = "<?php\n/**\n * Public Ed25519 verification keys.\n *\n * @package SW\\Securelogin\n */\n\nreturn array(\n" . implode("\n", $rows) . "\n);\n";
+$contents = "<?php\n/**\n * Public Ed25519 verification keys.\n *\n * @package SW\\Securelogin\n */\n\ndefined( 'ABSPATH' ) || exit;\n\nreturn array(\n" . implode("\n", $rows) . "\n);\n";
 if (file_put_contents($target, $contents, LOCK_EX) !== strlen($contents)) {
     throw new RuntimeException('Öffentlicher Schlüsselring konnte nicht geschrieben werden.');
 }

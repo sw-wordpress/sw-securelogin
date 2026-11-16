@@ -210,12 +210,32 @@ After installing/activating Plugin Check 2.1.0 in the disposable site, run all c
 (including runtime) on the installed archive:
 
 ```sh
-wp --require="$SWSL_TEST_WORDPRESS/wp-content/plugins/plugin-check/cli.php" plugin check sw-securelogin --format=strict-json --path="$SWSL_TEST_WORDPRESS"
+wp --require="$SWSL_TEST_WORDPRESS/wp-content/plugins/plugin-check/cli.php" plugin check sw-securelogin --format=strict-json --path="$SWSL_TEST_WORDPRESS" > build/plugin-check.json
 ```
 
-Plugin Check does not itself return failure for every finding. CI parses the JSON and
-fails on `ERROR`; all warnings remain in its artifact. Two reviewed warnings and their
-reasons are recorded in [the implementation review](SECURITY-REVIEW-M3.md).
+Plugin Check does not itself return failure for every finding. CI retains the unchanged
+strict-json report and validates it against the **installed ZIP**, using:
+
+```sh
+python3 -m unittest discover -s tests/release -p 'test_*.py'
+python3 bin/check-plugin-check.py --distribution github build/plugin-check.json "$SWSL_TEST_WORDPRESS/wp-content/plugins/sw-securelogin"
+```
+
+The [ADR 009 distribution policy](ADR-009-verified-manual-updates.md) permits exactly
+two WordPress.org-only updater errors for the pinned GitHub build. The validator
+requires the exact Update URI, text domain and literal local source/descriptor configuration;
+it never executes packaged PHP. Malformed JSON/schema, duplicate JSON keys, changed
+configuration, duplicate/unknown updater policy findings and every other `ERROR`
+fail. The three known update-modification warnings remain visible; a changed updater
+warning also requires review. Other warnings remain in the raw artifact, including
+the earlier [implementation review findings](SECURITY-REVIEW-M3.md).
+
+`UpdateConfigTest` checks fresh-process direct access to every shipped updater config,
+normal bootstrapped reads and the real signer's guarded keyring regeneration,
+key preservation, idempotence and conflicting-ID refusal. The Bash/Zsh operator
+harness also checks the regenerated keyring's guard. Offline commands define their
+own explicit `ABSPATH` context before loading local config; unit/WordPress bootstraps
+retain their existing contexts.
 
 The M3 MariaDB fixture also passed a complete database export/import restoration:
 with the guarded disposable database, export using `--skip-comments --skip-dump-date

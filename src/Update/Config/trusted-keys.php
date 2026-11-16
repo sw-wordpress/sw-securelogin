@@ -5,6 +5,8 @@
  * @package SW\Securelogin
  */
 
+defined( 'ABSPATH' ) || exit;
+
 return array(
 	'sw-securelogin-2026-11' => 'zvCOL0ERH2IgzuuRyzZeilcroUFDhc0UMK2Jai0dOSw=',
 );

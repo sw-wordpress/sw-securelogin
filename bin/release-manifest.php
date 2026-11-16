@@ -17,6 +17,9 @@ if ( PHP_SAPI !== 'cli' ) {
 	exit( 1 );
 }
 
+// Offline CLI bootstrap for the guarded, local updater configuration.
+define( 'ABSPATH', '/swsl-release-signing/' );
+
 /**
  * Plugin header values of a packaged main file.
  *
@@ -66,7 +69,7 @@ function swsl_sign_release( array $argv ): void {
 			foreach ( $keys as $id => $value ) {
 				$rows[] = "\t" . str_pad( var_export( $id, true ), $width ) . ' => ' . var_export( $value, true ) . ',';
 			}
-			$contents = "<?php\n/**\n * Public Ed25519 verification keys.\n *\n * @package SW\\Securelogin\n */\n\nreturn array(\n" . implode( "\n", $rows ) . "\n);\n";
+			$contents = "<?php\n/**\n * Public Ed25519 verification keys.\n *\n * @package SW\\Securelogin\n */\n\ndefined( 'ABSPATH' ) || exit;\n\nreturn array(\n" . implode( "\n", $rows ) . "\n);\n";
 			if ( file_put_contents( $file, $contents, LOCK_EX ) !== strlen( $contents ) ) {
 				throw new RuntimeException( 'Public keyring could not be written completely.' );
 			}

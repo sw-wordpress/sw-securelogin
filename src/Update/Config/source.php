@@ -5,6 +5,8 @@
  * @package sw-securelogin
  */
 
+defined( 'ABSPATH' ) || exit;
+
 return array(
 	'repository'    => 'sw-wordpress/sw-securelogin',
 	'repository_id' => 1439006733,

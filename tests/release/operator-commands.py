@@ -11,7 +11,7 @@ for shell in ('bash', 'zsh'):
         plugin, keys, fake = temp/'plugin', temp/'keys', temp/'bin'
         ring = plugin/'src/Update/Config/trusted-keys.php'
         ring.parent.mkdir(parents=True)
-        ring.write_text("<?php return ['old' => '" + 'A'*43 + "='];\n")
+        ring.write_text("<?php defined( 'ABSPATH' ) || exit; return ['old' => '" + 'A'*43 + "='];\n")
         fake.mkdir()
         # No network tool is ever invoked. Assert private material arrives solely via stdin.
         gh = fake/'gh'
@@ -46,7 +46,9 @@ with open(os.environ['SWSL_GH_LOG'],'a') as f: f.write(args[0]+' '+args[1]+'\\n'
         run(0,False)
         assert (keys/'signing-key.base64').read_bytes()==before
         run(1)
-        check=subprocess.check_output(['php','-r','$a=require $argv[1];echo json_encode($a);',str(ring)])
+        check=subprocess.check_output(['php','-r',"define('ABSPATH', '/swsl-operator-test/');$a=require $argv[1];echo json_encode($a);",str(ring)])
+        direct=subprocess.run(['php','-n','-r','require $argv[1];echo "unguarded";',str(ring)],capture_output=True)
+        assert direct.returncode==0 and direct.stdout==b'' and direct.stderr==b''
         data=json.loads(check)
         assert list(data)==['old','sw-securelogin-2026-11']
         assert before.strip() not in ring.read_bytes()

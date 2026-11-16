@@ -5,6 +5,8 @@
  * @package sw-securelogin
  */
 
+defined( 'ABSPATH' ) || exit;
+
 return array(
 	// uninstall.php runs without the plugin's constants.
 	defined( 'SWSL_FILE' ) ? plugin_basename( SWSL_FILE ) : 'sw-securelogin/sw-securelogin.php' => array(

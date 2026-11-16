@@ -36,7 +36,7 @@ coverage must still be collected from the original sources. See [testing](https:
 | Code quality | PHP lint, WPCS, PHPStan 8, unit/integration tests; PHP and JS each >80% coverage |
 | Security | Review auth, CSRF/permissions, ownership, origin/RP, replay/expiry, policies/session rollback, SQL, logs and deletion; no unresolved High/Critical findings |
 | Dependency audit | No known advisories in shipped packages; record locked versions and audit date |
-| Plugin Check | Run all checks on extracted artifact; review every finding, including runtime checks |
+| Plugin Check | Run all checks on extracted artifact; preserve raw report; fail on unexpected errors under the [ADR 009 GitHub distribution policy](https://github.com/sw-wordpress/sw-securelogin/blob/main/docs/ADR-009-verified-manual-updates.md); review warnings and runtime findings |
 | Matrix | WordPress 6.7 / PHP 8.2 / MySQL 8.0 and current WordPress / PHP 8.3 / MariaDB 11.4 |
 | Browser | Chromium automation plus physical-device registration/login on target Chrome/Firefox/Safari versions |
 | Compatibility | WP Armour, renamed login path, an actual MFA plugin; demonstrate fail-closed behavior for unsupported policies without disabling password/MFA recovery |

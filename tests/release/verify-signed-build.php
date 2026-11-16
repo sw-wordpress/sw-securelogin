@@ -159,7 +159,7 @@ foreach (['Manifest', 'Package'] as $class) {
 }
 copy($root . '/src/Update/Config/source.php', $runner . '/src/Update/Config/source.php');
 copy($root . '/bin/verify-release.php', $runner . '/bin/verify-release.php');
-$publicPhp = "<?php\nreturn " . var_export($public, true) . ";\n";
+$publicPhp = "<?php\ndefined( 'ABSPATH' ) || exit;\nreturn " . var_export($public, true) . ";\n";
 file_put_contents($runner . '/src/Update/Config/trusted-keys.php', $publicPhp);
 $zip = new ZipArchive();
 $zip->open($copy);
