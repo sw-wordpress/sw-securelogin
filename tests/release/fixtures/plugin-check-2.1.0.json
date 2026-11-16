@@ -1,0 +1,66 @@
+[
+  {
+    "line": 0,
+    "column": 0,
+    "type": "ERROR",
+    "code": "plugin_updater_detected",
+    "message": "Including An Update Checker / Changing Updates functionality. Plugin Updater detected. Use of the Update URI header is not allowed in plugins hosted on WordPress.org.",
+    "docs": "https://developer.wordpress.org/plugins/wordpress-org/common-issues/#update-checker"
+  },
+  {
+    "line": 0,
+    "column": 0,
+    "type": "ERROR",
+    "code": "plugin_updater_detected",
+    "message": "Plugin Updater detected. These are not permitted in WordPress.org hosted plugins. Detected: site_transient_update_plugins",
+    "docs": ""
+  },
+  {
+    "line": 0,
+    "column": 0,
+    "type": "WARNING",
+    "code": "update_modification_detected",
+    "message": "Plugin Updater detected. Detected code which may be altering WordPress update routines. Detected: auto_update_plugin",
+    "docs": "https://developer.wordpress.org/plugins/wordpress-org/common-issues/#update-checker"
+  },
+  {
+    "line": 0,
+    "column": 0,
+    "type": "WARNING",
+    "code": "update_modification_detected",
+    "message": "Plugin Updater detected. Detected code which may be altering WordPress update routines. Detected: pre_set_site_transient_update_plugins",
+    "docs": "https://developer.wordpress.org/plugins/wordpress-org/common-issues/#update-checker"
+  },
+  {
+    "line": 0,
+    "column": 0,
+    "type": "WARNING",
+    "code": "update_modification_detected",
+    "message": "Plugin Updater detected. Detected code which may be altering WordPress update routines. Detected: _site_transient_update_plugins",
+    "docs": "https://developer.wordpress.org/plugins/wordpress-org/common-issues/#update-checker"
+  },
+  {
+    "line": 0,
+    "column": 0,
+    "type": "ERROR",
+    "code": "missing_direct_file_access_protection",
+    "message": "PHP file should prevent direct access. Add a check like: if ( ! defined( 'ABSPATH' ) ) exit;",
+    "docs": "https://developer.wordpress.org/plugins/wordpress-org/common-issues/#direct-file-access"
+  },
+  {
+    "line": 43,
+    "column": 9,
+    "type": "WARNING",
+    "code": "PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound",
+    "message": "load_plugin_textdomain() has been discouraged since WordPress version 4.6. When your plugin is hosted on WordPress.org, you no longer need to manually include this function call for translations under your plugin slug. WordPress will automatically load the translations for you as needed.",
+    "docs": "https://make.wordpress.org/core/2016/07/06/i18n-improvements-in-4-6/"
+  },
+  {
+    "line": 54,
+    "column": 33,
+    "type": "WARNING",
+    "code": "WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound",
+    "message": "Hook names invoked by a theme/plugin should start with the theme/plugin prefix. Found: &quot;wp_authenticate_user&quot;.",
+    "docs": ""
+  }
+]

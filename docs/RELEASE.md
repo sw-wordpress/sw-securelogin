@@ -36,7 +36,7 @@ coverage must still be collected from the original sources. See [testing](https:
 | Code quality | PHP lint, WPCS, PHPStan 8, unit/integration tests; PHP and JS each >80% coverage |
 | Security | Review auth, CSRF/permissions, ownership, origin/RP, replay/expiry, policies/session rollback, SQL, logs and deletion; no unresolved High/Critical findings |
 | Dependency audit | No known advisories in shipped packages; record locked versions and audit date |
-| Plugin Check | Run all checks on extracted artifact; review every finding, including runtime checks |
+| Plugin Check | Run all checks on extracted artifact; preserve raw report; fail on unexpected errors under the [ADR 009 GitHub distribution policy](https://github.com/sw-wordpress/sw-securelogin/blob/main/docs/ADR-009-verified-manual-updates.md); review warnings and runtime findings |
 | Matrix | WordPress 6.7 / PHP 8.2 / MySQL 8.0 and current WordPress / PHP 8.3 / MariaDB 11.4 |
 | Browser | Chromium automation plus physical-device registration/login on target Chrome/Firefox/Safari versions |
 | Compatibility | WP Armour, renamed login path, an actual MFA plugin; demonstrate fail-closed behavior for unsupported policies without disabling password/MFA recovery |
@@ -97,3 +97,14 @@ Local source verification: 56 unit tests, 74 integration tests, WPCS and PHPStan
 PHP line coverage is 89.93% (938/1043); JavaScript is 96.1%. Chromium verifies
 confirmation cancellation, persisted consent and withdrawal alongside enrollment/login.
 This subsequent implementation requires a fresh remote CI/SonarQube run before release.
+
+## Verifizierte GitHub-Updates
+
+Siehe [Konzept](GITHUB-UPDATES.md) und [Betrieb/Schlüssel](GITHUB-UPDATES-BETRIEB.md).
+
+
+Lokale Prüfung dieser Umsetzung (15.11.2026): 100 Unit-Tests, 74 vorhandene WordPress-Integrationstests sowie 108 verifizierte Updatefälle jeweils auf Single-Site und Multisite bestehen. PHPStan 8, WPCS, PHP-/JS-Syntaxprüfungen, Composer-Validierung, Produktionsabhängigkeits-Audit und actionlint bestehen. Vollständige PHP-Coverage auf Originalquellen: **88,43 % (1483/1677)**, JavaScript **95,91 %**; das separate Update-Browserszenario erreicht 100 % der ausführbaren Skriptzeilen. Native Einzel-/AJAX-/Sammelupdates ersetzen ausschließlich Dateien der privaten WordPress-Testinstallation. REST/CLI und fehlende Sodium-/ZIP-Erweiterungen werden separat geprüft. PHP 8.2 besteht zusätzlich die Unit- und Single-Site-/Multisite-Updatesuiten; Hauptlauf PHP 8.3.16, Integration WordPress 6.7 und private Upgradersuite WordPress 6.9.10 / MariaDB 11.4. Browser läuft auf dem Host, Datenbank in Docker.
+
+Die drei kopierbaren Betreiberblöcke wurden in Bash und Zsh mit Wegwerfschlüsseln und einer lokalen GitHub-CLI-Attrappe geprüft; keine produktiven Schlüssel generiert oder GitHub-Secrets geändert. Der Betreiber hat während der Umsetzung seinen produktiven **öffentlichen** Schlüssel eingerichtet; dessen Wert bleibt erhalten. Reproduzierbare ZIPs werden zweimal gebaut und bytegenau verglichen. Das echte Build-ZIP wird mit einem Wegwerfschlüssel signiert und durch Laufzeit-Manifest-/ZIP-Prüfer akzeptiert. Der genaue Pre-Publish-Prüfer besteht einen gültigen privaten Draft und verweigert manipulierte ZIPs beziehungsweise bereits veröffentlichte Releases; fehlendes Signing-Secret wird abgelehnt.
+
+Noch offen: authentifizierter SonarQube-Scan und Remote-PR-CI für diese Änderung, GitHub-Environment-Schutzregeln, geprüfte Erstverteilung des Public-Keys und ein tatsächlich signierter veröffentlichter Release. Die lokale Sonar-CLI meldet „Not authenticated“; die verbundenen MCP-Werkzeuge bieten aktuell keine lokale Datei-Analyse. Frühere Sonar-Ergebnisse belegen diese Änderung nicht. Die vorhandenen 1.0-Abnahmen und dokumentierten Altbefunde bleiben bestehen. Es wurde kein Release-Tag erzeugt oder gepusht und nichts veröffentlicht. Die Updateversorgung wird deshalb noch nicht als produktiv aktiv bestätigt.

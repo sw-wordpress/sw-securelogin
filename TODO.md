@@ -280,3 +280,7 @@ Testbefehle und die isolierte WordPress-Testumgebung stehen in
 [ADR 001](docs/ADR-001-foundation.md), [ADR 002](docs/ADR-002-migrations.md),
 [ADR 003](docs/ADR-003-mozart.md), [ADR 004](docs/ADR-004-passkey-enrollment.md) und
 [ADR 006](docs/ADR-006-uninstall.md) sowie [Bedrohungsmodell](docs/THREAT-MODEL.md).
+
+## Verifizierte GitHub-Updates
+
+Implementiert: ausschließlich manuelle native Updates, signierter Draft-Release-Workflow, `make release VERSION=X.Y.Z`, isolierte Single-Site-/Multisite-/Browser- und Build-Verifikation. Öffentlicher Betreiber-Schlüssel ist im Checkout eingerichtet; geschützte `plugin-releases`-Umgebung, Erstverteilung und erste signierte Veröffentlichung bleiben ausstehend. [Betrieb](docs/GITHUB-UPDATES-BETRIEB.md), [Prüfungen](docs/RELEASE.md).

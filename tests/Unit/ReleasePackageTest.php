@@ -54,7 +54,7 @@ final class ReleasePackageTest extends TestCase {
 
 	public function testDevelopmentFilesSymlinksMissingFilesAndVersionMismatchAreRejected(): void {
 		$output = $this->directory . '/invalid.zip';
-		foreach ( array( '.env', 'tests/secret.php', 'vendor/autoload.php', 'assets/private.key' ) as $file ) {
+		foreach ( array( '.env', 'tests/secret.php', 'vendor/autoload.php', 'assets/private.key', 'assets/signing-key.base64', 'src/secret-key.txt' ) as $file ) {
 			$path = $this->stage . '/' . $file;
 			if ( ! is_dir( dirname( $path ) ) ) mkdir( dirname( $path ), 0700, true );
 			file_put_contents( $path, 'must not ship' );

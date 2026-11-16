@@ -9,6 +9,7 @@
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: sw-securelogin
  * Domain Path: /languages
+ * Update URI: https://github.com/sw-wordpress/sw-securelogin
  *
  * @package SW\Securelogin
  */
@@ -24,11 +25,17 @@ if ( version_compare( PHP_VERSION, SWSL_MIN_PHP, '<' ) ) {
 	return;
 }
 
+defined( 'SWSL_FILE' ) || define( 'SWSL_FILE', __FILE__ );
+defined( 'SWSL_DIR' ) || define( 'SWSL_DIR', __DIR__ . '/' );
+
 // Deactivation removes only this plugin's maintenance job, never credential data.
 register_deactivation_hook(
 	__FILE__,
 	static function (): void {
 		wp_clear_scheduled_hook( 'swsl_cleanup' );
+		if ( class_exists( \SW\Securelogin\Update\Provider::class ) ) {
+			\SW\Securelogin\Update\Provider::deactivate();
+		}
 	}
 );
 
@@ -52,6 +59,8 @@ $swsl_loader = require $swsl_autoload;
 // Mozart generates a dependency loader; register the plugin's own PSR-4 classes.
 $swsl_loader->addPsr4( 'SW\\Securelogin\\', __DIR__ . '/src/' );
 unset( $swsl_autoload, $swsl_loader );
+
+\SW\Securelogin\Update\Provider::init();
 
 add_action(
 	'plugins_loaded',

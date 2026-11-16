@@ -160,7 +160,7 @@ must exceed 80%; see [SonarQube setup](SONARQUBE.md).
 
 ## Dependency security
 
-Every push/PR fails on known advisories in shipped dependencies (`composer audit --locked --no-dev`,
+Every PR fails on known advisories in shipped dependencies (`composer audit --locked --no-dev`,
 `npm audit --omit=dev --audit-level=high`). `.github/workflows/security-audit.yml` audits all
 dependencies, including dev tooling, daily and keeps one open `security-audit` issue (closed once
 clean). `.github/dependabot.yml` opens weekly grouped PRs; Dependabot PRs get no secrets, so the
@@ -210,12 +210,38 @@ After installing/activating Plugin Check 2.1.0 in the disposable site, run all c
 (including runtime) on the installed archive:
 
 ```sh
-wp --require="$SWSL_TEST_WORDPRESS/wp-content/plugins/plugin-check/cli.php" plugin check sw-securelogin --format=strict-json --path="$SWSL_TEST_WORDPRESS"
+wp --require="$SWSL_TEST_WORDPRESS/wp-content/plugins/plugin-check/cli.php" plugin check sw-securelogin --format=strict-json --path="$SWSL_TEST_WORDPRESS" > build/plugin-check.json
 ```
 
-Plugin Check does not itself return failure for every finding. CI parses the JSON and
-fails on `ERROR`; all warnings remain in its artifact. Two reviewed warnings and their
-reasons are recorded in [the implementation review](SECURITY-REVIEW-M3.md).
+Plugin Check does not itself return failure for every finding. CI retains the unchanged
+strict-json report and validates it against the **installed ZIP**, using:
+
+```sh
+python3 -m unittest discover -s tests/release -p 'test_*.py'
+python3 bin/check-plugin-check.py --distribution github build/plugin-check.json "$SWSL_TEST_WORDPRESS/wp-content/plugins/sw-securelogin"
+```
+
+The [ADR 009 distribution policy](ADR-009-verified-manual-updates.md) permits exactly
+two WordPress.org-only updater errors for the pinned GitHub build. The validator
+requires the exact Update URI, text domain and literal local source/descriptor configuration;
+it never executes packaged PHP. Malformed JSON/schema, duplicate JSON keys, changed
+configuration, duplicate/unknown updater policy findings and every other `ERROR`
+fail. The three known update-modification warnings remain visible; a changed updater
+warning also requires review. Other warnings remain in the raw artifact, including
+the earlier [implementation review findings](SECURITY-REVIEW-M3.md).
+
+The packaged-config regression fixture preserves both exact config texts and SHA-256
+provenance from the CI 43852016000 ZIP. Tests cover optional trailing commas before
+`)` removed by Mozart, while required separators, strings, values, guards and
+executable additions remain strict. The older real report fixture retains its
+direct-access error and must still fail; filtered reports in unit tests are synthetic.
+
+`UpdateConfigTest` checks fresh-process direct access to every shipped updater config,
+normal bootstrapped reads and the real signer's guarded keyring regeneration,
+key preservation, idempotence and conflicting-ID refusal. The Bash/Zsh operator
+harness also checks the regenerated keyring's guard. Offline commands define their
+own explicit `ABSPATH` context before loading local config; unit/WordPress bootstraps
+retain their existing contexts.
 
 The M3 MariaDB fixture also passed a complete database export/import restoration:
 with the guarded disposable database, export using `--skip-comments --skip-dump-date
@@ -240,3 +266,37 @@ cancel the warning and reload: it must remain off. Accept and save, deactivate a
 verify data is still present; delete through WordPress and verify the four plugin tables
 and settings are gone while password login still works. Repeat with consent withdrawn
 before deactivation: data must remain. Backups remain under operator control.
+
+## Verifizierte GitHub-Updates
+
+Siehe [Konzept](GITHUB-UPDATES.md) und [Betrieb/Schlüssel](GITHUB-UPDATES-BETRIEB.md).
+
+
+Die zusätzliche WordPress-PHPUnit-9-Suite ist von den PHPUnit-11-Abhängigkeiten getrennt. Sie lädt ausschließlich diesen Checkout und ein privates WordPress unter `tests/wp/vendor/`; ihre Datenbank ist fest auf `swsl_wp_tests` beschränkt. Echte Upgrader dürfen ausschließlich Plugin-Dateien in dieser privaten Installation ersetzen. Kein Pfad zum Entwicklungs-WordPress wird verwendet. Die bestehende Integrationssuite verwendet separat `swsl_m0_test`.
+
+Die CI legt `swsl_wp_tests` vor dem Suite-Bootstrap zusätzlich zur bestehenden
+Integrationsdatenbank an. Lokal übernimmt `bin/test-db.sh start` die Bereitstellung.
+Die Betriebsbefehlsprüfung benötigt PHP mit Sodium sowie Bash und Zsh; beide Shells
+werden verpflichtend geprüft. `PluginDeactivationTest` prüft den Plugin-Einstiegspunkt
+ohne beide Autoloader in einem frischen PHP-Prozess; die WordPress-Suite prüft den
+registrierten Deaktivierungs-Hook mit geladenem Updater und erhaltener Fremdplugin-Auswahl.
+
+```sh
+composer install --working-dir=tests/wp --no-interaction --prefer-dist
+bash bin/test-db.sh start
+XDEBUG_MODE=coverage composer test:updates:coverage
+WP_MULTISITE=1 XDEBUG_MODE=off composer test:updates
+python3 tests/release/operator-commands.py
+npm run test:updates-ui
+composer build:release
+composer test:signed-build
+```
+
+Single-Site und Multisite verwenden dieselbe Wegwerf-DB und laufen zwingend sequenziell. Danach können die vorhandenen Integrations- und Browsersuiten mit ihrer separaten, bewachten Datenbank ausgeführt werden. `composer coverage:merge` führt `unit.xml`, `wordpress.xml` und `updates.xml` zusammen; beide Sprachgrenzen bleiben strikt >80%, kein Produktionscode ist ausgeschlossen. `tests/Compatibility/update-context.php REST_REQUEST` beziehungsweise `WP_CLI` prüfen die konstanten Ausführungskontexte in eigenständigen Prozessen gegen `$SWSL_TEST_WORDPRESS`. Fehlendes Sodium und ZipArchive werden in separaten PHP-Prozessen getestet.
+
+`VerifiedUpdatesTest` deckt signierte/gefälschte/mehrdeutige Metadaten, bytegenaue Signaturen, Rollback, Cache-Ablauf, Fehler-/Tageslimit nach Transient-Löschung, Rechte/Nonce, Frontend/Cron, HTTP-Redirects/Größenlimits, schädliche ZIP-Pfade/Dateitypen/Header, Locks mit Fremdverbindung und Übernahme, Deaktivierung und eigene/fremde Angebote ab. Native Einzel-/AJAX-/Sammel-Upgrader laufen ausschließlich in der privaten WordPress-Kopie. Eine zweite aus den tatsächlichen Provider-Klassen abgeleitete SW-Plugin-Fixture wird parallel aktiviert: getrennte Hooks, Schlüssel, Speicher und Locknamen werden geprüft. Es wird kein fremder Checkout zur Laufzeit benötigt.
+
+Die Browserprüfung simuliert HTTP ausschließlich lokal und prüft verzögerte Tagesprüfung, Single-Flight, Sperr-/Fehleranzeigen, Timeout und Schaltflächenfreigabe. Der bestehende Chromium-Gesamtablauf prüft zusätzlich die echte native Pluginzeile. Die drei Betriebsblöcke laufen mit Wegwerfschlüsseln und einer lokalen `gh`-Attrappe in Bash und Zsh: 0700/0600, Überschreibschutz, Erhalt vorhandener Public-Keys, Konfliktablehnung, Secret ausschließlich über stdin. Der Harness führt keine GitHub-Änderung aus.
+
+
+Finaler Kandidat: `build/sw-securelogin-0.3.0.zip`, SHA-256 `3c17260ed30e804d55728736a9a980c50aae241009a27c6f6422cf8af32769dd`. In der separaten WordPress-6.7-Installation regulär per WP-CLI als ZIP installiert und aktiviert: 74 Integrationstests und der vollständige Chromium-Ablauf einschließlich nativer Updatezeile bestehen auch gegen das installierte Artefakt. Die produktiven Plugin-Dateien wurden dabei nicht durch einen Upgrader ersetzt. Detaillierte Prüfstände und ausstehende Remote-/Betreiberabnahmen: [RELEASE.md](RELEASE.md).

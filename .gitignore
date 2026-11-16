@@ -8,3 +8,6 @@
 /.scannerwork/
 /strix_runs/
 /.phpstan.cache/
+
+/tests/wp/vendor/
+/tests/wp/.phpunit.result.cache

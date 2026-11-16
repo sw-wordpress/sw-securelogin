@@ -5,6 +5,8 @@ if ( 'cli-server' !== PHP_SAPI ) exit;
 // Browser tests exercise local authentication, not background updates or remote feeds.
 define( 'DISABLE_WP_CRON', true );
 define( 'WP_HTTP_BLOCK_EXTERNAL', true );
+// Operator keys must not alter this fixture or cause real GitHub checks.
+define( 'SWSL_RELEASE_PUBLIC_KEYS', array() );
 $_SERVER['HTTPS'] = 'on';
 $_SERVER['SERVER_PORT'] = 8443;
 $swsl_path = parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH );
