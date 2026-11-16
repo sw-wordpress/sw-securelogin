@@ -11,7 +11,7 @@
     <coverage>
         <include>
             <directory suffix=".php">../../src</directory>
-            <file>../../sw-backupit.php</file>
+            <file>../../sw-securelogin.php</file>
             <file>../../uninstall.php</file>
         </include>
     </coverage>

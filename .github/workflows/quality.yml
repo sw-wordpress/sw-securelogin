@@ -19,6 +19,10 @@ jobs:
           coverage: ${{ matrix.php == '8.2' && 'xdebug' || 'none' }}
       - run: composer install --no-interaction --prefer-dist
       - run: composer validate --strict
+      - name: Install required operator-test shells
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes zsh
       - run: python3 tests/release/operator-commands.py
       - name: Audit shipped Composer packages
         if: matrix.php == '8.2'
@@ -116,6 +120,7 @@ jobs:
           SWSL_TEST_DB_PASSWORD: swsl-test-root
           SWSL_TEST_DB_PORT: '3306'
         run: |
+          php -r 'mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT); $db = new mysqli("127.0.0.1", getenv("SWSL_TEST_DB_USER"), getenv("SWSL_TEST_DB_PASSWORD"), "", (int) getenv("SWSL_TEST_DB_PORT")); $db->query("CREATE DATABASE IF NOT EXISTS swsl_wp_tests CHARACTER SET utf8mb4");'
           if [ '${{ matrix.php }}' = '8.2' ]; then
             XDEBUG_MODE=coverage composer test:updates:coverage
           else

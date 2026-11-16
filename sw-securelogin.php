@@ -33,7 +33,9 @@ register_deactivation_hook(
 	__FILE__,
 	static function (): void {
 		wp_clear_scheduled_hook( 'swsl_cleanup' );
-		\SW\Securelogin\Update\Provider::deactivate();
+		if ( class_exists( \SW\Securelogin\Update\Provider::class ) ) {
+			\SW\Securelogin\Update\Provider::deactivate();
+		}
 	}
 );
 

@@ -1084,8 +1084,11 @@ final class VerifiedUpdatesTest extends WP_UnitTestCase {
 			'response' => array( 'other/other.php' => (object) array( 'new_version' => '2.0.0' ) ),
 		) );
 		$this->assertArrayHasKey( $file, get_site_transient( 'update_plugins' )->response );
+		wp_schedule_single_event( time() + HOUR_IN_SECONDS, 'swsl_cleanup' );
+		$this->assertNotFalse( wp_next_scheduled( 'swsl_cleanup' ) );
 		try {
-			Provider::deactivate();
+			do_action( 'deactivate_' . plugin_basename( SWSL_FILE ), is_multisite() );
+			$this->assertFalse( wp_next_scheduled( 'swsl_cleanup' ) );
 			$this->assertSame( array( 'other/other.php' ), get_site_option( 'auto_update_plugins' ) );
 			$this->assertArrayNotHasKey( $file, get_site_transient( 'update_plugins' )->response );
 			$this->assertArrayHasKey( 'other/other.php', get_site_transient( 'update_plugins' )->response );

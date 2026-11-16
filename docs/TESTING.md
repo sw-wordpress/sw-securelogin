@@ -248,6 +248,13 @@ Siehe [Konzept](GITHUB-UPDATES.md) und [Betrieb/Schlüssel](GITHUB-UPDATES-BETRI
 
 Die zusätzliche WordPress-PHPUnit-9-Suite ist von den PHPUnit-11-Abhängigkeiten getrennt. Sie lädt ausschließlich diesen Checkout und ein privates WordPress unter `tests/wp/vendor/`; ihre Datenbank ist fest auf `swsl_wp_tests` beschränkt. Echte Upgrader dürfen ausschließlich Plugin-Dateien in dieser privaten Installation ersetzen. Kein Pfad zum Entwicklungs-WordPress wird verwendet. Die bestehende Integrationssuite verwendet separat `swsl_m0_test`.
 
+Die CI legt `swsl_wp_tests` vor dem Suite-Bootstrap zusätzlich zur bestehenden
+Integrationsdatenbank an. Lokal übernimmt `bin/test-db.sh start` die Bereitstellung.
+Die Betriebsbefehlsprüfung benötigt PHP mit Sodium sowie Bash und Zsh; beide Shells
+werden verpflichtend geprüft. `PluginDeactivationTest` prüft den Plugin-Einstiegspunkt
+ohne beide Autoloader in einem frischen PHP-Prozess; die WordPress-Suite prüft den
+registrierten Deaktivierungs-Hook mit geladenem Updater und erhaltener Fremdplugin-Auswahl.
+
 ```sh
 composer install --working-dir=tests/wp --no-interaction --prefer-dist
 bash bin/test-db.sh start
