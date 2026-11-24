@@ -3,15 +3,28 @@
 declare(strict_types=1);
 
 use Facile\OpenIDClient\Session\AuthSession;
+use Facile\JoseVerifier\JWK\JwksProviderBuilder;
 use Facile\OpenIDClient\Client\ClientBuilder;
 use Facile\OpenIDClient\Client\Metadata\ClientMetadata;
+use Facile\OpenIDClient\Issuer\IssuerBuilder;
+use Facile\OpenIDClient\Issuer\Metadata\Provider\MetadataProviderBuilder;
 use SW\Securelogin\Spikes\Oidc\StrictCodeFlow;
+use SW\Securelogin\Spikes\Oidc\StrictResponseGuard;
 
 require __DIR__ . '/library.php';
 require __DIR__ . '/StrictVerifierBuilder.php';
+require __DIR__ . '/AmbiguousResponse.php';
+require __DIR__ . '/StrictResponseGuard.php';
 require __DIR__ . '/StrictCodeFlow.php';
 
-$strict = new StrictCodeFlow($http, $factory);
+// The fixture ($http) keeps its state; the guarded decorator is the transport the flow uses.
+$guarded = new StrictResponseGuard($http, $factory);
+$issuer = (new IssuerBuilder())
+	->setMetadataProviderBuilder((new MetadataProviderBuilder())->setHttpClient($guarded)->setRequestFactory($factory)->setUriFactory($factory))
+	->setJwksProviderBuilder((new JwksProviderBuilder())->withHttpClient($guarded)->withRequestFactory($factory))
+	->build($metadata['issuer'] . '/.well-known/openid-configuration');
+$client = (new ClientBuilder())->setIssuer($issuer)->setHttpClient($guarded)->setClientMetadata($client->getMetadata())->build();
+$strict = new StrictCodeFlow($guarded, $factory);
 $callback = ['code' => 'fixture-code', 'state' => 'fixture-state', 'iss' => $metadata['issuer']];
 $redirect = 'https://wp.example.invalid/callback';
 $http->token = $sign($claims);
@@ -98,3 +111,4 @@ foreach ([null, 'none', 'HS256'] as $algorithm) {
 	$reject(static fn() => $strict->exchange($wrongProfile, $callback, $session, $redirect), 'unapproved-algorithm-profile', true);
 }
 echo 'Configured-profile rejection checks: ' . $rejected . ". No WordPress session/link API is present.\n";
+require __DIR__ . '/adversarial.php';

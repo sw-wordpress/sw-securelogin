@@ -6,7 +6,7 @@ Abschnitte in dieser Reihenfolge. Referenzumsetzung: [README.md](../README.md).
 
 | # | Abschnitt | Regeln |
 |---|-----------|--------|
-| 1 | `# <Plugin-Name>` | Anzeigename aus dem Plugin-Header, keine weitere H1. |
+| 1 | `# <Plugin-Name>` | Anzeigename aus dem Plugin-Header, keine weitere H1. Direkt darunter, vor den Badges: *Open source by Stefan Warnat – free to use, free to change, better together.* |
 | 2 | Badges | Ein Block aus acht Badges in dieser Reihenfolge (siehe unten). |
 | 3 | Beschreibung (ohne Überschrift) | 2–3 kurze Sätze, max. 6: was das Plugin tut, nicht wie die Technik dahinter funktioniert. Fachbegriffe beim ersten Vorkommen auf Wikipedia o. Ä. verlinken statt erklären. Status nur bei Preview/Beta. |
 | 4 | `## Features` | Liste: `- **Kurzer Titel** — 1 kurzer Satz.` Nur Key Facts (3–6 Punkte), die das Plugin auszeichnen. Keine Sprachen, Anforderungen, Roadmap oder allgemeinen Erklärungen. |
@@ -21,7 +21,7 @@ Abschnitte in dieser Reihenfolge. Referenzumsetzung: [README.md](../README.md).
 | 8 | `## Troubleshooting` | Optional, nur bei typischen Stolperfallen: Tabelle `Problem | Solution`, max. ca. 8 Zeilen. |
 | 9 | `## Built with AI` | Für interessierte Nutzer: Hinweis auf KI-gestützte Implementierung mit Link auf das [Organisations-Manifest](https://github.com/sw-wordpress/.github/blob/main/profile/README.md) als Begründung, warum es das Plugin in dieser Form gibt. Danach für Agenten: Pflicht, die Projektregeln zu befolgen, mit Links auf `AGENTS.md` und vorhandene Projektdokumente (`PLAN.md`, `CODE-STYLE.md`, `TODO.md`, `docs/`). Nur verlinken, nicht duplizieren. |
 | 10 | `## Development` | Voraussetzungen, Installation, Build/Kompilierung, Prüfungen und Tests inkl. Coverage-Grenze, Release-Build. Ausführbare Befehle als Codeblock; Details in `docs/` verlinken. |
-| 11 | `## License` | Fester Text: `[GPL-2.0-or-later](https://www.gnu.org/licenses/gpl-2.0.html) — see [LICENSE](LICENSE). Provided by Stefan Warnat.` Danach **alle** mitgelieferten Drittkomponenten (Laufzeit-Bibliotheken, kopierter Code, Fonts, JS-Bibliotheken; keine Dev-Abhängigkeiten) als Liste `- [Name](URL) — Lizenz`, mit Fundort der Lizenztexte im Paket. Ohne Drittkomponenten: `No third-party components are bundled.` |
+| 11 | `## License` | Fester Text: `[GPL-2.0-or-later](https://www.gnu.org/licenses/gpl-2.0.html) — see [LICENSE](LICENSE).` Danach **alle** mitgelieferten Drittkomponenten (Laufzeit-Bibliotheken, kopierter Code, Fonts, JS-Bibliotheken; keine Dev-Abhängigkeiten) als Liste `- [Name](URL) — Lizenz`, mit Fundort der Lizenztexte im Paket. Ohne Drittkomponenten: `No third-party components are bundled.` |
 
 ## Badges
 

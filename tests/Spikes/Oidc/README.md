@@ -26,6 +26,35 @@ errors without exposing library exceptions. It is evaluation code, not a usable
 callback: browser binding, expiry, atomic consumption, raw duplicate parsing and
 local session/link policies are still absent.
 
+`adversarial.php` exercises 79 signed-token/JWKS characterization cases in that configured
+flow behind `StrictResponseGuard`, a narrow PSR-18 decorator rejecting duplicate JSON names,
+object-shaped audiences, non-string `sub`/`nonce`/`azp` and duplicate JWKS `kid`s (not a JWT
+parser): all 79 are rejected and no PHP diagnostics may occur. Without the guard the candidate
+exposed seven gaps (see ADR 008). The empty gap list
+and rejection count are asserted, so any new acceptance fails until reviewed. Cases cover claim types, subject length, audience
+shapes, duplicate/escaped JSON names, untrusted header URLs and key selection/use.
+Every JWKS case constructs a fresh provider and asserts an actual JWKS fetch, avoiding
+false evidence from cached keys. Header URL cases assert no unexpected HTTP request.
+The valid flow is repeated afterward to detect leaked fixture state. This matrix also
+runs in all three scoped/collision modes. See the
+[current adapter results](../../../docs/ADR-008-oidc-library-transport-spike.md#schema-and-header-checker-follow-up-2026-11-17).
+
+JOSE `CallableChecker`/`ClaimCheckerManager` now enforce non-empty ASCII subjects up
+to 255 characters and decoded audience shapes after the complete client verifies the
+ID token. `CompactSerializer`/`HeaderCheckerManager` reject any `jku`/`x5u` presence,
+including null/empty/malformed values. Four positive controls check subject boundaries,
+case preservation and a one-element audience list. No custom JWT parser is used.
+The guard (ADR 008, "Raw-response guard prototype") closes numeric-object audiences,
+duplicate JSON names and duplicate JWKS identifiers and keeps the candidate's
+nonce/azp array-to-string warnings from occurring; the harness asserts no diagnostics.
+No warning suppression or upstream source patch is applied.
+
+`fuzz.php` compares `StrictResponseGuard` with an independent Python oracle (`fuzz_oracle.py`)
+on seeded generated documents, tokens and JWKS plus 99 edge cases. Set
+`SWSL_FUZZ_ITERATIONS` (per category, default 30000) and `SWSL_FUZZ_SEED` to scale or
+vary a run, for example `SWSL_FUZZ_ITERATIONS=300000 composer test:oidc-spike`. Any
+disagreement, PHP diagnostic or unexpected exception fails the run.
+
 The runner reproduces unmodified upstream `Compose` failing on a virtual package,
 then builds with the corrected project adapter. The scoped consumer repeats its
 signed-token/profile tests without a vendor fallback, with foreign symbols before/after

@@ -43,7 +43,8 @@ $metadata = ['issuer' => $claims['iss'], 'authorization_endpoint' => $claims['is
 $http = new class($metadata, ['keys' => [$jwk]]) implements ClientInterface {
 	public array $calls = [];
 	public string $token = '';
-	public function __construct(private array $metadata, private array $jwks) {}
+	public ?string $rawJwks = null;
+	public function __construct(private array $metadata, public array $jwks) {}
 	public function sendRequest(RequestInterface $request): ResponseInterface {
 		$uri = (string) $request->getUri();
 		$this->calls[] = [$request->getMethod(), $uri];
@@ -62,7 +63,8 @@ $http = new class($metadata, ['keys' => [$jwk]]) implements ClientInterface {
 		} else {
 			throw new RuntimeException('Unexpected HTTP request; injection failed.');
 		}
-		return new Response(200, ['Content-Type' => 'application/json'], json_encode($data, JSON_THROW_ON_ERROR));
+		$raw = 'GET' === $request->getMethod() && $base . '/keys' === $uri ? $this->rawJwks : null;
+		return new Response(200, ['Content-Type' => 'application/json'], $raw ?? json_encode($data, JSON_THROW_ON_ERROR));
 	}
 };
 $factory = new Psr17Factory();

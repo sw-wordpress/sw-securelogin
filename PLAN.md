@@ -313,6 +313,18 @@ Die vier beobachteten Default-API-Lücken werden inzwischen im isolierten Testad
 abgewiesen (56 Negativfälle). Die Mozart-Hürden sind im Buildadapter behoben: echtes
 präfixiertes OIDC-Artefakt mit Signatur-/Kollisionstests unter PHP 8.2/8.3 erfolgreich;
 genaue Freigabegrenzen in [ADR 003](docs/ADR-003-mozart.md).
+Fortsetzung vom 17.11.2026: 64 weitere Claim-/JSON-/JWKS-Fälle am konfigurierten
+Kandidaten unter PHP 8.2/8.3 einschließlich präfixierter Artefakte geprüft; 47 werden
+abgewiesen, 17 zeigen verbleibende Integrationslücken. Ergebnisse und Freigabegrenzen:
+[ADR 008](docs/ADR-008-oidc-library-transport-spike.md#configured-candidate-adversarial-characterization-2026-11-17).
+Anschließend elf dieser Lücken über öffentliche JOSE-Checker im isolierten Adapter
+geschlossen; aktuelle Matrix: 77 Fälle, 70 Ablehnungen und sieben verbleibende Lücken
+sowie vier positive Schema-Grenzfälle. Parsergrenzen und Upstream-Diagnostik verhindern
+weiterhin die Produktionsfreigabe; [aktueller Prüfstand](docs/ADR-008-oidc-library-transport-spike.md#schema-and-header-checker-follow-up-2026-11-17).
+Am 24.11.2026 schließt ein enger Rohantwort-Guard (PSR-18-Decorator, kein JWT-Parser) im Spike
+die sieben Lücken und die Upstream-Warnungen (79/79 Ablehnungen); Fuzzing, Transportkomposition,
+browsergebundene Transaktionen und Wartungsbewertung bleiben offen,
+[Details](docs/ADR-008-oidc-library-transport-spike.md#raw-response-guard-prototype-2026-11-24).
 
 - [ ] Provider-Discovery/JWKS, geschützte Konfiguration, SSRF-Schutz.
 - [ ] Authorization Code + PKCE, State, Nonce, Callback-Validierung.
