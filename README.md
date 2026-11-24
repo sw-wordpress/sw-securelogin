@@ -1,5 +1,7 @@
 # SW Securelogin
 
+*Open source by Stefan Warnat – free to use, free to change, better together.*
+
 [![Release](https://img.shields.io/github/v/release/sw-wordpress/sw-securelogin?sort=semver)](https://github.com/sw-wordpress/sw-securelogin/releases)
 [![CI](https://github.com/sw-wordpress/sw-securelogin/actions/workflows/quality.yml/badge.svg)](https://github.com/sw-wordpress/sw-securelogin/actions/workflows/quality.yml)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=sw-wordpress_sw-securelogin&metric=coverage)](https://sonarcloud.io/summary/overall?id=sw-wordpress_sw-securelogin)
@@ -116,7 +118,7 @@ Setup of the test site, coverage and SonarQube: [docs/TESTING.md](docs/TESTING.m
 
 ## License
 
-[GPL-2.0-or-later](https://www.gnu.org/licenses/gpl-2.0.html) — see [LICENSE](LICENSE). Provided by Stefan Warnat.
+[GPL-2.0-or-later](https://www.gnu.org/licenses/gpl-2.0.html) — see [LICENSE](LICENSE).
 
 Bundled third-party components (license texts in `vendor-prefixed/licenses/` of the release build):
 

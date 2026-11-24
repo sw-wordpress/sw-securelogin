@@ -96,6 +96,9 @@ final class SettingsPage {
 		echo '<label><input id="swsl-delete-data" name="delete_data" type="checkbox" value="1" aria-describedby="swsl-removal-help" ' . checked( '1', get_option( 'swsl_delete_data_on_uninstall' ), false ) . '> ' . esc_html__( 'Permanently delete all plugin data when deleting SW Securelogin', 'sw-securelogin' ) . '</label>';
 		submit_button( __( 'Save removal setting', 'sw-securelogin' ), 'primary', 'swsl-save-removal' );
 		echo '</form>';
+		echo '<p class="description">';
+		esc_html_e( 'Open source by Stefan Warnat – free to use, free to change, better together.', 'sw-securelogin' );
+		echo '</p>';
 		echo '</div>';
 	}
 }

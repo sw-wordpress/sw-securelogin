@@ -500,3 +500,7 @@ msgstr ""
 "Die Daten von SW Securelogin konnten nicht vollständig gelöscht werden. "
 "Stelle dein Backup wieder her oder wiederhole die Löschung, bevor du die "
 "Plugin-Dateien entfernst."
+
+#: src/Admin/SettingsPage.php:100
+msgid "Open source by Stefan Warnat – free to use, free to change, better together."
+msgstr "Open Source von Stefan Warnat – frei nutzbar, frei veränderbar, gemeinsam besser."

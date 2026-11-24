@@ -43,6 +43,28 @@ final class PluginTest extends TestCase {
 		}
 		$this->assertStringContainsString( 'SW Securelogin', $output );
 		$this->assertStringContainsString( 'Password login remains available', $output );
+		$this->assertStringContainsString( 'Open source by Stefan Warnat – free to use, free to change, better together.', $output );
+	}
+
+	public function testGermanOverviewUsesTheBundledFooterTranslation(): void {
+		$user = get_user_by( 'login', 'swsl-test-admin' );
+		wp_set_current_user( $user->ID );
+		$locale = determine_locale();
+		$catalog = dirname( __DIR__, 2 ) . '/languages/sw-securelogin-de_DE.mo';
+		try {
+			$this->assertTrue( load_textdomain( 'sw-securelogin', $catalog, 'de_DE' ) );
+			ob_start();
+			try {
+				( new SettingsPage() )->render();
+				$output = ob_get_contents();
+			} finally {
+				ob_end_clean();
+			}
+			$this->assertStringContainsString( 'Open Source von Stefan Warnat – frei nutzbar, frei veränderbar, gemeinsam besser.', $output );
+		} finally {
+			unload_textdomain( 'sw-securelogin' );
+			WP_Translation_Controller::get_instance()->set_locale( $locale );
+		}
 	}
 
 	public function testPasswordAuthenticationAndSessionSurviveDeactivation(): void {
