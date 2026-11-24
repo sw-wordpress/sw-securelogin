@@ -3,6 +3,8 @@ parameters:
     paths:
         - StrictCodeFlow.php
         - StrictVerifierBuilder.php
+        - StrictResponseGuard.php
+        - AmbiguousResponse.php
         - ../../../bin/mozart-graph.php
         - ../../../bin/mozart-autoload.php
     stubFiles:

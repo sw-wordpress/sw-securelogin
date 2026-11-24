@@ -14,9 +14,13 @@ composer validate --working-dir="$SWSL_STAGE" --strict
 composer audit --working-dir="$SWSL_STAGE" --locked --no-dev
 "$SWSL_PHP" "$SWSL_PROBE/profile.php" "$SWSL_STAGE/vendor/autoload.php"
 "$SWSL_PHP" "$SWSL_ROOT/vendor/bin/phpcs" --standard="$SWSL_ROOT/phpcs.xml.dist" \
-  "$SWSL_PROBE/StrictCodeFlow.php" "$SWSL_PROBE/StrictVerifierBuilder.php"
+  "$SWSL_PROBE/StrictCodeFlow.php" "$SWSL_PROBE/StrictVerifierBuilder.php" \
+  "$SWSL_PROBE/StrictResponseGuard.php" "$SWSL_PROBE/AmbiguousResponse.php"
 "$SWSL_PHP" "$SWSL_ROOT/vendor/bin/phpstan" analyse --configuration="$SWSL_PROBE/phpstan.neon" \
   --autoload-file="$SWSL_STAGE/vendor/autoload.php" --memory-limit=512M --no-progress
+# Differential fuzzing of the response guard against an independent Python oracle.
+# SWSL_FUZZ_ITERATIONS (per category, default 30000) and SWSL_FUZZ_SEED are optional.
+"$SWSL_PHP" "$SWSL_PROBE/fuzz.php" "$SWSL_STAGE/vendor/autoload.php" "$SWSL_STAGE"
 
 # Build the real candidate with the reviewed production adapter.
 "$SWSL_PHP" -r '
@@ -28,7 +32,8 @@ file_put_contents($path, json_encode($candidate, JSON_PRETTY_PRINT | JSON_THROW_
 ' "$SWSL_STAGE" "$SWSL_ROOT"
 mkdir -p "$SWSL_STAGE/bin" "$SWSL_STAGE/src"
 cp "$SWSL_ROOT/bin/mozart-compose.php" "$SWSL_ROOT/bin/mozart-graph.php" "$SWSL_ROOT/bin/mozart-visitor.php" "$SWSL_ROOT/bin/mozart-autoload.php" "$SWSL_STAGE/bin/"
-cp "$SWSL_PROBE/library.php" "$SWSL_PROBE/profile.php" "$SWSL_PROBE/StrictCodeFlow.php" "$SWSL_PROBE/StrictVerifierBuilder.php" "$SWSL_STAGE/src/"
+cp "$SWSL_PROBE/library.php" "$SWSL_PROBE/profile.php" "$SWSL_PROBE/StrictCodeFlow.php" "$SWSL_PROBE/StrictVerifierBuilder.php" "$SWSL_PROBE/StrictResponseGuard.php" "$SWSL_PROBE/AmbiguousResponse.php" "$SWSL_STAGE/src/"
+cp "$SWSL_PROBE/adversarial.php" "$SWSL_STAGE/src/"
 
 # Diagnose upstream behavior separately, without changing the guarded production adapter.
 cp "$SWSL_PROBE/mozart.php" "$SWSL_STAGE/bin/oidc-mozart-probe.php"

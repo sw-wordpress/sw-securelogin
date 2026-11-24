@@ -13,7 +13,11 @@ use Facile\OpenIDClient\Client\ClientInterface;
 use Facile\OpenIDClient\Service\AuthorizationService;
 use Facile\OpenIDClient\Service\Builder\AuthorizationServiceBuilder;
 use Facile\OpenIDClient\Session\AuthSessionInterface;
+use Jose\Component\Checker\CallableChecker;
 use Jose\Component\Checker\ClaimCheckerManager;
+use Jose\Component\Checker\HeaderCheckerManager;
+use Jose\Component\Signature\JWSTokenSupport;
+use Jose\Component\Signature\Serializer\CompactSerializer;
 use Psr\Http\Client\ClientInterface as HttpClient;
 use Psr\Http\Message\RequestFactoryInterface;
 use RuntimeException;
@@ -98,12 +102,48 @@ final class StrictCodeFlow {
 			if ( is_array( $claims['aud'] ?? null ) && count( $claims['aud'] ) > 1 ) {
 				$mandatory[] = 'azp';
 			}
-			// The library verifies signature and claim values; JOSE enforces presence too.
-			( new ClaimCheckerManager( array() ) )->check( $claims, $mandatory );
+			// Keep cryptographic/protocol validation in the complete client. Add schema checks
+			// through JOSE's public checker API only after it has verified the ID token.
+			( new ClaimCheckerManager(
+				array(
+					new CallableChecker( 'sub', static fn ( mixed $value ): bool => is_string( $value ) && 1 === preg_match( '/\A[\x00-\x7f]{1,255}\z/', $value ) ),
+					new CallableChecker( 'aud', static fn ( mixed $value ): bool => self::hasAudienceShape( $value ) ),
+				)
+			) )->check( $claims, $mandatory );
+			$jws = ( new CompactSerializer() )->unserialize( $result->getIdToken() );
+			( new HeaderCheckerManager(
+				array(
+					new CallableChecker( 'jku', static fn (): bool => false ),
+					new CallableChecker( 'x5u', static fn (): bool => false ),
+				),
+				array( new JWSTokenSupport() )
+			) )->check( $jws, 0 );
 			return $claims;
 		} catch ( Throwable ) {
 			// Library messages/causes can contain expected/received claims. Do not expose them.
 			throw new RuntimeException( 'OIDC evaluation exchange failed.' );
 		}
+	}
+
+	/** Check the decoded audience shape, without replacing the client's value checks.
+	 *
+	 * Associative JSON decoding loses numeric object keys; raw-shape proof remains open.
+	 *
+	 * @param mixed $value Decoded audience from the verified result.
+	 * @return bool Whether it is a non-empty string or list of non-empty strings.
+	 */
+	private static function hasAudienceShape( mixed $value ): bool {
+		if ( is_string( $value ) ) {
+			return '' !== $value;
+		}
+		if ( ! is_array( $value ) || ! array_is_list( $value ) || array() === $value ) {
+			return false;
+		}
+		foreach ( $value as $audience ) {
+			if ( ! is_string( $audience ) || '' === $audience ) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
